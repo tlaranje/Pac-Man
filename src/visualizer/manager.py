@@ -8,7 +8,7 @@ EAST = 0x02
 SOUTH = 0x04
 WEST = 0x08
 
-map = [
+""" map = [
     "D39391391539553D5157915795153B",
     "BC6AEAEAC3C693C538556C15696BAA",
     "813C3C569693AC556C5393C57A96AA",
@@ -39,6 +39,12 @@ map = [
     "952AC6D51552A953AAC6AAEC3ABABA",
     "AD6A9393C3BAAC7C46956C53AC6AAA",
     "C5546C6C56C6C5555545557C4556C6"
+] """
+
+map = [
+    "D39",
+    "BC6",
+    "813"
 ]
 
 
@@ -73,6 +79,7 @@ class Manager:
         )
 
         self.map_int: list
+        self.walls: list
 
     def draw_main_menu(self) -> None:
         text_surf = self.title_font.render("Pac-Man", True, (215, 215, 215))
@@ -110,7 +117,23 @@ class Manager:
                 self.state = "MAIN_MENU"
                 x, y = self.menu_size
                 self.update_display_mode(x, y)
-        self.draw_maze()
+
+    def parse_map(self, raw_map: list[str]) -> list[list[int]]:
+        """Parse hex map, auto-detecting 1 or 2 chars per cell."""
+        step = 1
+        test_row = raw_map[0]
+        try:
+            [int(c, 16) for c in test_row]  # tenta 1 char
+            step = 1
+        except ValueError:
+            step = 2
+
+        result = []
+        for row in raw_map:
+            result.append(
+                [int(row[i:i+step], 16) for i in range(0, len(row), step)]
+            )
+        return result
 
     def draw_maze(self) -> None:
         for y, row in enumerate(self.map_int):
@@ -125,11 +148,8 @@ class Manager:
                     print("WEST")
 
     def run(self) -> None:
-        self.map_int = []
-        for row in map:
-            self.map_int.append(
-                [int(row[i:i+2], 16) for i in range(0, len(row), 2)]
-            )
+        self.map_int = self.parse_map(map)
+        print(self.map_int)
 
         while True:
             mouse_pos = pygame.mouse.get_pos()
