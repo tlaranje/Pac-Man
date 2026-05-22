@@ -1,0 +1,20 @@
+[project]
+name = "Pac-Man"
+version = "0.0.1"
+description = "tlaranje's Pac-MAn project (school 42)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flake8>=7.1.1",
+    "mypy>=1.11.2",
+    "pydantic>=2.8.2",
+    "rich>=13.8.1",
+    "pygame-ce>=2.5.7",
+    "pygame-gui>=0.6.14",
+    "CairoSVG>=2.9.0",
+]
+
+# Silencia o aviso do mypy para módulos sem stubs
+[[tool.mypy.overrides]]
+module = "cairosvg"
+ignore_missing_imports = true
