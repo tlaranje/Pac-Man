@@ -3,6 +3,11 @@ import pygame
 import sys
 import os
 
+NORTH = 0x01
+EAST = 0x02
+SOUTH = 0x04
+WEST = 0x08
+
 map = [
     "D39391391539553D5157915795153B",
     "BC6AEAEAC3C693C538556C15696BAA",
@@ -67,6 +72,8 @@ class Manager:
             "assets/fonts/Rajdhani-Bold.ttf", 50
         )
 
+        self.map_int: list
+
     def draw_main_menu(self) -> None:
         text_surf = self.title_font.render("Pac-Man", True, (215, 215, 215))
         text_rect = text_surf.get_rect(
@@ -103,14 +110,26 @@ class Manager:
                 self.state = "MAIN_MENU"
                 x, y = self.menu_size
                 self.update_display_mode(x, y)
+        self.draw_maze()
+
+    def draw_maze(self) -> None:
+        for y, row in enumerate(self.map_int):
+            for x, cell in enumerate(row):
+                if cell & NORTH:
+                    print("NORTH")
+                if cell & EAST:
+                    print("EAST")
+                if cell & SOUTH:
+                    print("SOUTH")
+                if cell & WEST:
+                    print("WEST")
 
     def run(self) -> None:
-        map_int = []
+        self.map_int = []
         for row in map:
-            map_int.append(
+            self.map_int.append(
                 [int(row[i:i+2], 16) for i in range(0, len(row), 2)]
             )
-        print(map_int)
 
         while True:
             mouse_pos = pygame.mouse.get_pos()
