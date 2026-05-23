@@ -1,9 +1,10 @@
+import random
 import json
 import re
 from argparse import ArgumentParser
 from pathlib import Path
 from mazegenerator import MazeGenerator
-from ..models import PacManMap, PacManConfigModel
+from ..models import PacManMap, PacGumsMap, PacManConfigModel
 
 
 class PacManCLI:
@@ -62,3 +63,22 @@ class PacManConfig:
                 )
             )
         return maps
+
+    def load_pacgums(self, maps: list[PacManMap]) -> list[PacGumsMap]:
+        pacgums_maps: list[PacGumsMap] = []
+        for map in maps:
+            walkable: list[tuple[int, int]] = [
+                (x, y)
+                for y in range(map._height)
+                for x in range(map._width)
+                if (self.maze[y][x] & 0b1111) != 0
+            ]
+
+            count: int = min(self.settings.pacgum, len(walkable))
+            chosen = random.sample(walkable, count)
+
+            pacgums_map = [[False] * self.width for _ in range(self.height)]
+            for x, y in chosen:
+                pacgums_map[y][x] = True
+            pacgums_maps.append(pacgums_map)
+        return pacgums_maps

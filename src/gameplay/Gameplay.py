@@ -1,5 +1,12 @@
+import curses
+import time
 from ..parser import PacManConfig
 from ..models import PacManMap
+
+NORTH: int = 1
+EAST: int = 2
+SOUTH: int = 4
+WEST: int = 8
 
 
 class PacManEntity:
@@ -8,9 +15,29 @@ class PacManEntity:
     """
 
     def __init__(self, map: PacManMap) -> None:
-        self.current_map: PacManMap = map
+        self.current_map: list[list[int]] = map._maze
         self.x: int = map._entryx
         self.y: int = map._entryy
+
+    def move_up(self) -> None:
+        if self.current_map[self.y][self.x] & NORTH:
+            return
+        self.y -= 1
+
+    def move_down(self) -> None:
+        if self.current_map[self.y][self.x] & SOUTH:
+            return
+        self.y += 1
+
+    def move_right(self) -> None:
+        if self.current_map[self.y][self.x] & EAST:
+            return
+        self.x += 1
+
+    def move_left(self) -> None:
+        if self.current_map[self.y][self.x] & WEST:
+            return
+        self.x -= 1
 
 
 class PacManGameplay:
@@ -29,60 +56,111 @@ class PacManGameplay:
         self.player = PacManEntity(self.maps[map_idx])
 
 
-def render_maze(maze: list[list[int]], player: PacManEntity = None) -> None:
-    """
-    Render a maze in terminal.
-    Each cell uses 4 bits:
-        bit 0 -> North
-        bit 1 -> East
-        bit 2 -> South
-        bit 3 -> West
-    If a bit is 1 => wall exists.
-    """
+# ----------------------------
+# MAZE RENDERER (CURSES)
+# ----------------------------
+
+
+def render_maze(stdscr, maze: list[list[int]], player=None) -> None:
     rows = len(maze)
     cols = len(maze[0])
 
+    y_offset = 0
+
     # top border
+    line = ""
     for x in range(cols):
         cell = maze[0][x]
-        if cell & (1 << 0):  # north wall
-            print("+---", end="")
+        if cell & (1 << 0):
+            line += "+---"
         else:
-            print("+   ", end="")
-    print("+")
+            line += "+   "
+    line += "+"
+    stdscr.addstr(y_offset, 0, line)
+    y_offset += 1
 
     for y in range(rows):
-        # vertical walls + cell content
+        # vertical walls + content
+        line = ""
+
         for x in range(cols):
             cell = maze[y][x]
+
             # west wall
             if cell & (1 << 3):
-                print("|", end="")
+                line += "|"
             else:
-                print(" ", end="")
-            # cell content
+                line += " "
+
+            # player or empty
             if player is not None and player.x == x and player.y == y:
-                print(" P ", end="")
+                line += " P "
             else:
-                print("   ", end="")
-        # east wall of last cell
+                line += "   "
+
+        # east wall
         last = maze[y][-1]
         if last & (1 << 1):
-            print("|")
-        else:
-            print(" ")
-        # south walls
+            line += "|"
+
+        stdscr.addstr(y_offset, 0, line)
+        y_offset += 1
+
+        # bottom walls
+        line = ""
         for x in range(cols):
             cell = maze[y][x]
-            print("+", end="")
+            line += "+"
+
             if cell & (1 << 2):
-                print("---", end="")
+                line += "---"
             else:
-                print("   ", end="")
-        print("+")
+                line += "   "
+
+        line += "+"
+        stdscr.addstr(y_offset, 0, line)
+        y_offset += 1
 
 
-config = PacManConfig("/home/joesanto/Downloads/test.json")
-pacman = PacManGameplay(config)
-pacman.gameplay_init(0)
-render_maze(pacman.maps[0].maze, pacman.player)
+# ----------------------------
+# GAME LOOP
+# ----------------------------
+def main(stdscr):
+    curses.cbreak()
+    stdscr.nodelay(True)
+    stdscr.keypad(True)
+    curses.curs_set(0)  # hide cursor
+
+    config = PacManConfig("/home/joel/Downloads/test.json")
+    pacman = PacManGameplay(config)
+    pacman.gameplay_init(0)
+
+    while True:
+        key = stdscr.getch()
+
+        # INPUT
+        if key == ord('w'):
+            pacman.player.move_up()
+        elif key == ord('d'):
+            pacman.player.move_right()
+        elif key == ord('s'):
+            pacman.player.move_down()
+        elif key == ord('a'):
+            pacman.player.move_left()
+        elif key == ord('q'):
+            break
+
+        # RENDER
+        stdscr.clear()
+        render_maze(stdscr, pacman.maps[0].maze, pacman.player)
+        stdscr.refresh()
+
+        # GAME SPEED (adjust for smoothness)
+        time.sleep(0.05)
+
+
+# ----------------------------
+# RUN
+# ----------------------------
+if __name__ == "__main__":
+    curses.wrapper(main)
