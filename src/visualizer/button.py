@@ -1,15 +1,8 @@
-import cairosvg
+from src.utils import load_svg
 import pygame
-import io
 
 SVG_PLAY = "assets/img/Button.svg"
 SVG_PLAY_CLICK = "assets/img/Button_click.svg"
-
-
-def load_svg(path: str, rect: pygame.Rect) -> pygame.Surface:
-    png = cairosvg.svg2png(url=path)
-    surf = pygame.image.load(io.BytesIO(png)).convert_alpha()
-    return pygame.transform.scale(surf, (rect.width, rect.height))
 
 
 class Button:

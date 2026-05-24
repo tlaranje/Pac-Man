@@ -12,9 +12,21 @@ dependencies = [
     "pygame-ce>=2.5.7",
     "pygame-gui>=0.6.14",
     "CairoSVG>=2.9.0",
+    "mazegenerator",
 ]
+
+# Configuração para permitir referências diretas a arquivos locais
+[tool.hatch.metadata]
+allow-direct-references = true
+
+# Defina o caminho para o arquivo .whl
+[tool.uv.sources]
+mazegenerator = { path = "./mazegenerator-2.0.2-py3-none-any.whl" }
 
 # Silencia o aviso do mypy para módulos sem stubs
 [[tool.mypy.overrides]]
 module = "cairosvg"
+ignore_missing_imports = true
+
+[tool.mypy]
 ignore_missing_imports = true

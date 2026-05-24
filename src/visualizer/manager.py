@@ -1,51 +1,13 @@
+from mazegenerator import MazeGenerator
 from .button import Button
+import pygame.gfxdraw
 import pygame
 import sys
 import os
 
-NORTH = 0x01
-EAST = 0x02
-SOUTH = 0x04
-WEST = 0x08
-
-""" map = [
-    "D39391391539553D5157915795153B",
-    "BC6AEAEAC3C693C538556C15696BAA",
-    "813C3C569693AC556C5393C57A96AA",
-    "EAC7A9396D2AC53953BAAC553AC546",
-    "96956AC6956C53AABA86AD53AC3953",
-    "A96D52916D5396C6AAC3C53C43C47A",
-    "869556AE953C69516ABC53C3BA9552",
-    "A969792969693ABC56C5543AAC693A",
-    "A83C3AC43C16C4455555396A8556AA",
-    "AAC3C693AFC3F957FFFFAE9685396A",
-    "AC7C53AAEF96FC51553FC56BA96A96",
-    "C5553C2C3FC3F956B96F9516AAD6C3",
-    "9553C3E92F96F83D2C3FABA96C553A",
-    "C3BA9696EFC7FEC3C56FC2C6953BAA",
-    "BC2C6D293FFFF952FFFFBC3D2BC2C6",
-    "C3C393C6C393F83AF95543A96A96D3",
-    "943AAC5556AAFAAAF8793AC692C552",
-    "A96C6B913D2AFEAAFA96C4792C5796",
-    "AE913AAAC56AF96EFEC5553AC553C3",
-    "856AAAAC3B96FC53FFFF93AC39547A",
-    "C57AAC69686D515297952C696C5396",
-    "9556C556945556BAA947C53C3956C3",
-    "C3B955556953D504687939296C5396",
-    "968693957ABC53AB9696C6AA93BC6B",
-    "A96D2AA956853AC6ABAD556C6A8552",
-    'AC556C6C392D6C5546C39517968396',
-    "C53939556EC39555393AA929696AC3",
-    "952AC6D51552A953AAC6AAEC3ABABA",
-    "AD6A9393C3BAAC7C46956C53AC6AAA",
-    "C5546C6C56C6C5555545557C4556C6"
-] """
-
-map = [
-    "D39",
-    "BC6",
-    "813"
-]
+MAZE_WIDTH = 20
+MAZE_HEIGHT = 20
+TILE_SIZE = 32
 
 
 class Manager:
@@ -53,9 +15,10 @@ class Manager:
         pygame.init()
 
         os.environ['SDL_VIDEO_CENTERED'] = '1'
-
         self.menu_size: tuple[int, int] = (250, 250)
-        self.game_play_size: tuple[int, int] = (500, 500)
+        self.game_play_size: tuple[int, int] = (
+            (MAZE_WIDTH * TILE_SIZE) + 32, (MAZE_HEIGHT * TILE_SIZE) + 32
+        )
         self.win_size: tuple[int, int] = self.menu_size
         Button.win_size = self.win_size
 
@@ -64,7 +27,10 @@ class Manager:
 
         pygame.display.set_caption("Pac-Man")
 
-        self.state: str = "MAIN_MENU"
+        self.state: str = "GAME_PLAY"
+        self.update_display_mode(
+            self.game_play_size[0], self.game_play_size[1]
+        )
         self.menu_buttons: list[Button] = [
             Button(
                 size=(150, 60), pos=(None, 100), text="Play", action="PLAY"
@@ -78,8 +44,114 @@ class Manager:
             "assets/fonts/Rajdhani-Bold.ttf", 50
         )
 
-        self.map_int: list
-        self.walls: list
+    def update_display_mode(self, width: int, height: int) -> None:
+        self.win_size = (width, height)
+        Button.win_size = self.win_size
+        self.screen = pygame.display.set_mode(self.win_size)
+        pygame.event.post(
+            pygame.event.Event(pygame.ACTIVEEVENT, gain=1, state=1)
+        )
+
+    def draw_maze(self) -> None:
+        maze = MazeGenerator(
+            size=(MAZE_WIDTH, MAZE_HEIGHT), perfect=True, exit_cell=(19, 19)
+        )
+
+        border_color = (0, 0, 0)
+        inner_color = (25, 25, 166)
+
+        border_size = 8
+        inner_thickness = 4
+        margin = 16
+
+        def draw_square_cap(color: tuple, pos: tuple, thickness: int):
+            rect = pygame.Rect(0, 0, thickness, thickness)
+            rect.center = (pos[0] + 1, pos[1] + 1)
+            pygame.draw.rect(self.screen, color, rect)
+
+        for y, row in enumerate(maze.maze):
+            for x, cell in enumerate(row):
+                pos_x = (x * TILE_SIZE) + margin
+                pos_y = (y * TILE_SIZE) + margin
+
+                top_left = (pos_x, pos_y)
+                top_right = (pos_x + TILE_SIZE, pos_y)
+                bottom_left = (pos_x, pos_y + TILE_SIZE)
+                bottom_right = (pos_x + TILE_SIZE, pos_y + TILE_SIZE)
+
+                if cell & 1:  # Norte
+                    pygame.draw.line(
+                        self.screen, border_color, top_left,
+                        top_right, border_size
+                    )
+                    draw_square_cap(border_color, top_left, border_size)
+                    draw_square_cap(border_color, top_right, border_size)
+
+                if cell & 2:  # Leste
+                    pygame.draw.line(
+                        self.screen, border_color, top_right,
+                        bottom_right, border_size
+                    )
+                    draw_square_cap(border_color, top_right, border_size)
+                    draw_square_cap(border_color, bottom_right, border_size)
+
+                if cell & 4:  # Sul
+                    pygame.draw.line(
+                        self.screen, border_color, bottom_left,
+                        bottom_right, border_size
+                    )
+                    draw_square_cap(border_color, bottom_left, border_size)
+                    draw_square_cap(border_color, bottom_right, border_size)
+
+                if cell & 8:  # Oeste
+                    pygame.draw.line(
+                        self.screen, border_color,
+                        top_left, bottom_left, border_size
+                    )
+                    draw_square_cap(border_color, top_left, border_size)
+                    draw_square_cap(border_color, bottom_left, border_size)
+
+        for y, row in enumerate(maze.maze):
+            for x, cell in enumerate(row):
+                pos_x = (x * TILE_SIZE) + margin
+                pos_y = (y * TILE_SIZE) + margin
+
+                top_left = (pos_x, pos_y)
+                top_right = (pos_x + TILE_SIZE, pos_y)
+                bottom_left = (pos_x, pos_y + TILE_SIZE)
+                bottom_right = (pos_x + TILE_SIZE, pos_y + TILE_SIZE)
+
+                if cell & 1:  # Norte
+                    pygame.draw.line(
+                        self.screen, inner_color, top_left,
+                        top_right, inner_thickness
+                    )
+                    draw_square_cap(inner_color, top_left, inner_thickness)
+                    draw_square_cap(inner_color, top_right, inner_thickness)
+
+                if cell & 2:  # Leste
+                    pygame.draw.line(
+                        self.screen, inner_color, top_right,
+                        bottom_right, inner_thickness
+                    )
+                    draw_square_cap(inner_color, top_right, inner_thickness)
+                    draw_square_cap(inner_color, bottom_right, inner_thickness)
+
+                if cell & 4:  # Sul
+                    pygame.draw.line(
+                        self.screen, inner_color, bottom_left,
+                        bottom_right, inner_thickness
+                    )
+                    draw_square_cap(inner_color, bottom_left, inner_thickness)
+                    draw_square_cap(inner_color, bottom_right, inner_thickness)
+
+                if cell & 8:  # Oeste
+                    pygame.draw.line(
+                        self.screen, inner_color, top_left,
+                        bottom_left, inner_thickness
+                    )
+                    draw_square_cap(inner_color, top_left, inner_thickness)
+                    draw_square_cap(inner_color, bottom_left, inner_thickness)
 
     def draw_main_menu(self) -> None:
         text_surf = self.title_font.render("Pac-Man", True, (215, 215, 215))
@@ -89,14 +161,6 @@ class Manager:
         self.screen.blit(text_surf, text_rect)
         for btn in self.menu_buttons:
             btn.draw()
-
-    def update_display_mode(self, width: int, height: int) -> None:
-        self.win_size = (width, height)
-        Button.win_size = self.win_size
-        self.screen = pygame.display.set_mode(self.win_size)
-        pygame.event.post(
-            pygame.event.Event(pygame.ACTIVEEVENT, gain=1, state=1)
-        )
 
     def handle_menu_events(self, event: pygame.event.Event) -> None:
         for btn in self.menu_buttons:
@@ -117,44 +181,22 @@ class Manager:
                 self.state = "MAIN_MENU"
                 x, y = self.menu_size
                 self.update_display_mode(x, y)
-
-    def parse_map(self, raw_map: list[str]) -> list[list[int]]:
-        """Parse hex map, auto-detecting 1 or 2 chars per cell."""
-        step = 1
-        test_row = raw_map[0]
-        try:
-            [int(c, 16) for c in test_row]  # tenta 1 char
-            step = 1
-        except ValueError:
-            step = 2
-
-        result = []
-        for row in raw_map:
-            result.append(
-                [int(row[i:i+step], 16) for i in range(0, len(row), step)]
-            )
-        return result
-
-    def draw_maze(self) -> None:
-        for y, row in enumerate(self.map_int):
-            for x, cell in enumerate(row):
-                if cell & NORTH:
-                    print("NORTH")
-                if cell & EAST:
-                    print("EAST")
-                if cell & SOUTH:
-                    print("SOUTH")
-                if cell & WEST:
-                    print("WEST")
+            if (event.key == pygame.K_r):
+                self.screen.fill((50, 50, 50))
+                pygame.draw.rect(
+                    self.screen, (100, 100, 100),
+                    (
+                        16, 16, (MAZE_WIDTH * TILE_SIZE),
+                        (MAZE_HEIGHT * TILE_SIZE)
+                    )
+                )
+                self.draw_maze()
+                pygame.display.flip()
 
     def run(self) -> None:
-        self.map_int = self.parse_map(map)
-        print(self.map_int)
-
+        self.screen.fill((50, 50, 50))
         while True:
             mouse_pos = pygame.mouse.get_pos()
-
-            self.screen.fill((50, 50, 50))
 
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
