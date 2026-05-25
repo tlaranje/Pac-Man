@@ -11,35 +11,33 @@ TILE_SIZE = 32
 
 
 class Maze:
-    def __init__(
-            self,
-            screen: pygame.Surface,
-            maze_size: tuple[int, int] = (20, 20),
-            entry_cell: tuple[int, int] = (0, 0),
-            exit_cell: tuple[int, int] = (19, 19),
-            perfect: bool = True,
-            seed: int = -1
-    ) -> None:
-        self.maze = MazeGenerator(
-            size=(maze_size[0], maze_size[1]), perfect=perfect,
-            entry_cell=entry_cell, exit_cell=exit_cell, seed=seed
-        )
+    def __init__(self, screen: pygame.Surface, maze, gameplay) -> None:
+        self.maze = maze
+        self.gameplay = gameplay
         self.screen = screen
-        self.maze_size = maze_size
-        self.perfect = perfect
-        self.entry_cell = entry_cell
-        self.exit_cell = exit_cell
-        self.seed = seed
-        self.player_frames: list[pygame.Surface] = self.init_player_frames()
+        self.maze_size = (maze._width, maze._height)
+        self.perfect = maze._perfect
+        self.entry_cell = maze.maze_entry
+        self.exit_cell = maze.maze_exit
+        self.seed = maze._seed
+        self.player_frames: list[pygame.Surface] = [
+            self.init_frames("assets/img/PacMan.png")
+        ]
+        self.ghost_1_frames: list[pygame.Surface] = [
+            self.init_frames("assets/img/blueGhost.png"),
+            self.init_frames("assets/img/orangeGhost.png")
+        ]
+        self.ghost_delay = 500
+        self.last_ghost_move = pygame.time.get_ticks()
 
-    """ def init_player_frames(self) -> list[pygame.Surface]:
-        tileset = pygame.image.load("assets/img/PacMan.png").convert_alpha()
-        p_frames = []
+    def init_frames(self, file_path: str) -> pygame.Surface:
+        tileset = pygame.image.load(file_path).convert_alpha()
+        # p_frames = []
 
-        frame = pygame.Rect(0, 0, 32, 32)
-        p_frames.append(tileset.subsurface(frame))
+        frame = pygame.Rect(0, 0, 16, 16)
+        f = tileset.subsurface(frame)
 
-        return p_frames """
+        return f
 
     def handle_game_play_events(
         self: VProtocol, event: pygame.event.Event
@@ -49,6 +47,14 @@ class Maze:
                 self.state = "MAIN_MENU"
                 x, y = self.menu_size
                 self.update_display_mode(x, y)
+            if event.key == pygame.K_a:
+                self.gameplay.player.move_left()
+            if event.key == pygame.K_d:
+                self.gameplay.player.move_right()
+            if event.key == pygame.K_w:
+                self.gameplay.player.move_up()
+            if event.key == pygame.K_s:
+                self.gameplay.player.move_down()
             if event.key == pygame.K_r:
                 if self.seed == -1:
                     seed = random.randint(0, 100000)
@@ -64,6 +70,7 @@ class Maze:
                 )
 
     def draw_maze(self) -> None:
+        self.gameplay.player.eat(self.gameplay.pacgums_maps[0])
         border_color = (0, 0, 0)
         inner_color = (25, 25, 166)
 
@@ -189,3 +196,36 @@ class Maze:
                         (bottom_left[0], bottom_left[1] + 1),
                         inner_thickness
                     )
+
+        for y, row in enumerate(self.gameplay.pacgums_maps[0]):
+            for x, cell in enumerate(row):
+                pos_x = (x * TILE_SIZE) + 24
+                pos_y = (y * TILE_SIZE) + 24
+
+                if cell:
+                    pygame.draw.rect(
+                        self.screen, pygame.Color("cyan"),
+                        (pos_x, pos_y, 16, 16)
+                    )
+        x = self.gameplay.player.x * TILE_SIZE + 24
+        y = self.gameplay.player.y * TILE_SIZE + 24
+
+        for i, g in enumerate(self.gameplay.ghosts_maps[0]):
+            gx = g.x * TILE_SIZE + 24
+            gy = g.y * TILE_SIZE + 24
+
+            self.screen.blit(
+                self.ghost_1_frames[i % 2],
+                (gx, gy)
+            )
+
+        self.screen.blit(
+            self.player_frames[0],
+            (x, y)
+        )
+
+        curr_time = pygame.time.get_ticks()
+
+        if curr_time - self.last_ghost_move >= self.ghost_delay:
+            self.gameplay.move_ghosts()
+            self.last_ghost_move = curr_time

@@ -1,4 +1,7 @@
+from src.gameplay import PacManGameplay
+# from mazegenerator import MazeGenerator
 from ._visualizer import Visualizer
+from src.parser import PacManConfig
 from ._maze import Maze
 import pygame
 import sys
@@ -12,18 +15,22 @@ class Manager:
     def __init__(self) -> None:
         pygame.init()
         self.vis = Visualizer()
+        self.config = PacManConfig("./config.json")
+        self.gameplay = PacManGameplay(self.config)
 
     def run(self) -> None:
         self.vis.stetup_window()
+        self.gameplay.gameplay_init(0)
+        maze = self.gameplay.maps[0]
+
         Maze.__init__(
             self.vis,
             screen=self.vis.screen,
-            maze_size=(15, 15),
-            entry_cell=(0, 0),
-            exit_cell=(14, 14)
+            maze=maze,
+            gameplay=self.gameplay
         )
         self.vis.init_menu_buttons()
-
+        clock: pygame.time.Clock = pygame.time.Clock()
         while True:
             self.vis.screen.fill((50, 50, 50))
             mouse_pos = pygame.mouse.get_pos()
@@ -53,3 +60,4 @@ class Manager:
                 self.vis.draw_maze()
 
             pygame.display.flip()
+            clock.tick(60)

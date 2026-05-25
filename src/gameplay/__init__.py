@@ -1,1 +1,1 @@
-from .Gameplay import PacManEntity, PacManGhost
+from .Gameplay import PacManEntity, PacManGhost, PacManGameplay

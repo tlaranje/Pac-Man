@@ -54,6 +54,7 @@ class PacManConfig:
         for level in self.settings.levels:
             size: tuple[int, int] = (level.width, level.height)
             start_position: tuple[int, int] = (level.start_x, level.start_y)
+            print(size)
             maps.append(
                 MazeGenerator(
                     size=size,
@@ -90,7 +91,7 @@ class PacManConfig:
         for map in maps:
             ghosts: list[PacManGhost] = []
 
-            for _ in range(2):
+            for _ in range(5):
                 ghost = PacManGhost(
                     x=map._exitx,
                     y=map._exity,
