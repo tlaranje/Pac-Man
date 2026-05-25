@@ -18,7 +18,9 @@ class Manager:
         Maze.__init__(
             self.vis,
             screen=self.vis.screen,
-            maze_size=(15, 15)
+            maze_size=(15, 15),
+            entry_cell=(0, 0),
+            exit_cell=(14, 14)
         )
         self.vis.init_menu_buttons()
 

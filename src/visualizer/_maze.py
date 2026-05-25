@@ -4,6 +4,7 @@ import pygame
 import random
 
 if TYPE_CHECKING:
+    from pygame.typing import ColorLike
     from .protocol import VisualizerProtocol as VProtocol
 
 TILE_SIZE = 32
@@ -29,6 +30,16 @@ class Maze:
         self.entry_cell = entry_cell
         self.exit_cell = exit_cell
         self.seed = seed
+        self.player_frames: list[pygame.Surface] = self.init_player_frames()
+
+    """ def init_player_frames(self) -> list[pygame.Surface]:
+        tileset = pygame.image.load("assets/img/PacMan.png").convert_alpha()
+        p_frames = []
+
+        frame = pygame.Rect(0, 0, 32, 32)
+        p_frames.append(tileset.subsurface(frame))
+
+        return p_frames """
 
     def handle_game_play_events(
         self: VProtocol, event: pygame.event.Event
@@ -60,15 +71,29 @@ class Maze:
         inner_thickness = 3
         margin = 16
 
+        def draw_square(color: ColorLike, pos: tuple[int, int]) -> None:
+            padding = border_size // 2
+
+            inner_tile_size = TILE_SIZE - (padding * 2)
+
+            start_rect = pygame.Rect(
+                pos[0] + padding,
+                pos[1] + padding,
+                inner_tile_size,
+                inner_tile_size
+            )
+
+            pygame.draw.rect(self.screen, color, start_rect)
+
         def draw_square_cap(color: tuple, pos: tuple, thickness: int) -> None:
             color = (0, 0, 0)
             rect = pygame.Rect(0, 0, thickness, thickness)
             rect.center = (pos[0], pos[1])
             pygame.draw.rect(self.screen, color, rect)
 
-        # --- Bloco 1: Desenhando as Bordas Externas ---
         for y, row in enumerate(self.maze.maze):
             for x, cell in enumerate(row):
+
                 pos_x = (x * TILE_SIZE) + margin
                 pos_y = (y * TILE_SIZE) + margin
 
@@ -76,6 +101,12 @@ class Maze:
                 top_right = (pos_x + TILE_SIZE, pos_y)
                 bottom_left = (pos_x, pos_y + TILE_SIZE)
                 bottom_right = (pos_x + TILE_SIZE, pos_y + TILE_SIZE)
+
+                if x == self.entry_cell[0] and y == self.entry_cell[1]:
+                    draw_square(pygame.Color("green"), (pos_x, pos_y))
+
+                if x == self.exit_cell[0] and y == self.exit_cell[1]:
+                    draw_square(pygame.Color("red"), (pos_x, pos_y))
 
                 if cell & 1:  # Norte
                     pygame.draw.line(
