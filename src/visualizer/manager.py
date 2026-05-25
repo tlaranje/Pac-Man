@@ -1,5 +1,4 @@
 from src.gameplay import PacManGameplay
-# from mazegenerator import MazeGenerator
 from ._visualizer import Visualizer
 from src.parser import PacManConfig
 from ._maze import Maze
@@ -57,7 +56,8 @@ class Manager:
                     btn.update(mouse_pos)
                 self.vis.draw_main_menu()
             elif self.vis.state == "GAME_PLAY":
-                self.vis.draw_maze()
+                self.vis.screen.blit(self.vis.maze_surface, (0, 0))
+                self.vis.move_player_ghosts()
 
             pygame.display.flip()
             clock.tick(60)

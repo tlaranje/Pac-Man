@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from typing import Protocol
 import pygame
 
@@ -8,6 +8,9 @@ if TYPE_CHECKING:
 
 
 class VisualizerProtocol(Protocol):
+    maze_size: tuple[int, int]
+    title_font: Any
+    gameplay: Any
     screen: pygame.Surface
     maze: "Maze"
     menu_size: tuple[int, int]

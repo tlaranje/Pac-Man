@@ -1,5 +1,4 @@
 from ._protocol import VisualizerProtocol as VProtocol
-from ._button import Button
 import pygame
 import os
 
@@ -11,10 +10,8 @@ class Window:
     def stetup_window(self: VProtocol) -> None:
         self.screen: pygame.Surface = pygame.display.set_mode(self.menu_size)
         pygame.display.set_caption("Pac-Man")
-        Button.screen = self.screen
 
     def update_display_mode(self: VProtocol, width: int, height: int) -> None:
-        Button.win_size = (width, height)
         self.screen = pygame.display.set_mode((width, height))
         pygame.event.post(
             pygame.event.Event(pygame.ACTIVEEVENT, gain=1, state=1)

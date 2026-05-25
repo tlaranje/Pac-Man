@@ -4,7 +4,7 @@ import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .protocol import VisualizerProtocol as VProtocol
+    from ._protocol import VisualizerProtocol as VProtocol
 
 
 class Menu:
@@ -28,7 +28,7 @@ class Menu:
             )
         ]
 
-    def draw_main_menu(self: VProtocol) -> None:
+    def draw_main_menu(self: "VProtocol") -> None:
         text_surf = self.title_font.render("Pac-Man", True, (215, 215, 215))
         text_rect = text_surf.get_rect(
             centerx=self.screen.get_rect().centerx, y=10

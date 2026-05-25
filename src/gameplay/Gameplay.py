@@ -194,4 +194,3 @@ class PacManGameplay:
                 ghost.chase_position(player_x, player_y)
             else:
                 ghost.move_randomly()
-            print(self.chase_moves)

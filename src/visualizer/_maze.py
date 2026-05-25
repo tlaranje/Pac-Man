@@ -1,11 +1,9 @@
-from mazegenerator import MazeGenerator
 from typing import TYPE_CHECKING
 import pygame
-import random
 
 if TYPE_CHECKING:
     from pygame.typing import ColorLike
-    from .protocol import VisualizerProtocol as VProtocol
+    from ._protocol import VisualizerProtocol as VProtocol
 
 TILE_SIZE = 32
 
@@ -20,7 +18,7 @@ class Maze:
         self.entry_cell = maze.maze_entry
         self.exit_cell = maze.maze_exit
         self.seed = maze._seed
-        self.player_frames: list[pygame.Surface] = [
+        self.player_frames = [
             self.init_frames("assets/img/PacMan.png")
         ]
         self.ghost_1_frames: list[pygame.Surface] = [
@@ -29,6 +27,15 @@ class Maze:
         ]
         self.ghost_delay = 500
         self.last_ghost_move = pygame.time.get_ticks()
+        maze_pixel_width = self.maze_size[0] * TILE_SIZE + 32
+        maze_pixel_height = self.maze_size[1] * TILE_SIZE + 32
+
+        self.maze_surface = pygame.Surface(
+            (maze_pixel_width, maze_pixel_height)
+        )
+        self.maze_surface.fill((50, 50, 50))
+
+        self.draw_maze()
 
     def init_frames(self, file_path: str) -> pygame.Surface:
         tileset = pygame.image.load(file_path).convert_alpha()
@@ -40,7 +47,7 @@ class Maze:
         return f
 
     def handle_game_play_events(
-        self: VProtocol, event: pygame.event.Event
+        self: "VProtocol", event: pygame.event.Event
     ) -> None:
         if event.type == pygame.KEYDOWN:
             if (event.key == pygame.K_ESCAPE):
@@ -55,22 +62,39 @@ class Maze:
                 self.gameplay.player.move_up()
             if event.key == pygame.K_s:
                 self.gameplay.player.move_down()
-            if event.key == pygame.K_r:
-                if self.seed == -1:
-                    seed = random.randint(0, 100000)
-                else:
-                    seed = self.seed
 
-                self.maze = MazeGenerator(
-                    size=(self.maze_size[0], self.maze_size[1]),
-                    perfect=self.perfect,
-                    entry_cell=self.entry_cell,
-                    exit_cell=self.exit_cell,
-                    seed=seed
-                )
+    def move_player_ghosts(self) -> None:
+        # self.gameplay.player.eat(self.gameplay.pacgums_maps[0])
+        for y, row in enumerate(self.gameplay.pacgums_maps[0]):
+            for x, cell in enumerate(row):
+                pos_x = (x * TILE_SIZE) + 24
+                pos_y = (y * TILE_SIZE) + 24
+
+                if cell:
+                    pygame.draw.rect(
+                        self.screen, pygame.Color("cyan"),
+                        (pos_x, pos_y, 16, 16)
+                    )
+        x = self.gameplay.player.x * TILE_SIZE + 16 + 9
+        y = self.gameplay.player.y * TILE_SIZE + 16 + 9
+
+        for i, g in enumerate(self.gameplay.ghosts_maps[0]):
+            gx = g.x * TILE_SIZE + 25
+            gy = g.y * TILE_SIZE + 25
+
+            self.screen.blit(
+                self.ghost_1_frames[i % 2],
+                (gx, gy)
+            )
+        self.screen.blit(self.player_frames[0], (x, y))
+        # pygame.draw.rect(self.screen, pygame.Color("red"), (x, y, 16, 16))
+        curr_time = pygame.time.get_ticks()
+
+        if curr_time - self.last_ghost_move >= self.ghost_delay:
+            self.gameplay.move_ghosts()
+            self.last_ghost_move = curr_time
 
     def draw_maze(self) -> None:
-        self.gameplay.player.eat(self.gameplay.pacgums_maps[0])
         border_color = (0, 0, 0)
         inner_color = (25, 25, 166)
 
@@ -78,7 +102,7 @@ class Maze:
         inner_thickness = 3
         margin = 16
 
-        def draw_square(color: ColorLike, pos: tuple[int, int]) -> None:
+        def draw_square(color: "ColorLike", pos: tuple[int, int]) -> None:
             padding = border_size // 2
 
             inner_tile_size = TILE_SIZE - (padding * 2)
@@ -90,13 +114,13 @@ class Maze:
                 inner_tile_size
             )
 
-            pygame.draw.rect(self.screen, color, start_rect)
+            pygame.draw.rect(self.maze_surface, color, start_rect)
 
         def draw_square_cap(color: tuple, pos: tuple, thickness: int) -> None:
             color = (0, 0, 0)
             rect = pygame.Rect(0, 0, thickness, thickness)
             rect.center = (pos[0], pos[1])
-            pygame.draw.rect(self.screen, color, rect)
+            pygame.draw.rect(self.maze_surface, color, rect)
 
         for y, row in enumerate(self.maze.maze):
             for x, cell in enumerate(row):
@@ -117,7 +141,7 @@ class Maze:
 
                 if cell & 1:  # Norte
                     pygame.draw.line(
-                        self.screen, border_color,
+                        self.maze_surface, border_color,
                         (top_left[0] - 1, top_left[1]),
                         (top_right[0] + 1, top_right[1]),
                         border_size
@@ -127,7 +151,7 @@ class Maze:
 
                 if cell & 2:  # Leste
                     pygame.draw.line(
-                        self.screen, border_color,
+                        self.maze_surface, border_color,
                         (top_right[0], top_right[1] - 1),
                         (bottom_right[0], bottom_right[1] + 1),
                         border_size
@@ -137,7 +161,7 @@ class Maze:
 
                 if cell & 4:  # Sul
                     pygame.draw.line(
-                        self.screen, border_color,
+                        self.maze_surface, border_color,
                         (bottom_left[0] - 1, bottom_left[1]),
                         (bottom_right[0] + 1, bottom_right[1]),
                         border_size
@@ -147,7 +171,7 @@ class Maze:
 
                 if cell & 8:  # Oeste
                     pygame.draw.line(
-                        self.screen, border_color,
+                        self.maze_surface, border_color,
                         (top_left[0], top_left[1] - 1),
                         (bottom_left[0], bottom_left[1] + 1),
                         border_size
@@ -167,7 +191,7 @@ class Maze:
 
                 if cell & 1:  # Norte
                     pygame.draw.line(
-                        self.screen, inner_color,
+                        self.maze_surface, inner_color,
                         (top_left[0] - 1, top_left[1]),
                         (top_right[0] + 1, top_right[1]),
                         inner_thickness
@@ -175,7 +199,7 @@ class Maze:
 
                 if cell & 2:  # Leste
                     pygame.draw.line(
-                        self.screen, inner_color,
+                        self.maze_surface, inner_color,
                         (top_right[0], top_right[1] - 1),
                         (bottom_right[0], bottom_right[1] + 1),
                         inner_thickness
@@ -183,7 +207,7 @@ class Maze:
 
                 if cell & 4:  # Sul
                     pygame.draw.line(
-                        self.screen, inner_color,
+                        self.maze_surface, inner_color,
                         (bottom_left[0] - 1, bottom_left[1]),
                         (bottom_right[0] + 1, bottom_right[1]),
                         inner_thickness
@@ -191,41 +215,8 @@ class Maze:
 
                 if cell & 8:  # Oeste
                     pygame.draw.line(
-                        self.screen, inner_color,
+                        self.maze_surface, inner_color,
                         (top_left[0], top_left[1] - 1),
                         (bottom_left[0], bottom_left[1] + 1),
                         inner_thickness
                     )
-
-        for y, row in enumerate(self.gameplay.pacgums_maps[0]):
-            for x, cell in enumerate(row):
-                pos_x = (x * TILE_SIZE) + 24
-                pos_y = (y * TILE_SIZE) + 24
-
-                if cell:
-                    pygame.draw.rect(
-                        self.screen, pygame.Color("cyan"),
-                        (pos_x, pos_y, 16, 16)
-                    )
-        x = self.gameplay.player.x * TILE_SIZE + 24
-        y = self.gameplay.player.y * TILE_SIZE + 24
-
-        for i, g in enumerate(self.gameplay.ghosts_maps[0]):
-            gx = g.x * TILE_SIZE + 24
-            gy = g.y * TILE_SIZE + 24
-
-            self.screen.blit(
-                self.ghost_1_frames[i % 2],
-                (gx, gy)
-            )
-
-        self.screen.blit(
-            self.player_frames[0],
-            (x, y)
-        )
-
-        curr_time = pygame.time.get_ticks()
-
-        if curr_time - self.last_ghost_move >= self.ghost_delay:
-            self.gameplay.move_ghosts()
-            self.last_ghost_move = curr_time
