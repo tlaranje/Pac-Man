@@ -24,6 +24,16 @@ class PacManEntity:
     def eat(self, objects_map: list[list[bool]]) -> None:
         objects_map[self.y][self.x] = False
 
+    def move(self, direction: str) -> None:
+        if direction == "N":
+            self.move_up()
+        elif direction == "S":
+            self.move_down()
+        elif direction == "E":
+            self.move_right()
+        elif direction == "W":
+            self.move_left()
+
     def move_up(self) -> None:
         if self.maze[self.y][self.x] & NORTH:
             return
@@ -75,6 +85,9 @@ class PacManGhost(PacManEntity):
         super().__init__(x, y, map)
         self.repeat_move: int = 0
         self.last_diretion: int = 0
+        self.shortest_path: str = ""
+        self.last_chase_x: int = None
+        self.last_chase_y: int = None
         self.last_move = None
 
     def move_randomly(self) -> None:
@@ -115,6 +128,12 @@ class PacManGhost(PacManEntity):
             self.last_diretion = move[1]
 
     def chase_position(self, x: int, y: int) -> None:
+        if self.last_chase_x == x and self.last_chase_y == y \
+                and self.shortest_path:
+            self.move(self.shortest_path[0])
+            self.shortest_path = self.shortest_path[1:]
+            return
+
         save_entryx: int = self.map._entryx
         save_entryy: int = self.map._entryy
         save_exitx: int = self.map._exitx
@@ -125,7 +144,14 @@ class PacManGhost(PacManEntity):
         self.map._exitx = x
         self.map._exity = y
 
+        self.last_chase_x = x
+        self.last_chase_y = y
+
         self.map._find_short_path()
+        self.shortest_path = self.map._shortest_path[:]
+        if self.shortest_path:
+            self.move(self.shortest_path[0])
+            self.shortest_path = self.shortest_path[1:]
 
         self.map._entryx = save_entryx
         self.map._entryy = save_entryy
@@ -159,11 +185,17 @@ class PacManGameplay:
         self.player = PacManEntity(x, y, self.maps[map_idx])
 
     def move_ghosts(self) -> None:
-        for ghost in self.ghosts_maps[self.map_idx]:
-            ghost.move_randomly()
-            if ghost.is_on_corridor_pos(self.player.x, self.player.y):
-                ghost.x = ghost.map._exitx
-                ghost.y = ghost.map._exity
+        chasing_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
+        for i, ghost in enumerate(self.ghosts_maps[self.map_idx]):
+            playerx: int = self.player.x
+            playery: int = self.player.y
+            if ghost.is_on_corridor_pos(playerx, playery):
+                chasing_moves[i] = 20
+            if chasing_moves[i] > 0:
+                chasing_moves[i] -= 1
+                ghost.chase_position(playerx, playery)
+            else:
+                ghost.move_randomly()
 
 
 def render_maze(
@@ -331,7 +363,7 @@ def main(stdscr):
         # ------------------------
         # FPS CONTROL
         # ------------------------
-        time.sleep(0.1)
+        time.sleep(0.7)
 
 
 # ----------------------------
