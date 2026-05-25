@@ -1,5 +1,5 @@
 from ._protocol import VisualizerProtocol as VProtocol
-from _button import Button
+from ._button import Button
 import pygame
 import os
 
@@ -8,10 +8,7 @@ class Window:
     def __init__(self) -> None:
         os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-        self.menu_size: tuple[int, int] = (250, 250)
-        self.game_play_size: tuple[int, int] = (500, 500)
-
-    def stetup_window(self) -> None:
+    def stetup_window(self: VProtocol) -> None:
         self.screen: pygame.Surface = pygame.display.set_mode(self.menu_size)
         pygame.display.set_caption("Pac-Man")
         Button.screen = self.screen

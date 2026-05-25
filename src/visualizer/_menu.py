@@ -1,24 +1,34 @@
-from ._protocol import VisualizerProtocol as VProtocol
 from ._button import Button
-from pygame import Font
+import pygame
+import sys
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .protocol import VisualizerProtocol as VProtocol
 
 
 class Menu:
-    def __init__(self: VProtocol) -> None:
-        self.menu_buttons: list[Button] = [
+    def __init__(self) -> None:
+        self.menu_buttons: list[Button] = []
+        self.title_font = pygame.font.Font(
+            "assets/fonts/Rajdhani-Bold.ttf", 50
+        )
+
+    def init_menu_buttons(self: "VProtocol") -> None:
+        self.menu_buttons = [
             Button(
+                screen=self.screen,
+                win_size=self.menu_size,
                 size=(150, 60), pos=(None, 100), text="Play", action="PLAY"
             ),
             Button(
+                screen=self.screen,
+                win_size=self.menu_size,
                 size=(150, 60), pos=(None, 170), text="Exit", action="QUIT_APP"
             )
         ]
 
-        self.title_font = Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 50
-        )
-
-    def draw_main_menu(self) -> None:
+    def draw_main_menu(self: VProtocol) -> None:
         text_surf = self.title_font.render("Pac-Man", True, (215, 215, 215))
         text_rect = text_surf.get_rect(
             centerx=self.screen.get_rect().centerx, y=10
@@ -27,13 +37,17 @@ class Menu:
         for btn in self.menu_buttons:
             btn.draw()
 
-    def handle_menu_events(self, event: pygame.event.Event) -> None:
+    def handle_menu_events(
+        self: "VProtocol", event: pygame.event.Event
+    ) -> None:
         for btn in self.menu_buttons:
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
                     self.state = 'GAME_PLAY'
-                    x, y = self.game_play_size
-                    self.update_display_mode(x, y)
+                    tile_size = 32
+                    width = self.maze_size[0] * tile_size + 32
+                    height = self.maze_size[1] * tile_size + 32
+                    self.update_display_mode(width, height)
                     pygame.event.clear()
                     return
                 elif btn.action_value == "QUIT_APP":

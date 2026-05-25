@@ -6,17 +6,18 @@ SVG_PLAY_CLICK = "assets/img/Button_click.svg"
 
 
 class Button:
-    screen: pygame.Surface
-    win_size: tuple[int, int]
-
     def __init__(
         self,
+        screen: pygame.Surface,
+        win_size: tuple[int, int],
         pos: tuple[int | None, int | None] = (None, None),
         size: tuple[int, int] = (150, 50),
         text: str = "Hello",
         font: pygame.Font | None = None,
         action: str | None = None,
     ) -> None:
+        self.screen = screen
+        self.win_size = win_size
         self.pos: tuple[int | None, int | None] = pos
         self.size: tuple[int, int] = size
         self.text: str = text
@@ -31,11 +32,16 @@ class Button:
 
         self._hovered = False
         self._pressed = False
-        self.setup_button()
+        self._setup_button()
 
-    def setup_button(self) -> None:
+    def _setup_button(self) -> None:
         x, y = self.pos
-        win_x, win_y = self.win_size
+
+        active_screen = pygame.display.get_surface()
+        if active_screen is None:
+            win_x, win_y = (800, 600)
+        else:
+            win_x, win_y = active_screen.get_size()
 
         pos_x: int = (win_x // 2) - (self.size[0] // 2) if x is None else x
         pos_y: int = (win_y // 2) - (self.size[1] // 2) if y is None else y

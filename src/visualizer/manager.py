@@ -1,4 +1,5 @@
-from ._button import Button
+from ._visualizer import Visualizer
+from ._maze import Maze
 import pygame
 import sys
 
@@ -10,21 +11,26 @@ TILE_SIZE = 32
 class Manager:
     def __init__(self) -> None:
         pygame.init()
-
-        self.state: str = "GAME_PLAY"
-
-
+        self.vis = Visualizer()
 
     def run(self) -> None:
-        self.screen.fill((50, 50, 50))
+        self.vis.stetup_window()
+        Maze.__init__(
+            self.vis,
+            screen=self.vis.screen,
+            maze_size=(15, 15)
+        )
+        self.vis.init_menu_buttons()
+
         while True:
+            self.vis.screen.fill((50, 50, 50))
             mouse_pos = pygame.mouse.get_pos()
 
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if (
                         event.key == pygame.K_ESCAPE
-                        and self.state == 'MAIN_MENU'
+                        and self.vis.state == 'MAIN_MENU'
                     ):
                         pygame.event.post(pygame.event.Event(pygame.QUIT))
 
@@ -32,14 +38,16 @@ class Manager:
                     pygame.quit()
                     sys.exit()
 
-                if self.state == "MAIN_MENU":
-                    self.handle_menu_events(event)
-                elif self.state == "GAME_PLAY":
-                    self.handle_game_play_events(event)
+                if self.vis.state == "MAIN_MENU":
+                    self.vis.handle_menu_events(event)
+                elif self.vis.state == "GAME_PLAY":
+                    self.vis.handle_game_play_events(event)
 
-            if self.state == "MAIN_MENU":
-                for btn in self.menu_buttons:
+            if self.vis.state == "MAIN_MENU":
+                for btn in self.vis.menu_buttons:
                     btn.update(mouse_pos)
-                self.draw_main_menu()
+                self.vis.draw_main_menu()
+            elif self.vis.state == "GAME_PLAY":
+                self.vis.draw_maze()
 
             pygame.display.flip()
