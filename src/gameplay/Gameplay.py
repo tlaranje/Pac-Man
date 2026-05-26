@@ -1,6 +1,7 @@
 import random
 from ..parser import PacManConfig
 from ..models import PacManMap, PacGumsMap
+from typing import Any
 
 NORTH: int = 1
 EAST: int = 2
@@ -84,9 +85,34 @@ class PacManGhost(PacManEntity):
         self.repeat_move: int = 0
         self.last_diretion: int = 0
         self.shortest_path: str = ""
-        self.last_chase_x: int = None
-        self.last_chase_y: int = None
-        self.last_move = None
+        self.last_chase_x: int = 0
+        self.last_chase_y: int = 0
+        self.last_move: Any
+        self.ghost_angle: int = 0
+
+    def update_ghost_angle(self) -> None:
+        if self.last_diretion == NORTH:
+            self.ghost_angle = 90
+        elif self.last_diretion == SOUTH:
+            self.ghost_angle = 270
+        elif self.last_diretion == WEST:
+            self.ghost_angle = 180
+        elif self.last_diretion == EAST:
+            self.ghost_angle = 0
+
+    def move(self, direction: str) -> None:
+        super().move(direction)
+
+        if direction == "N":
+            self.last_diretion = NORTH
+        elif direction == "S":
+            self.last_diretion = SOUTH
+        elif direction == "E":
+            self.last_diretion = EAST
+        elif direction == "W":
+            self.last_diretion = WEST
+
+        self.update_ghost_angle()
 
     def move_randomly(self) -> None:
         map = self.maze
@@ -97,6 +123,7 @@ class PacManGhost(PacManEntity):
                 and random.random() > 0.1:
             self.repeat_move -= 1
             self.last_move()
+            self.update_ghost_angle()
             return
 
         self.repeat_move = 4
@@ -124,6 +151,7 @@ class PacManGhost(PacManEntity):
             move[0]()
             self.last_move = move[0]
             self.last_diretion = move[1]
+            self.update_ghost_angle()
 
     def chase_position(self, x: int, y: int) -> None:
         if self.last_chase_x == x and self.last_chase_y == y \
@@ -171,7 +199,7 @@ class PacManGameplay:
         self.ghosts_maps: list[list[PacManGhost]] = config.load_ghosts(
             self.maps
         )
-        self.player: PacManEntity = None
+        self.player: PacManEntity
         self.map_idx: int = 0
         self.chase_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
 

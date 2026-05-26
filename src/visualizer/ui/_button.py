@@ -59,7 +59,7 @@ class Button:
         )
 
     def draw(self) -> None:
-        if self._pressed:
+        if self._pressed or self._hovered:
             img = self._img_click
             draw_rect = self.rect.move(0, 4)
         else:
@@ -68,14 +68,15 @@ class Button:
 
         self.screen.blit(img, draw_rect)
 
-        if self._hovered and not self._pressed:
+        if self._pressed:
             dark = img.copy()
             dark.fill((0, 0, 0, 60), special_flags=pygame.BLEND_RGBA_MULT)
             self.screen.blit(dark, draw_rect)
 
         if self.text:
             text_surf = self.font.render(self.text, True, (215, 215, 215))
-            if self._pressed:
+
+            if self._pressed or self._hovered:
                 text_rect = text_surf.get_rect(
                     center=(draw_rect.centerx, draw_rect.centery)
                 )

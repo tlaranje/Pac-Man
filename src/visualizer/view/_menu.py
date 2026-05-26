@@ -1,7 +1,8 @@
-from ._button import Button
+from .._constants import MENU_SIZE, BUTTON_SIZE, TILE_COLOR, TILE_SIZE, MARGIN
+from typing import TYPE_CHECKING
+from ..ui._button import Button
 import pygame
 import sys
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ._protocol import VisualizerProtocol as VProtocol
@@ -17,19 +18,18 @@ class Menu:
     def init_menu_buttons(self: "VProtocol") -> None:
         self.menu_buttons = [
             Button(
-                screen=self.screen,
-                win_size=self.menu_size,
-                size=(150, 60), pos=(None, 100), text="Play", action="PLAY"
+                screen=self.screen, win_size=MENU_SIZE,
+                size=BUTTON_SIZE, pos=(None, 100), text="Play", action="PLAY"
             ),
             Button(
-                screen=self.screen,
-                win_size=self.menu_size,
-                size=(150, 60), pos=(None, 170), text="Exit", action="QUIT_APP"
+                screen=self.screen, win_size=MENU_SIZE,
+                size=BUTTON_SIZE, pos=(None, 170), text="Exit",
+                action="QUIT_APP"
             )
         ]
 
     def draw_main_menu(self: "VProtocol") -> None:
-        text_surf = self.title_font.render("Pac-Man", True, (215, 215, 215))
+        text_surf = self.title_font.render("Pac-Man", True, TILE_COLOR)
         text_rect = text_surf.get_rect(
             centerx=self.screen.get_rect().centerx, y=10
         )
@@ -44,9 +44,8 @@ class Menu:
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
                     self.state = 'GAME_PLAY'
-                    tile_size = 32
-                    width = self.maze_size[0] * tile_size + 32
-                    height = self.maze_size[1] * tile_size + 32
+                    width = self.maze_size[0] * TILE_SIZE + MARGIN
+                    height = self.maze_size[1] * TILE_SIZE + MARGIN
                     self.update_display_mode(width, height)
                     pygame.event.clear()
                     return

@@ -13,7 +13,6 @@ class VisualizerProtocol(Protocol):
     gameplay: Any
     screen: pygame.Surface
     maze: "Maze"
-    menu_size: tuple[int, int]
     game_play_size: tuple[int, int]
     state: str
     menu_buttons: list["Button"]

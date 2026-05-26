@@ -1,13 +1,9 @@
 from src.gameplay import PacManGameplay
 from ._visualizer import Visualizer
 from src.parser import PacManConfig
-from ._maze import Maze
+from .view._maze import Maze
 import pygame
 import sys
-
-MAZE_WIDTH = 20
-MAZE_HEIGHT = 20
-TILE_SIZE = 32
 
 
 class Manager:
@@ -56,7 +52,6 @@ class Manager:
                     btn.update(mouse_pos)
                 self.vis.draw_main_menu()
             elif self.vis.state == "GAME_PLAY":
-                self.vis.screen.blit(self.vis.maze_surface, (0, 0))
                 self.vis.move_player_ghosts()
 
             pygame.display.flip()
