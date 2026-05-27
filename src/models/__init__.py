@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from mazegenerator import MazeGenerator
 
 PacManMap = MazeGenerator
-PacGumsMap = list[list[bool]]
+PacGumsMap = list[list[tuple[bool, str]]]
 
 DEFAULT_WIDTH: int = 20
 DEFAULT_HEIGHT: int = 20

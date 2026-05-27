@@ -1,13 +1,17 @@
+from pygame import Surface
 import pygame
 from .._constants import (
-    TILE_SIZE, MARGIN, BORDER_SIZE,
+    TILE_SIZE, MARGIN, BORDER_SIZE, MAZE_OFFSET,
     BORDER_COLOR, INNER_COLOR, INNER_THICKNESS
 )
 
 
 class MazeRenderer:
-    def __init__(self, maze_surface: pygame.Surface):
+    def __init__(self, maze_surface: Surface):
         self.maze_surface = maze_surface
+        self.high_score_font = pygame.font.Font(
+            "assets/fonts/Rajdhani-Bold.ttf", 20
+        )
 
     def _draw_square(self, color, pos: tuple[int, int]) -> None:
         padding = BORDER_SIZE - 8 // 2
@@ -22,25 +26,24 @@ class MazeRenderer:
     def draw_walls(
         self, maze_grid: list, entry_cell: tuple, exit_cell: tuple
     ) -> None:
+        i = 0
+        high_score = self.high_score_font.render(
+            f"High Score: {i}", True, (255, 255, 255)
+        )
+        x, y = self.maze_surface.get_size()
+        self.maze_surface.blit(
+            high_score, (x // 2 - high_score.get_width() // 2, 10)
+        )
 
         for y, row in enumerate(maze_grid):
             for x, cell in enumerate(row):
                 pos_x = (x * TILE_SIZE) + MARGIN // 2
-                pos_y = (y * TILE_SIZE) + MARGIN // 2
+                pos_y = (y * TILE_SIZE) + MARGIN + MAZE_OFFSET // 2
 
                 top_left = (pos_x, pos_y)
                 top_right = (pos_x + TILE_SIZE, pos_y)
                 bottom_left = (pos_x, pos_y + TILE_SIZE)
                 bottom_right = (pos_x + TILE_SIZE, pos_y + TILE_SIZE)
-
-                if x == entry_cell[0] and y == entry_cell[1]:
-                    self._draw_square(
-                        pygame.Color("green"), (pos_x + 1, pos_y + 1)
-                    )
-                if x == exit_cell[0] and y == exit_cell[1]:
-                    self._draw_square(
-                        pygame.Color("red"), (pos_x + 1, pos_y + 1)
-                    )
 
                 if cell & 1:
                     pygame.draw.line(
@@ -81,7 +84,7 @@ class MazeRenderer:
         for y, row in enumerate(maze_grid):
             for x, cell in enumerate(row):
                 pos_x = (x * TILE_SIZE) + MARGIN // 2
-                pos_y = (y * TILE_SIZE) + MARGIN // 2
+                pos_y = (y * TILE_SIZE) + MARGIN + MAZE_OFFSET // 2
 
                 if cell & 1:
                     pygame.draw.line(
@@ -114,13 +117,19 @@ class MazeRenderer:
     def draw_pacgums(self, pacgums_map: list, fruit_frames: list) -> None:
         for y, row in enumerate(pacgums_map):
             for x, cell in enumerate(row):
-                if cell:
+                if cell[0]:
                     pacgums_size = 16
                     pos_x = (x * TILE_SIZE) + 16 + (
                         TILE_SIZE - pacgums_size) // 2 + 2
                     pos_y = (y * TILE_SIZE) + 16 + (
-                        TILE_SIZE - pacgums_size) // 2 + 1
-                    self.maze_surface.blit(
-                        fruit_frames[x % len(fruit_frames)]["0"][0],
-                        (pos_x, pos_y, pacgums_size, pacgums_size)
-                    )
+                        TILE_SIZE - pacgums_size) // 2 + 1 + MAZE_OFFSET
+                    if cell[1] == "super":
+                        self.maze_surface.blit(
+                            fruit_frames[1]["0"][0],
+                            (pos_x, pos_y, pacgums_size, pacgums_size)
+                        )
+                    else:
+                        self.maze_surface.blit(
+                            fruit_frames[0]["0"][0],
+                            (pos_x, pos_y, pacgums_size, pacgums_size)
+                        )

@@ -5,6 +5,7 @@ BUTTON_SIZE = (160, 50)
 
 TILE_SIZE = 27
 MARGIN = 32
+MAZE_OFFSET = 32
 
 TILE_COLOR = pygame.Color("light grey")
 BACKGROUND_COLOR = pygame.Color("grey")

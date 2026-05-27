@@ -1,4 +1,6 @@
-from .._constants import MENU_SIZE, BUTTON_SIZE, TILE_COLOR, TILE_SIZE, MARGIN
+from .._constants import (
+    MENU_SIZE, BUTTON_SIZE, TILE_COLOR, TILE_SIZE, MARGIN, MAZE_OFFSET
+)
 from typing import TYPE_CHECKING
 from ..ui._button import Button
 import pygame
@@ -45,7 +47,9 @@ class Menu:
                 if btn.action_value == "PLAY":
                     self.state = 'GAME_PLAY'
                     width = self.maze_size[0] * TILE_SIZE + MARGIN
-                    height = self.maze_size[1] * TILE_SIZE + MARGIN
+                    height = (
+                        self.maze_size[1] * TILE_SIZE + MARGIN + MAZE_OFFSET
+                    )
                     self.update_display_mode(width, height)
                     pygame.event.clear()
                     return

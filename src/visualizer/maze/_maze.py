@@ -2,7 +2,7 @@ import pygame
 from typing import TYPE_CHECKING
 from pygame import Event
 
-from .._constants import TILE_SIZE, MARGIN
+from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET
 from ._sprites import SpriteLoader
 from ._movement import MovementController
 from ._rendering import MazeRenderer
@@ -34,12 +34,7 @@ class Maze:
         ]
         self.fruit_frames = [
             self.sprite_loader.load_frames(pos=18, is_fruit=True, start=13),
-            self.sprite_loader.load_frames(pos=20, is_fruit=True, start=12),
-            self.sprite_loader.load_frames(pos=20, is_fruit=True, start=13),
-            self.sprite_loader.load_frames(pos=21, is_fruit=True, start=12),
-            self.sprite_loader.load_frames(pos=22, is_fruit=True, start=12),
-            self.sprite_loader.load_frames(pos=21, is_fruit=True, start=13),
-            self.sprite_loader.load_frames(pos=22, is_fruit=True, start=13),
+            self.sprite_loader.load_frames(pos=20, is_fruit=True, start=12)
         ]
 
         self.ghost_delay = 500
@@ -51,9 +46,8 @@ class Maze:
         self.next_dir = None
         self.player_angle = 0
 
-        # Configuração da Superfície do Labirinto
         maze_pixel_width = self.maze_size[0] * TILE_SIZE + MARGIN
-        maze_pixel_height = self.maze_size[1] * TILE_SIZE + MARGIN
+        maze_pixel_height = self.maze_size[1]*TILE_SIZE + MARGIN + MAZE_OFFSET
         self.maze_surface = pygame.Surface(
             (maze_pixel_width, maze_pixel_height)
         )
@@ -64,7 +58,6 @@ class Maze:
         self.animation_speed = 15
         self.lerp_speed = 0.15
 
-        # Posições Visuais Suaves (Lerp)
         start_px = self.gameplay.player.x * TILE_SIZE + 16 + (
             TILE_SIZE - 16) // 2 + 1
         start_py = self.gameplay.player.y * TILE_SIZE + 16 + (
@@ -75,7 +68,8 @@ class Maze:
         self.ghosts_visual_pos = []
         for g in self.gameplay.ghosts_maps[0]:
             start_gx = g.x * TILE_SIZE + 16 + (TILE_SIZE) // 2 + 1
-            start_gy = g.y * TILE_SIZE + 16 + (TILE_SIZE) // 2 + 1
+            start_gy = g.y * TILE_SIZE + 16 + (
+                TILE_SIZE) // 2 + 1
             self.ghosts_visual_pos.append(
                 {"x": float(start_gx), "y": float(start_gy)}
             )
@@ -107,7 +101,6 @@ class Maze:
 
         px, py = self.gameplay.player.x, self.gameplay.player.y
 
-        # Valida colisões através da instância do movement_controller
         if self.next_dir and self.movement_controller.can_move(
            px, py, self.next_dir):
             self.current_dir = self.next_dir
@@ -133,7 +126,7 @@ class Maze:
 
     def clear_pacgum_at(self, x: int, y: int) -> None:
         pos_x = (x * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 2
-        pos_y = (y * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 2
+        pos_y = (y * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 2 + MAZE_OFFSET
         pygame.draw.rect(
             self.maze_surface, (50, 50, 50), (pos_x, pos_y, 16, 16)
         )
@@ -158,7 +151,8 @@ class Maze:
 
         for i, g in enumerate(self.gameplay.ghosts_maps[0]):
             target_gx = g.x * TILE_SIZE + 16 + (TILE_SIZE) // 2 + 1
-            target_gy = g.y * TILE_SIZE + 16 + (TILE_SIZE) // 2 + 1
+            target_gy = g.y * TILE_SIZE + 16 + (
+                TILE_SIZE) // 2 + 1 + MAZE_OFFSET
 
             self.ghosts_visual_pos[i]["x"] += (
                 target_gx - self.ghosts_visual_pos[i]["x"]) * self.lerp_speed
@@ -190,7 +184,7 @@ class Maze:
         target_px = self.gameplay.player.x * TILE_SIZE + 16 + (
             TILE_SIZE - 16) // 2 + 11
         target_py = self.gameplay.player.y * TILE_SIZE + 16 + (
-            TILE_SIZE - 16) // 2 + 9
+            TILE_SIZE - 16) // 2 + 9 + MAZE_OFFSET
 
         self.player_visual_x += (
             target_px - self.player_visual_x) * self.lerp_speed
