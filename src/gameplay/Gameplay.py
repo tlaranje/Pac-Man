@@ -20,8 +20,9 @@ class PacManEntity:
         self.x: int = x
         self.y: int = y
 
-    def eat(self, objects_map: list[list[bool]]) -> None:
-        objects_map[self.y][self.x] = False
+    def eat(self, objects_map: list[list[tuple[bool, str]]]) -> None:
+        cell_type: str = objects_map[self.y][self.x][1]
+        objects_map[self.y][self.x] = (False, cell_type)
 
     def move(self, direction: str) -> None:
         if direction == "N":
@@ -200,7 +201,7 @@ class PacManPlayer(PacManEntity):
             if ghost.x == self.x \
                     and ghost.y == self.y:
                 return True
-        False
+        return False
 
 
 class PacManGameplay:
@@ -209,6 +210,7 @@ class PacManGameplay:
     """
 
     def __init__(self, config: PacManConfig) -> None:
+        self.config: PacManConfig = config
         self.maps: list[PacManMap] = config.load_maps()
         self.maps_count: int = len(self.maps)
         self.pacgums_maps: list[PacGumsMap] = config.load_pacgums(
@@ -220,6 +222,11 @@ class PacManGameplay:
         self.player: PacManPlayer
         self.map_idx: int = 0
         self.chase_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
+
+    def reset(self) -> None:
+        self.pacgums_maps = self.config.load_pacgums(self.maps)
+        self.ghosts_maps = self.config.load_ghosts(self.maps)
+        self.gameplay_init(0)
 
     def gameplay_init(self, map_idx: int) -> None:
         if map_idx < 0 or map_idx >= self.maps_count:

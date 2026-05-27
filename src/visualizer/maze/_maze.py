@@ -1,63 +1,58 @@
-import pygame
-from typing import TYPE_CHECKING
-from pygame import Event
-
-from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET
-from ._sprites import SpriteLoader
+from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET, MENU_SIZE
 from ._movement import MovementController
-from ._rendering import MazeRenderer
+from typing import TYPE_CHECKING
+from pygame import Surface
+from pygame import Event
+import pygame
 
 if TYPE_CHECKING:
-    from ._protocol import VisualizerProtocol as VProtocol
+    from ._rendering import MazeRenderer
+    from .._visualizer import Visualizer
 
 
 class Maze:
-    def __init__(self, screen: pygame.Surface, maze, gameplay) -> None:
-        self.maze = maze
-        self.gameplay = gameplay
-        self.screen = screen
-        self.maze_size = (maze._width, maze._height)
-        self.perfect = maze._perfect
-        self.entry_cell = maze.maze_entry
-        self.exit_cell = maze.maze_exit
-        self.seed = maze._seed
+    def __init__(self, visualizer: "Visualizer") -> None:
+        self.vis = visualizer
 
-        self.sprite_loader = SpriteLoader()
+        # Variables of Maze
+        self.maze = self.vis.gameplay.maps[0]
+
+        self.size = (self.maze._width, self.maze._height)
+        self.perfect = self.maze._perfect
+        self.entry_cell = self.maze.maze_entry
+        self.exit_cell = self.maze.maze_exit
+        self.seed = self.maze._seed
+
+        # MovementController class
         self.movement_controller = MovementController(self.maze.maze)
-
-        self.player_frames = self.sprite_loader.load_frames(
-            pos=21, num_frames=3
-        )
-        self.ghosts_frames = [
-            self.sprite_loader.load_frames(num_frames=2, pos=17),
-            self.sprite_loader.load_frames(num_frames=2, pos=18)
-        ]
-        self.fruit_frames = [
-            self.sprite_loader.load_frames(pos=18, is_fruit=True, start=13),
-            self.sprite_loader.load_frames(pos=20, is_fruit=True, start=12)
-        ]
 
         self.ghost_delay = 500
         self.last_ghost_move = pygame.time.get_ticks()
         self.player_delay = 150
         self.last_player_move = pygame.time.get_ticks()
 
-        self.current_dir = None
-        self.next_dir = None
-        self.player_angle = 0
+        self.current_dir: str | None = None
+        self.next_dir: str | None = None
+        self.player_angle: int = 0
+        self.game_started: bool = False
 
-        maze_pixel_width = self.maze_size[0] * TILE_SIZE + MARGIN
-        maze_pixel_height = self.maze_size[1]*TILE_SIZE + MARGIN + MAZE_OFFSET
-        self.maze_surface = pygame.Surface(
-            (maze_pixel_width, maze_pixel_height)
-        )
+        # Static maze surface for walls and pacgums
+        maze_width = self.size[0] * TILE_SIZE + MARGIN
+        maze_height = self.size[1]*TILE_SIZE + MARGIN + MAZE_OFFSET
+        self.maze_surface = pygame.Surface((maze_width, maze_height))
         self.maze_surface.fill((50, 50, 50))
 
+        # Score count for HighScore text
+        self.score: int = 0
+
+        # Variables for smooth movement
         self.current_frame = 0
         self.animation_timer = 0
         self.animation_speed = 15
         self.lerp_speed = 0.15
 
+        self.gameplay = self.vis.gameplay
+        self.gameplay.gameplay_init(0)
         start_px = self.gameplay.player.x * TILE_SIZE + 16 + (
             TILE_SIZE - 16) // 2 + 1
         start_py = self.gameplay.player.y * TILE_SIZE + 16 + (
@@ -74,19 +69,38 @@ class Maze:
                 {"x": float(start_gx), "y": float(start_gy)}
             )
 
-        self.renderer = MazeRenderer(self.maze_surface)
-        self.renderer.draw_walls(
-            self.maze.maze, self.entry_cell, self.exit_cell
-        )
-        self.renderer.draw_pacgums(
-            self.gameplay.pacgums_maps[0], self.fruit_frames
+        self.ghosts_frames: list[Surface] = []
+        self.fruit_sprites: list[Surface] = []
+
+        self.high_score_font = pygame.font.Font(
+            "assets/fonts/Rajdhani-Bold.ttf", 20
         )
 
-    def handle_game_play_events(self: "VProtocol", event: Event) -> None:
+    def init_sprites(self, renderer: "MazeRenderer") -> None:
+        sprite_loader = self.vis.sprite_loader
+        self.player_frames = sprite_loader.load_frames(
+            pos=21, num_frames=3
+        )
+        self.ghosts_frames = [
+            sprite_loader.load_frames(num_frames=2, pos=17),
+            sprite_loader.load_frames(num_frames=2, pos=18)
+        ]
+        self.fruit_sprites = [
+            sprite_loader.load_frames(pos=18, is_fruit=True, start=13),
+            sprite_loader.load_frames(pos=20, is_fruit=True, start=12)
+        ]
+        # renderer.draw_walls(
+        #     self.maze.maze, self.entry_cell, self.exit_cell
+        # )
+        # renderer.draw_pacgums(
+        #     self.gameplay.pacgums_maps[0], self.fruit_sprites
+        # )
+
+    def handle_game_play_events(self, event: Event) -> None:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             self.state = "MAIN_MENU"
-            x, y = self.menu_size
-            self.update_display_mode(x, y)
+            x, y = MENU_SIZE
+            self.vis.window.update_display_mode(x, y)
 
         new_dir = MovementController.get_direction_from_input(
             pygame.key.get_pressed()
@@ -96,6 +110,14 @@ class Maze:
 
     def update_player_movement(self) -> None:
         curr_time = pygame.time.get_ticks()
+
+        if not self.game_started:
+            if self.next_dir:
+                self.game_started = True
+                self.last_player_move = curr_time
+            else:
+                return
+
         if curr_time - self.last_player_move < self.player_delay:
             return
 
@@ -125,14 +147,45 @@ class Maze:
             self.current_dir = None
 
     def clear_pacgum_at(self, x: int, y: int) -> None:
+        is_eat = self.gameplay.pacgums_maps[0][y][x][0]
+        self.gameplay.player.eat(self.gameplay.pacgums_maps[0])
+        type_pacgum = self.gameplay.pacgums_maps[0][y][x][1]
+
+        if type_pacgum == "normal" and is_eat is True:
+            self.score += 10
+        if type_pacgum == "super" and is_eat is True:
+            self.score += 100
+
         pos_x = (x * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 2
         pos_y = (y * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 2 + MAZE_OFFSET
         pygame.draw.rect(
             self.maze_surface, (50, 50, 50), (pos_x, pos_y, 16, 16)
         )
 
+        high_score = self.high_score_font.render(
+            f"High Score: {self.score}", True, (255, 255, 255)
+        )
+        x, y = self.vis.screen.get_size()
+        self.vis.screen.blit(
+            high_score, (x // 2 - high_score.get_width() // 2, 10)
+        )
+
     def move_player_ghosts(self) -> None:
-        self.screen.blit(self.maze_surface, (0, 0))
+        vis = self.vis
+        vis.screen.blit(self.maze_surface, (0, 0))
+
+        if self.gameplay.player.is_dead():
+            # x, y = MENU_SIZE
+            # self.win.update_display_mode(x, y)
+            self.state = "GAME_OVER"
+            self.gameplay.reset()
+            self.score = 0
+            self.game_started = False
+            self.current_dir = None
+            self.next_dir = None
+            self.player_angle = 0
+            return
+
         self.update_player_movement()
 
         px, py = self.gameplay.player.x, self.gameplay.player.y
@@ -145,7 +198,8 @@ class Maze:
             self.current_frame += 1
 
         curr_time = pygame.time.get_ticks()
-        if curr_time - self.last_ghost_move >= self.ghost_delay:
+        if self.game_started and (
+           curr_time - self.last_ghost_move >= self.ghost_delay):
             self.gameplay.move_ghosts()
             self.last_ghost_move = curr_time
 
@@ -179,7 +233,7 @@ class Maze:
                         int(self.ghosts_visual_pos[i]["y"])
                     )
                 )
-                self.screen.blit(ghost_current_frame, ghost_rect)
+                vis.screen.blit(ghost_current_frame, ghost_rect)
 
         target_px = self.gameplay.player.x * TILE_SIZE + 16 + (
             TILE_SIZE - 16) // 2 + 11
@@ -209,6 +263,6 @@ class Maze:
             ]
 
         player_rect = active_player_frame.get_rect(
-            center=(int(self.player_visual_x), int(self.player_visual_y))
+            center=(int(self.player_visual_x-1), int(self.player_visual_y))
         )
-        self.screen.blit(active_player_frame, player_rect)
+        vis.screen.blit(active_player_frame, player_rect)

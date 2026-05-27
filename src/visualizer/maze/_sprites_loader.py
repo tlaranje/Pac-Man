@@ -1,10 +1,16 @@
-import pygame
+from typing import TYPE_CHECKING
 from typing import Any
+import pygame
+
+
+if TYPE_CHECKING:
+    from ._visualizer import Visualizer
 
 
 class SpriteLoader:
-    def __init__(self, spritesheet_path: str = "assets/img/pacman.png"):
-        self.spritesheet_path = spritesheet_path
+    def __init__(self, visualizer: "Visualizer") -> None:
+        self.vis = visualizer
+        self.spritesheet_path: str = "assets/img/pacman.png"
 
     def load_frames(
         self, is_fruit: bool = False, num_frames: int = 1,
