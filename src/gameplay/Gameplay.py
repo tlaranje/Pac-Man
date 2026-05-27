@@ -185,6 +185,24 @@ class PacManGhost(PacManEntity):
         self.map._exity = save_exity
 
 
+class PacManPlayer(PacManEntity):
+    """
+    :TODO
+    """
+
+    def __init__(self, x: int, y: int, map: PacManMap,
+                 ghosts_map: list[PacManGhost]) -> None:
+        super().__init__(x, y, map)
+        self.ghosts_map: list[PacManGhost] = ghosts_map
+
+    def is_dead(self) -> bool:
+        for ghost in self.ghosts_map:
+            if ghost.x == self.x \
+                    and ghost.y == self.y:
+                return True
+        False
+
+
 class PacManGameplay:
     """
     :TODO
@@ -199,7 +217,7 @@ class PacManGameplay:
         self.ghosts_maps: list[list[PacManGhost]] = config.load_ghosts(
             self.maps
         )
-        self.player: PacManEntity
+        self.player: PacManPlayer
         self.map_idx: int = 0
         self.chase_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
 
@@ -209,7 +227,10 @@ class PacManGameplay:
         self.map_idx = map_idx
         x: int = self.maps[map_idx]._entryx
         y: int = self.maps[map_idx]._entryy
-        self.player = PacManEntity(x, y, self.maps[map_idx])
+        self.player = PacManPlayer(
+            x, y, self.maps[map_idx],
+            self.ghosts_maps[self.map_idx]
+        )
 
     def move_ghosts(self) -> None:
         for i, ghost in enumerate(self.ghosts_maps[self.map_idx]):
