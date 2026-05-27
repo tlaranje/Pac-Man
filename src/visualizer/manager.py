@@ -16,6 +16,12 @@ class Manager:
 
         window.stetup_window()
         menu.init_menu_buttons()
+        maze.init_sprites()
+
+        vis.renderer.draw_walls(maze.maze_grid.maze)
+        vis.renderer.draw_pacgums(
+            maze.gameplay.pacgums_maps[0], maze.fruit_sprites
+        )
 
         clock: pygame.time.Clock = pygame.time.Clock()
         while True:

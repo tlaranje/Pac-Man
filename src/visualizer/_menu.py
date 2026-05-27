@@ -48,10 +48,10 @@ class Menu:
         for btn in self.menu_buttons:
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
-                    self.state = 'GAME_PLAY'
+                    vis.state = 'GAME_PLAY'
                     width = vis.maze.size[0] * TILE_SIZE + MARGIN
                     height = (
-                        vis.maze.size[0] * TILE_SIZE + MARGIN + MAZE_OFFSET
+                        vis.maze.size[1] * TILE_SIZE + MARGIN + MAZE_OFFSET
                     )
                     vis.window.update_display_mode(width, height)
                     pygame.event.clear()

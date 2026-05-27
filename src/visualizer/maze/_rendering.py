@@ -25,9 +25,7 @@ class MazeRenderer:
         rect.center = (pos[0], pos[1])
         pygame.draw.rect(self.maze_surface, BORDER_COLOR, rect)
 
-    def draw_walls(
-        self, maze_grid: list, entry_cell: tuple, exit_cell: tuple
-    ) -> None:
+    def draw_walls(self, maze_grid: list) -> None:
         for y, row in enumerate(maze_grid):
             for x, cell in enumerate(row):
                 pos_x = (x * TILE_SIZE) + MARGIN // 2

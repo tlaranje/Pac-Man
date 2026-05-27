@@ -1,12 +1,12 @@
-from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET, MENU_SIZE
+from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET
 from ._movement import MovementController
+from ._sprites_loader import SpriteLoader
 from typing import TYPE_CHECKING
 from pygame import Surface
 from pygame import Event
 import pygame
 
 if TYPE_CHECKING:
-    from ._rendering import MazeRenderer
     from .._visualizer import Visualizer
 
 
@@ -15,16 +15,16 @@ class Maze:
         self.vis = visualizer
 
         # Variables of Maze
-        self.maze = self.vis.gameplay.maps[0]
+        self.maze_grid = self.vis.gameplay.maps[0]
 
-        self.size = (self.maze._width, self.maze._height)
-        self.perfect = self.maze._perfect
-        self.entry_cell = self.maze.maze_entry
-        self.exit_cell = self.maze.maze_exit
-        self.seed = self.maze._seed
+        self.size = (self.maze_grid._width, self.maze_grid._height)
+        self.perfect = self.maze_grid._perfect
+        self.entry_cell = self.maze_grid.maze_entry
+        self.exit_cell = self.maze_grid.maze_exit
+        self.seed = self.maze_grid._seed
 
         # MovementController class
-        self.movement_controller = MovementController(self.maze.maze)
+        self.movement_controller = MovementController(self.maze_grid.maze)
 
         self.ghost_delay = 500
         self.last_ghost_move = pygame.time.get_ticks()
@@ -40,7 +40,6 @@ class Maze:
         maze_width = self.size[0] * TILE_SIZE + MARGIN
         maze_height = self.size[1]*TILE_SIZE + MARGIN + MAZE_OFFSET
         self.maze_surface = pygame.Surface((maze_width, maze_height))
-        self.maze_surface.fill((50, 50, 50))
 
         # Score count for HighScore text
         self.score: int = 0
@@ -76,8 +75,8 @@ class Maze:
             "assets/fonts/Rajdhani-Bold.ttf", 20
         )
 
-    def init_sprites(self, renderer: "MazeRenderer") -> None:
-        sprite_loader = self.vis.sprite_loader
+    def init_sprites(self) -> None:
+        sprite_loader = SpriteLoader()
         self.player_frames = sprite_loader.load_frames(
             pos=21, num_frames=3
         )
@@ -89,19 +88,8 @@ class Maze:
             sprite_loader.load_frames(pos=18, is_fruit=True, start=13),
             sprite_loader.load_frames(pos=20, is_fruit=True, start=12)
         ]
-        # renderer.draw_walls(
-        #     self.maze.maze, self.entry_cell, self.exit_cell
-        # )
-        # renderer.draw_pacgums(
-        #     self.gameplay.pacgums_maps[0], self.fruit_sprites
-        # )
 
     def handle_game_play_events(self, event: Event) -> None:
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            self.state = "MAIN_MENU"
-            x, y = MENU_SIZE
-            self.vis.window.update_display_mode(x, y)
-
         new_dir = MovementController.get_direction_from_input(
             pygame.key.get_pressed()
         )

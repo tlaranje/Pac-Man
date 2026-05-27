@@ -85,7 +85,7 @@ class PacManGhost(PacManEntity):
         super().__init__(x, y, map)
         self.repeat_move: int = 0
         self.last_diretion: int = 0
-        self.shortest_path: str = ""
+        self.shortest_path: Any = ""
         self.last_chase_x: int = 0
         self.last_chase_y: int = 0
         self.last_move: Any
