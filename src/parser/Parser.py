@@ -71,7 +71,7 @@ class PacManConfig:
                 (x, y)
                 for y in range(map._height)
                 for x in range(map._width)
-                if (map._maze[y][x] & 0b1111) != 0
+                if (map._maze[y][x] & 0b1111) != 0b1111
             ]
 
             count: int = min(self.settings.pacgum, len(walkable))
