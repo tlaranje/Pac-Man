@@ -1,4 +1,4 @@
-from .._constants import (
+""" from .._constants import (
     TILE_SIZE, MARGIN, BORDER_SIZE, INNER_THICKNESS,
     BORDER_COLOR, INNER_COLOR
 )
@@ -22,12 +22,20 @@ class Maze:
         self.exit_cell = maze.maze_exit
         self.seed = maze._seed
 
-        self.player_frames = self.init_frames(
-            "assets/img/test.png", pos=21, num_frames=3
-        )
+        self.player_frames = self.init_frames(pos=21, num_frames=3)
         self.ghosts_frames: list[list[pygame.Surface]] = [
-            self.init_frames("assets/img/test.png", num_frames=2, pos=17),
-            self.init_frames("assets/img/test.png", num_frames=2, pos=18)
+            self.init_frames(num_frames=2, pos=17),
+            self.init_frames(num_frames=2, pos=18)
+        ]
+        self.fruit_frames = [
+            self.init_frames(pos=18, is_fruit=True, start=13),
+            self.init_frames(pos=20, is_fruit=True, start=12),
+            self.init_frames(pos=20, is_fruit=True, start=13),
+            self.init_frames(pos=21, is_fruit=True, start=12),
+            self.init_frames(pos=22, is_fruit=True, start=12),
+
+            self.init_frames(pos=21, is_fruit=True, start=13),
+            self.init_frames(pos=22, is_fruit=True, start=13),
         ]
         self.ghost_delay = 500
         self.last_ghost_move = pygame.time.get_ticks()
@@ -74,10 +82,12 @@ class Maze:
         self.draw_all_pacgums()
 
     def init_frames(
-        self, file_path: str, is_ghost: bool = False, num_frames: int = 2,
-        pos: int = 0
+        self, is_fruit: bool = False, num_frames: int = 1, pos: int = 0,
+        start: int = 0
     ) -> Any:
-        spritesheet = pygame.image.load(file_path).convert_alpha()
+        spritesheet = pygame.image.load(
+            "assets/img/pacman.png"
+        ).convert_alpha()
 
         height = 16
         widths = [16] * num_frames
@@ -87,9 +97,13 @@ class Maze:
 
         background_color = spritesheet.get_at((0, base_column))
 
-        direcoes = ["D", "S", "A", "W"]
+        if is_fruit:
+            direcoes = ["0"]
+        else:
+            direcoes = ["D", "S", "A", "W"]
+
         frames_dict: Any = {}
-        current_x = 0
+        current_x = start * 16
 
         for dir_key in direcoes:
             frames_dict[dir_key] = []
@@ -109,25 +123,6 @@ class Maze:
                 current_x += w
 
         return frames_dict
-        """         else:
-            frames_list = []
-            current_x = 0
-
-            for w in widths:
-                rect = pygame.Rect(current_x, base_column, w, height)
-                frame = spritesheet.subsurface(rect)
-
-                standard_surface = pygame.Surface(
-                    (max_w, height), pygame.SRCALPHA
-                )
-
-                standard_surface.set_colorkey(background_color)
-                standard_surface.blit(frame, (0, 0))
-
-                frames_list.append(standard_surface)
-                current_x += w
-
-            return frames_list """
 
     def handle_game_play_events(self: "VProtocol", event: Event) -> None:
         if event.type == pygame.KEYDOWN:
@@ -286,22 +281,22 @@ class Maze:
         for y, row in enumerate(self.gameplay.pacgums_maps[0]):
             for x, cell in enumerate(row):
                 if cell:
-                    pacguns_size = 8
+                    pacguns_size = 16
                     pos_x = (x * TILE_SIZE) + 16 + (
-                        TILE_SIZE - pacguns_size) // 2 + 1
+                        TILE_SIZE - pacguns_size) // 2 + 2
                     pos_y = (y * TILE_SIZE) + 16 + (
                         TILE_SIZE - pacguns_size) // 2 + 1
-                    pygame.draw.rect(
-                        self.maze_surface, pygame.Color("cyan"),
+                    self.maze_surface.blit(
+                        self.fruit_frames[x % len(self.fruit_frames)]["0"][0],
                         (pos_x, pos_y, pacguns_size, pacguns_size)
                     )
 
     def clear_pacgum_at(self, x: int, y: int) -> None:
-        pos_x = (x * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 + 1
-        pos_y = (y * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 + 1
+        pos_x = (x * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 2
+        pos_y = (y * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 2
         pygame.draw.rect(
             self.maze_surface, (50, 50, 50),
-            (pos_x, pos_y, 8, 8)
+            (pos_x, pos_y, 16, 16)
         )
 
     def draw_maze(self) -> None:
@@ -416,3 +411,4 @@ class Maze:
                         (bottom_left[0], bottom_left[1] + 1),
                         INNER_THICKNESS
                     )
+ """

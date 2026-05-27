@@ -1,6 +1,6 @@
 from ._window import Window
 from .view._menu import Menu
-from .view._maze import Maze
+from .maze._maze import Maze
 
 from pygame import Surface
 

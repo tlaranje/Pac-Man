@@ -1,7 +1,7 @@
 from src.gameplay import PacManGameplay
 from ._visualizer import Visualizer
 from src.parser import PacManConfig
-from .view._maze import Maze
+from .maze._maze import Maze
 import pygame
 import sys
 
