@@ -13,13 +13,15 @@ class Manager:
         menu = vis.menu
         maze = vis.maze
         window = vis.window
+        renderer = vis.renderer
+        game_over = vis.game_over
 
         window.stetup_window()
         menu.init_menu_buttons()
-        maze.init_sprites()
+        renderer.init_sprites()
 
-        vis.renderer.draw_walls(maze.maze_grid.maze)
-        vis.renderer.draw_pacgums(
+        renderer.draw_walls(maze.maze_grid.maze)
+        renderer.draw_pacgums(
             maze.gameplay.pacgums_maps[0], maze.fruit_sprites
         )
 
@@ -27,6 +29,7 @@ class Manager:
         while True:
             vis.screen.fill((50, 50, 50))
             mouse_pos = pygame.mouse.get_pos()
+            state = vis.state
 
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -40,17 +43,21 @@ class Manager:
                     pygame.quit()
                     sys.exit()
 
-                if vis.state == "MAIN_MENU":
+                if state == "MAIN_MENU":
                     menu.handle_menu_events(event)
-                elif vis.state == "GAME_PLAY":
+                elif state == "GAME_PLAY":
                     maze.handle_game_play_events(event)
+                elif state == "GAME_OVER":
+                    game_over.handle_game_over_events(event)
 
-            if vis.state == "MAIN_MENU":
+            if state == "MAIN_MENU":
                 for btn in menu.menu_buttons:
                     btn.update(mouse_pos)
                 menu.draw_main_menu()
-            elif vis.state == "GAME_PLAY":
+            elif state == "GAME_PLAY":
                 maze.move_player_ghosts()
+            elif state == "GAME_OVER":
+                game_over.draw_game_over()
 
             pygame.display.flip()
             clock.tick(60)

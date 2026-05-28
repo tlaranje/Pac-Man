@@ -2,8 +2,10 @@ from .._constants import (
     TILE_SIZE, MARGIN, BORDER_SIZE, MAZE_OFFSET,
     BORDER_COLOR, INNER_COLOR, INNER_THICKNESS
 )
+from ._sprites_loader import SpriteLoader
 from typing import TYPE_CHECKING
 from pygame import Event
+from pygame import Color
 import pygame
 
 if TYPE_CHECKING:
@@ -14,6 +16,20 @@ class MazeRenderer:
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
         self.maze_surface = self.vis.maze_surface
+
+    def init_sprites(self) -> None:
+        sprite_loader = SpriteLoader()
+        self.vis.maze.player_frames = sprite_loader.load_frames(
+            pos=21, num_frames=3
+        )
+        self.vis.maze.ghosts_frames = [
+            sprite_loader.load_frames(num_frames=2, pos=17),
+            sprite_loader.load_frames(num_frames=2, pos=18)
+        ]
+        self.vis.maze.fruit_sprites = [
+            sprite_loader.load_frames(pos=18, is_fruit=True, start=13),
+            sprite_loader.load_frames(pos=20, is_fruit=True, start=12)
+        ]
 
     def _draw_square(self, color, pos: tuple[int, int]) -> None:
         padding = BORDER_SIZE - 8 // 2
@@ -133,7 +149,8 @@ class GameOver():
         self.vis = visualizer
 
     def handle_game_over_events(self, event: Event) -> None:
-        print("dead")
+        vis = self.vis
+        vis.screen.fill(Color("black"))
 
     def draw_game_over(self) -> None:
         pass

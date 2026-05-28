@@ -15,7 +15,6 @@ class Visualizer():
 
         self.maze = Maze(self)
         self.maze_surface = self.maze.maze_surface
-        self.maze_surface.fill((50, 50, 50))
 
         self.renderer = MazeRenderer(self)
 

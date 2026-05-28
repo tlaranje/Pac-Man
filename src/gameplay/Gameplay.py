@@ -83,6 +83,9 @@ class PacManGhost(PacManEntity):
 
     def __init__(self, x: int, y: int, map: PacManMap) -> None:
         super().__init__(x, y, map)
+        self.spawn_x: int = x
+        self.spawn_y: int = y
+
         self.repeat_move: int = 0
         self.last_diretion: int = 0
         self.shortest_path: Any = ""
@@ -90,6 +93,15 @@ class PacManGhost(PacManEntity):
         self.last_chase_y: int = 0
         self.last_move: Any
         self.ghost_angle: int = 0
+
+    def reset_position(self) -> None:
+        self.x = self.spawn_x
+        self.y = self.spawn_y
+        self.shortest_path = ""
+        self.last_chase_x = 0
+        self.last_chase_y = 0
+        self.repeat_move = 0
+        self.last_diretion = 0
 
     def update_ghost_angle(self) -> None:
         if self.last_diretion == NORTH:
@@ -195,6 +207,12 @@ class PacManPlayer(PacManEntity):
                  ghosts_map: list[PacManGhost]) -> None:
         super().__init__(x, y, map)
         self.ghosts_map: list[PacManGhost] = ghosts_map
+        self.spawn_x: int = x
+        self.spawn_y: int = y
+
+    def reset_position(self) -> None:
+        self.x = self.spawn_x
+        self.y = self.spawn_y
 
     def is_dead(self) -> bool:
         for ghost in self.ghosts_map:
