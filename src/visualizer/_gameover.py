@@ -1,52 +1,42 @@
-from ._constants import (
-    MENU_SIZE, BUTTON_SIZE, TILE_COLOR, TILE_SIZE, MARGIN, MAZE_OFFSET
-)
+from ._constants import BUTTON_SIZE, TILE_SIZE, MARGIN, MAZE_OFFSET
 from typing import TYPE_CHECKING
 from ._button import Button
+from pygame import Event
+from pygame import Color
 import pygame
-import sys
 
 if TYPE_CHECKING:
-    from ._visualizer import Visualizer
+    from .._visualizer import Visualizer
 
 
-class Menu:
+class GameOver():
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
-        self.menu_buttons: list[Button] = []
-        self.title_font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 50
+        self.gameover_buttons: list[Button] = []
+        self.font = pygame.font.Font(
+            "assets/fonts/Rajdhani-Bold.ttf", 40
         )
 
-    def init_menu_buttons(self) -> None:
+    def init_game_over_buttons(self) -> None:
         vis = self.vis
+        win_size = self.vis.screen.get_size()
 
-        self.menu_buttons = [
+        self.gameover_buttons = [
             Button(
-                screen=vis.screen, win_size=MENU_SIZE,
+                screen=vis.screen, win_size=win_size,
                 size=BUTTON_SIZE, pos=(None, 100), text="Play", action="PLAY"
             ),
             Button(
-                screen=vis.screen, win_size=MENU_SIZE,
+                screen=vis.screen, win_size=win_size,
                 size=BUTTON_SIZE, pos=(None, 170), text="Exit",
                 action="QUIT_APP"
             )
         ]
 
-    def draw_main_menu(self) -> None:
-        self.vis.screen.fill((50, 50, 50))
-        text_surf = self.title_font.render("Pac-Man", True, TILE_COLOR)
-        text_rect = text_surf.get_rect(
-            centerx=self.vis.screen.get_rect().centerx, y=10
-        )
-        self.vis.screen.blit(text_surf, text_rect)
-        for btn in self.menu_buttons:
-            btn.draw()
-
-    def handle_menu_events(self, event: pygame.event.Event) -> None:
+    def handle_game_over_events(self, event: Event) -> None:
         vis = self.vis
 
-        for btn in self.menu_buttons:
+        for btn in self.gameover_buttons:
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
                     width = vis.maze.size[0] * TILE_SIZE + MARGIN
@@ -62,5 +52,21 @@ class Menu:
                     )
                     return
                 elif btn.action_value == "QUIT_APP":
-                    pygame.quit()
-                    sys.exit()
+                    vis.state = "MAIN_MENU"
+
+    def draw_game_over(self) -> None:
+        vis = self.vis
+
+        vis.screen.fill((50, 50, 50))
+        high_score_surface = self.font.render(
+            "Game Over", True, Color("white")
+        )
+        screen_w, screen_h = self.vis.screen.get_size()
+
+        self.vis.screen.blit(
+            high_score_surface,
+            (screen_w // 2 - high_score_surface.get_width() // 2, 10)
+        )
+
+        for button in self.gameover_buttons:
+            button.draw()

@@ -5,6 +5,8 @@ TILE_COLOR = pygame.Color("light grey")
 MENU_SIZE = (250, 250)
 BUTTON_SIZE = (160, 50)
 
+GAMEOVER_SIZE = (250, 250)
+
 # Maze constansts
 TILE_SIZE = 27
 MARGIN = 32

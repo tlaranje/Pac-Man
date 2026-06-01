@@ -1,6 +1,7 @@
-from .maze import MazeRenderer, Maze, GameOver
 from src.gameplay import PacManGameplay
+from .maze import MazeRenderer, Maze
 from src.parser import PacManConfig
+from ._gameover import GameOver
 from ._menu import Menu
 from ._window import Window
 from pygame import Surface

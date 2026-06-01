@@ -1,4 +1,4 @@
-from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET
+from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET, GAMEOVER_SIZE
 from ._movement import MovementController
 from typing import TYPE_CHECKING
 from pygame import Surface
@@ -64,7 +64,7 @@ class Maze:
         self.font = pygame.font.Font(
             "assets/fonts/Rajdhani-Bold.ttf", 20
         )
-        self.lives: int = 3
+        self.lives: int = 0
 
     def reset_visual_positions(self) -> None:
         start_px = self.gameplay.player.x * TILE_SIZE + 16 + (
@@ -91,15 +91,7 @@ class Maze:
         self.next_dir = None
         self.player_angle = 0
 
-        self.maze_surface.fill((0, 0, 0))
-
-        self.vis.renderer.draw_walls(self.maze_grid.maze)
-
-        self.vis.renderer.draw_pacgums(
-            self.gameplay.pacgums_maps[0], self.fruit_sprites
-        )
-
-        self.reset_visual_positions()
+        # self.maze_surface.fill((0, 0, 0))
 
     def handle_player_lose_life(self) -> None:
         self.game_started = False
@@ -110,6 +102,12 @@ class Maze:
         self.gameplay.player.reset_position()
         for g in self.gameplay.ghosts_maps[0]:
             g.reset_position()
+
+        self.maze_surface.fill((0, 0, 0))
+        self.vis.renderer.draw_walls(self.maze_grid.maze)
+        self.vis.renderer.draw_pacgums(
+            self.gameplay.pacgums_maps[0], self.fruit_sprites
+        )
 
         self.reset_visual_positions()
 
@@ -183,6 +181,10 @@ class Maze:
             self.lives -= 1
             if self.lives <= 0:
                 vis.state = "GAME_OVER"
+                self.handle_player_death()
+                self.maze_surface.fill((0, 0, 0))
+                x, y = GAMEOVER_SIZE
+                vis.window.update_display_mode(x, y)
                 return
             else:
                 self.handle_player_lose_life()

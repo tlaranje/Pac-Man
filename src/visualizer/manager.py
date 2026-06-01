@@ -18,6 +18,7 @@ class Manager:
 
         window.stetup_window()
         menu.init_menu_buttons()
+        game_over.init_game_over_buttons()
         renderer.init_sprites()
 
         renderer.draw_walls(maze.maze_grid.maze)
@@ -27,7 +28,6 @@ class Manager:
 
         clock: pygame.time.Clock = pygame.time.Clock()
         while True:
-            vis.screen.fill((50, 50, 50))
             mouse_pos = pygame.mouse.get_pos()
             state = vis.state
 
@@ -57,7 +57,8 @@ class Manager:
             elif state == "GAME_PLAY":
                 maze.move_player_ghosts()
             elif state == "GAME_OVER":
+                for btn in game_over.gameover_buttons:
+                    btn.update(mouse_pos)
                 game_over.draw_game_over()
-
             pygame.display.flip()
             clock.tick(60)

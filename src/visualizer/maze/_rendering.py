@@ -4,8 +4,7 @@ from .._constants import (
 )
 from ._sprites_loader import SpriteLoader
 from typing import TYPE_CHECKING
-from pygame import Event
-from pygame import Color
+
 import pygame
 
 if TYPE_CHECKING:
@@ -142,15 +141,3 @@ class MazeRenderer:
                             fruit_frames[0]["0"][0],
                             (pos_x, pos_y, pacgums_size, pacgums_size)
                         )
-
-
-class GameOver():
-    def __init__(self, visualizer: "Visualizer") -> None:
-        self.vis = visualizer
-
-    def handle_game_over_events(self, event: Event) -> None:
-        vis = self.vis
-        vis.screen.fill(Color("black"))
-
-    def draw_game_over(self) -> None:
-        pass
