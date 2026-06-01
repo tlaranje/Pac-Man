@@ -3,7 +3,7 @@ import pygame
 # Menu constansts
 TILE_COLOR = pygame.Color("white")
 TEXT_COLOR = pygame.Color("light grey")
-MENU_SIZE = (250, 250)
+MENU_SIZE = (250, 330)
 BUTTON_SIZE = (150, 50)
 
 GAMEOVER_SIZE = (250, 250)

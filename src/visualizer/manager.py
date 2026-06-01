@@ -6,6 +6,7 @@ import sys
 class Manager:
     def __init__(self) -> None:
         pygame.init()
+        pygame.key.set_repeat(500, 30)
         self.vis = Visualizer()
 
     def run(self) -> None:
@@ -28,7 +29,6 @@ class Manager:
 
         clock: pygame.time.Clock = pygame.time.Clock()
         while True:
-            mouse_pos = pygame.mouse.get_pos()
             state = vis.state
 
             for event in pygame.event.get():
@@ -51,16 +51,10 @@ class Manager:
                     game_over.handle_game_over_events(event)
 
             if state == "MAIN_MENU":
-                for btn in menu.menu_buttons:
-                    btn.update(mouse_pos)
                 menu.draw_main_menu()
-            elif state == "USER_SELECTION":
-                menu.draw_user_selection()
             elif state == "GAME_PLAY":
                 maze.move_player_ghosts()
             elif state == "GAME_OVER":
-                for btn in game_over.gameover_buttons:
-                    btn.update(mouse_pos)
                 game_over.draw_game_over()
             pygame.display.flip()
             clock.tick(60)
