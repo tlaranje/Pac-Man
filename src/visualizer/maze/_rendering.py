@@ -29,6 +29,11 @@ class MazeRenderer:
             sprite_loader.load_frames(pos=18, is_fruit=True, start=13),
             sprite_loader.load_frames(pos=20, is_fruit=True, start=12)
         ]
+        self.vis.maze.scared_ghosts_sprites = [
+            sprite_loader.load_frames(
+                num_frames=2, pos=19, is_fruit=True, start=10
+            )
+        ]
 
     def _draw_square(self, color, pos: tuple[int, int]) -> None:
         padding = BORDER_SIZE - 8 // 2

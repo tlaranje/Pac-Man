@@ -256,7 +256,6 @@ class PacManPlayer(PacManEntity):
         if not self.is_on_super():
             return self.is_on_ghost()
         for ghost in self.ghosts_map:
-            print(f"Ghost {(ghost.x, ghost.y)} is scared: {ghost.is_scared}")
             if ghost.x == self.x \
                     and ghost.y == self.y \
                     and (not ghost.is_scared):
@@ -292,6 +291,14 @@ class PacManGameplay:
         self.player: PacManPlayer
         self.map_idx: int = 0
         self.chase_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
+        self.scores: list[int] = [0]
+
+    def is_win(self) -> bool:
+        for row in self.pacgums_maps[self.map_idx]:
+            for pacgum in row:
+                if pacgum[0]:
+                    return False
+        return True
 
     def get_corners(self) -> list[list[tuple[int, int]]]:
         corners: list[list[tuple[int, int]]] = []
@@ -306,7 +313,9 @@ class PacManGameplay:
 
     def reset(self) -> None:
         self.pacgums_maps = self.config.load_pacgums(self.maps)
-        self.ghosts_maps = self.config.load_ghosts(self.maps)
+        self.ghosts_maps = self.config.load_ghosts(
+            self.maps, self.maps_corners
+        )
         self.gameplay_init(0)
 
     def gameplay_init(self, map_idx: int) -> None:

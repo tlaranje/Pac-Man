@@ -54,6 +54,8 @@ class Manager:
                 for btn in menu.menu_buttons:
                     btn.update(mouse_pos)
                 menu.draw_main_menu()
+            elif state == "USER_SELECTION":
+                menu.draw_user_selection()
             elif state == "GAME_PLAY":
                 maze.move_player_ghosts()
             elif state == "GAME_OVER":

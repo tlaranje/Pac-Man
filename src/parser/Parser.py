@@ -84,7 +84,7 @@ class PacManConfig:
             for x, y in chosen:
                 pacgums_map[y][x] = (True, "normal")
 
-            num_super = 4
+            num_super = int(count * 0.05)
             super_gums = random.sample(chosen, num_super)
 
             for x, y in super_gums:
@@ -96,7 +96,7 @@ class PacManConfig:
 
     def load_ghosts(self,
                     maps: list[PacManMap],
-                    corners: list[tuple[int, int]]) -> list[list]:
+                    corners: list[list[tuple[int, int]]]) -> list[list]:
         from ..gameplay import PacManGhost
         ghosts_maps: list[list[PacManGhost]] = []
 

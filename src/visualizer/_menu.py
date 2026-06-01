@@ -33,13 +33,24 @@ class Menu:
             )
         ]
 
+    def draw_user_selection(self) -> None:
+        vis = self.vis
+
+        vis.screen.fill((50, 50, 50))
+
     def draw_main_menu(self) -> None:
-        self.vis.screen.fill((50, 50, 50))
+        vis = self.vis
+
+        if vis.screen.get_size() != MENU_SIZE and vis.state == "MAIN_MENU":
+            x, y = MENU_SIZE
+            self.vis.window.update_display_mode(x, y)
+
+        vis.screen.fill((50, 50, 50))
         text_surf = self.title_font.render("Pac-Man", True, TILE_COLOR)
         text_rect = text_surf.get_rect(
-            centerx=self.vis.screen.get_rect().centerx, y=10
+            centerx=vis.screen.get_rect().centerx, y=10
         )
-        self.vis.screen.blit(text_surf, text_rect)
+        vis.screen.blit(text_surf, text_rect)
         for btn in self.menu_buttons:
             btn.draw()
 

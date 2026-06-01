@@ -60,6 +60,7 @@ class Maze:
         self.player_frames: list[Surface] = []
         self.ghosts_frames: list[Surface] = []
         self.fruit_sprites: list[Surface] = []
+        self.scared_ghosts_sprites: list[Surface] = []
 
         self.font = pygame.font.Font(
             "assets/fonts/Rajdhani-Bold.ttf", 20
@@ -82,7 +83,13 @@ class Maze:
                 {"x": float(start_gx), "y": float(start_gy)}
             )
 
-    def handle_player_death(self) -> None:
+    def handle_player_death(self, score: int, is_win: bool = False) -> None:
+        self.gameplay.scores.append(self.score)
+        self.vis.state = "GAME_OVER"
+        self.vis.game_over.title = "Game Over" if not is_win else "Win"
+        self.maze_surface.fill((0, 0, 0))
+        x, y = GAMEOVER_SIZE
+        self.vis.window.update_display_mode(x, y)
         self.gameplay.reset()
         self.score = 0
         self.lives = 3
@@ -90,8 +97,6 @@ class Maze:
         self.current_dir = None
         self.next_dir = None
         self.player_angle = 0
-
-        # self.maze_surface.fill((0, 0, 0))
 
     def handle_player_lose_life(self) -> None:
         self.game_started = False
@@ -178,14 +183,14 @@ class Maze:
         vis = self.vis
         vis.screen.blit(self.maze_surface, (0, 0))
 
+        if self.gameplay.is_win():
+            self.handle_player_death(self.score, is_win=True)
+            return
+
         if self.gameplay.player.is_dead():
             self.lives -= 1
             if self.lives <= 0:
-                vis.state = "GAME_OVER"
-                self.handle_player_death()
-                self.maze_surface.fill((0, 0, 0))
-                x, y = GAMEOVER_SIZE
-                vis.window.update_display_mode(x, y)
+                self.handle_player_death(self.score)
                 return
             else:
                 self.handle_player_lose_life()
@@ -214,9 +219,13 @@ class Maze:
         if self.gameplay.pacgums_maps[0][py][px][0] is True:
             self.clear_pacgum_at(px, py)
 
-        if self.gameplay.player.is_on_super() and self.gameplay.player.is_on_ghost():
-            ghosts_ate: int = self.gameplay.player.eat_ghosts()
-            self.score += ghosts_ate * 200
+        if self.gameplay.player.is_on_super():
+            if self.gameplay.player.is_on_ghost():
+                ghosts_ate: int = self.gameplay.player.eat_ghosts()
+                self.score += ghosts_ate * 200
+        else:
+            for ghost in self.gameplay.ghosts_maps[self.gameplay.map_idx]:
+                ghost.is_scared = False
 
         self.animation_timer += 1
         if self.animation_timer >= self.animation_speed:
@@ -240,13 +249,18 @@ class Maze:
                 target_gy - self.ghosts_visual_pos[i]["y"]) * self.lerp_speed
 
             angle = getattr(g, "ghost_angle", 0)
-            dir_key = (
-                "W" if angle == 90
-                else "S" if angle == 270
-                else "A" if angle == 180
-                else "D"
-            )
-            ghost_dict = self.ghosts_frames[i % 2]
+
+            if g.is_scared:
+                dir_key = '0'
+                ghost_dict = self.scared_ghosts_sprites[0]
+            else:
+                dir_key = (
+                    "W" if angle == 90
+                    else "S" if angle == 270
+                    else "A" if angle == 180
+                    else "D"
+                )
+                ghost_dict = self.ghosts_frames[i % 2]
 
             if isinstance(ghost_dict, dict):
                 dir_frames = ghost_dict[dir_key]

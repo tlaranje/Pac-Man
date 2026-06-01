@@ -1,3 +1,4 @@
+from ._constants import TEXT_COLOR
 from src.utils import load_svg
 import pygame
 
@@ -11,7 +12,7 @@ class Button:
         screen: pygame.Surface,
         win_size: tuple[int, int],
         pos: tuple[int | None, int | None] = (None, None),
-        size: tuple[int, int] = (150, 50),
+        size: tuple[int, int] = (100, 50),
         text: str = "Hello",
         font: pygame.Font | None = None,
         action: str | None = None,
@@ -22,7 +23,7 @@ class Button:
         self.size: tuple[int, int] = size
         self.text: str = text
         self.font = font or pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 30
+            "assets/fonts/Rajdhani-Bold.ttf", 25
         )
         self.action_value: str | None = action
 
@@ -32,9 +33,9 @@ class Button:
 
         self._hovered = False
         self._pressed = False
-        self._setup_button()
+        self.setup_button()
 
-    def _setup_button(self) -> None:
+    def setup_button(self) -> None:
         x, y = self.pos
 
         active_screen = pygame.display.get_surface()
@@ -74,7 +75,7 @@ class Button:
             self.screen.blit(dark, draw_rect)
 
         if self.text:
-            text_surf = self.font.render(self.text, True, (215, 215, 215))
+            text_surf = self.font.render(self.text, True, TEXT_COLOR)
 
             if self._pressed or self._hovered:
                 text_rect = text_surf.get_rect(
