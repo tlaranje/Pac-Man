@@ -2,6 +2,7 @@ import random
 from ..parser import PacManConfig
 from ..models import PacManMap, PacGumsMap
 from typing import Any
+import pygame
 
 NORTH: int = 1
 EAST: int = 2
@@ -203,23 +204,48 @@ class PacManPlayer(PacManEntity):
     :TODO
     """
 
+    SUPER_TIME = 10000
+
     def __init__(self, x: int, y: int, map: PacManMap,
                  ghosts_map: list[PacManGhost]) -> None:
         super().__init__(x, y, map)
         self.ghosts_map: list[PacManGhost] = ghosts_map
         self.spawn_x: int = x
         self.spawn_y: int = y
+        self.super_start: int | None = None
+
+    def turn_on_super(self) -> None:
+        self.super_start = pygame.time.get_ticks()
+
+    def is_on_super(self) -> bool:
+        if self.super_start is None:
+            return False
+        return pygame.time.get_ticks() - self.super_start <= self.SUPER_TIME
 
     def reset_position(self) -> None:
         self.x = self.spawn_x
         self.y = self.spawn_y
 
-    def is_dead(self) -> bool:
+    def is_on_ghost(self) -> bool:
         for ghost in self.ghosts_map:
             if ghost.x == self.x \
                     and ghost.y == self.y:
                 return True
         return False
+
+    def is_dead(self) -> bool:
+        if self.is_on_super():
+            return False
+        return self.is_on_ghost()
+
+    def eat_ghosts(self) -> int:
+        ghosts_ate: int = 0
+        for ghost in self.ghosts_map:
+            if ghost.x == self.x \
+                    and ghost.y == self.y:
+                ghosts_ate += 1
+                ghost.reset_position()
+        return ghosts_ate
 
 
 class PacManGameplay:
@@ -230,6 +256,7 @@ class PacManGameplay:
     def __init__(self, config: PacManConfig) -> None:
         self.config: PacManConfig = config
         self.maps: list[PacManMap] = config.load_maps()
+        self.maps_corners: list[list[tuple[int, int]]] = self.get_corners()
         self.maps_count: int = len(self.maps)
         self.pacgums_maps: list[PacGumsMap] = config.load_pacgums(
             self.maps
@@ -240,6 +267,17 @@ class PacManGameplay:
         self.player: PacManPlayer
         self.map_idx: int = 0
         self.chase_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
+
+    def get_corners(self) -> list[list[tuple[int, int]]]:
+        corners: list[list[tuple[int, int]]] = []
+        for map in self.maps:
+            corners.append([
+                (0, 0),
+                (0, map._width - 1),
+                (0, map._height - 1),
+                (map._width - 1, map._height - 1)
+            ])
+        return corners
 
     def reset(self) -> None:
         self.pacgums_maps = self.config.load_pacgums(self.maps)
@@ -261,6 +299,10 @@ class PacManGameplay:
         for i, ghost in enumerate(self.ghosts_maps[self.map_idx]):
             player_x: int = self.player.x
             player_y: int = self.player.y
+            if self.player.is_on_super():
+                corner = self.maps_corners[self.map_idx][i % 4]
+                ghost.chase_position(corner[0], corner[1])
+                continue
             if ghost.is_on_corridor_pos(player_x, player_y):
                 self.chase_moves[i] = 20
             if self.chase_moves[i] > 0:
