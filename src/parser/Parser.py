@@ -94,18 +94,21 @@ class PacManConfig:
 
         return pacgums_maps
 
-    def load_ghosts(self, maps: list[PacManMap]) -> list[list]:
+    def load_ghosts(self,
+                    maps: list[PacManMap],
+                    corners: list[tuple[int, int]]) -> list[list]:
         from ..gameplay import PacManGhost
         ghosts_maps: list[list[PacManGhost]] = []
 
-        for map in maps:
+        for i, map in enumerate(maps):
             ghosts: list[PacManGhost] = []
 
             for _ in range(5):
                 ghost = PacManGhost(
                     x=map._exitx,
                     y=map._exity,
-                    map=map
+                    map=map,
+                    map_corners=corners[i]
                 )
 
                 ghosts.append(ghost)
