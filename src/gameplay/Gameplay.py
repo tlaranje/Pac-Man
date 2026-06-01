@@ -230,6 +230,10 @@ class PacManPlayer(PacManEntity):
         self.spawn_x: int = x
         self.spawn_y: int = y
         self.super_start: int | None = None
+        self.is_invencible: bool = False
+
+    def toggle_invencibility(self) -> None:
+        self.is_invencible = not self.is_invencible
 
     def turn_on_super(self) -> None:
         self.super_start = pygame.time.get_ticks()
@@ -253,6 +257,8 @@ class PacManPlayer(PacManEntity):
         return False
 
     def is_dead(self) -> bool:
+        if self.is_invencible:
+            return False
         if not self.is_on_super():
             return self.is_on_ghost()
         for ghost in self.ghosts_map:
@@ -292,6 +298,10 @@ class PacManGameplay:
         self.map_idx: int = 0
         self.chase_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
         self.scores: list[int] = [0]
+        self.freeze_ghosts: bool = False
+
+    def toggle_freeze_ghosts(self) -> None:
+        self.freeze_ghosts = not self.freeze_ghosts
 
     def is_win(self) -> bool:
         for row in self.pacgums_maps[self.map_idx]:
@@ -330,6 +340,8 @@ class PacManGameplay:
         )
 
     def move_ghosts(self) -> None:
+        if self.freeze_ghosts:
+            return
         for i, ghost in enumerate(self.ghosts_maps[self.map_idx]):
             player_x: int = self.player.x
             player_y: int = self.player.y

@@ -1,4 +1,4 @@
-from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET, GAMEOVER_SIZE
+from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET, GAMEOVER_SIZE, MAX_PLAYER_DELAY
 from ._movement import MovementController
 from typing import TYPE_CHECKING
 from pygame import Surface
@@ -65,7 +65,22 @@ class Maze:
         self.font = pygame.font.Font(
             "assets/fonts/Rajdhani-Bold.ttf", 20
         )
-        self.lives: int = 0
+        self.lives: int = 3
+        self.is_cheat_mode: bool = False
+
+    def give_extra_lives(self) -> None:
+        self.lives += 1
+
+    def increase_player_speed(self) -> None:
+        if self.player_delay >= 10:
+            self.player_delay -= 10
+
+    def decrease_player_speed(self) -> None:
+        if self.player_delay + 10 < MAX_PLAYER_DELAY:
+            self.player_delay += 10
+
+    def toggle_cheat_mode(self) -> None:
+        self.is_cheat_mode = not self.is_cheat_mode
 
     def reset_visual_positions(self) -> None:
         start_px = self.gameplay.player.x * TILE_SIZE + 16 + (
@@ -122,6 +137,25 @@ class Maze:
         )
         if new_dir:
             self.next_dir = new_dir
+
+        if event.type != pygame.KEYDOWN:
+            return
+        if event.key == pygame.K_c:
+            self.toggle_cheat_mode()
+        elif event.key == pygame.K_i and self.is_cheat_mode:
+            self.gameplay.player.toggle_invencibility()
+        elif event.key == pygame.K_g and self.is_cheat_mode:
+            self.gameplay.toggle_freeze_ghosts()
+        elif event.key == pygame.K_l and self.is_cheat_mode:
+            self.give_extra_lives()
+        elif event.key == pygame.K_k and self.is_cheat_mode:
+            self.increase_player_speed()
+        elif event.key == pygame.K_j and self.is_cheat_mode:
+            self.decrease_player_speed()
+        print(self.player_delay)
+        print("is cheat mode:", self.is_cheat_mode)
+        print("is freeze ghosts:", self.gameplay.freeze_ghosts)
+        print("=====")
 
     def update_player_movement(self) -> None:
         curr_time = pygame.time.get_ticks()
