@@ -1,6 +1,6 @@
 from .._constants import (
-    TILE_SIZE, MARGIN, BORDER_SIZE, MAZE_OFFSET,
-    BORDER_COLOR, INNER_COLOR, INNER_THICKNESS
+    TILE_SIZE, BORDER_SIZE, BORDER_COLOR, INNER_COLOR,
+    INNER_THICKNESS, SCREEN_MIDPOINT
 )
 from ._sprites_loader import SpriteLoader
 from typing import TYPE_CHECKING
@@ -46,10 +46,17 @@ class MazeRenderer:
         pygame.draw.rect(self.maze_surface, BORDER_COLOR, rect)
 
     def draw_walls(self, maze_grid: list) -> None:
+        maze_size = self.vis.maze_size
         for y, row in enumerate(maze_grid):
             for x, cell in enumerate(row):
-                pos_x = (x * TILE_SIZE) + MARGIN // 2
-                pos_y = (y * TILE_SIZE) + MARGIN + MAZE_OFFSET // 2
+                pos_x = (
+                    (x * TILE_SIZE) + SCREEN_MIDPOINT[0]
+                    - maze_size[0] // 2
+                )
+                pos_y = (
+                    (y * TILE_SIZE) + SCREEN_MIDPOINT[1]
+                    - maze_size[1] // 2
+                )
 
                 top_left = (pos_x, pos_y)
                 top_right = (pos_x + TILE_SIZE, pos_y)
@@ -94,8 +101,14 @@ class MazeRenderer:
 
         for y, row in enumerate(maze_grid):
             for x, cell in enumerate(row):
-                pos_x = (x * TILE_SIZE) + MARGIN // 2
-                pos_y = (y * TILE_SIZE) + MARGIN + MAZE_OFFSET // 2
+                pos_x = (
+                    (x * TILE_SIZE) + SCREEN_MIDPOINT[0]
+                    - maze_size[0] // 2
+                )
+                pos_y = (
+                    (y * TILE_SIZE) + SCREEN_MIDPOINT[1]
+                    - maze_size[1] // 2
+                )
 
                 if cell & 1:
                     pygame.draw.line(
@@ -126,16 +139,22 @@ class MazeRenderer:
                     )
 
     def draw_pacgums(self, pacgums_map: list, fruit_frames: list) -> None:
+        maze_size = self.vis.maze_size
+
         for y, row in enumerate(pacgums_map):
             for x, cell in enumerate(row):
                 if (0, 0) == (x, y):
                     continue
                 if cell[0]:
                     pacgums_size = 16
-                    pos_x = (x * TILE_SIZE) + 14 + (
-                        TILE_SIZE - pacgums_size) // 2 + 4
-                    pos_y = (y * TILE_SIZE) + 15 + (
-                        TILE_SIZE - pacgums_size) // 2 + 1 + MAZE_OFFSET
+                    pos_x = (
+                        (x * TILE_SIZE) + SCREEN_MIDPOINT[0]
+                        - maze_size[0] // 2 + 7
+                    )
+                    pos_y = (
+                        (y * TILE_SIZE) + SCREEN_MIDPOINT[1]
+                        - maze_size[0] // 2 + 6
+                    )
                     if cell[1] == "super":
                         self.maze_surface.blit(
                             fruit_frames[1]["0"][0],

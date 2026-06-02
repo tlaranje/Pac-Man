@@ -1,6 +1,4 @@
-from .._constants import (
-    TILE_SIZE, MARGIN, MAZE_OFFSET, GAMEOVER_SIZE, MAX_PLAYER_DELAY, MAZE_SIZE
-)
+from .._constants import TILE_SIZE, MAX_PLAYER_DELAY, SCREEN_MIDPOINT
 from ._movement import MovementController
 from typing import TYPE_CHECKING
 from pygame import Surface
@@ -29,9 +27,10 @@ class Maze:
         self.game_started: bool = False
 
         # Static maze surface for walls and pacgums
-        maze_width = MAZE_SIZE[0] + MARGIN
-        maze_height = MAZE_SIZE[1] + MARGIN + MAZE_OFFSET
-        self.maze_surface = pygame.Surface((maze_width, maze_height))
+        info = pygame.display.Info()
+        x = info.current_w
+        y = info.current_h
+        self.maze_surface = pygame.Surface((x, y))
 
         # Score count for HighScore text
         self.score: int = 0
@@ -55,6 +54,7 @@ class Maze:
             "assets/fonts/Rajdhani-Bold.ttf", 20
         )
         self.lives: int = 3
+        self.time: int = 90
         self.is_cheat_mode: bool = False
 
         self.init_level()
@@ -110,8 +110,6 @@ class Maze:
         self.vis.state = "GAME_OVER"
         self.vis.game_over.title = "Game Over" if not is_win else "Win"
         self.maze_surface.fill((0, 0, 0))
-        x, y = GAMEOVER_SIZE
-        self.vis.window.update_display_mode(x, y)
         self.gameplay.reset()
         self.score = 0
         self.lives = 3
@@ -192,6 +190,7 @@ class Maze:
             self.current_dir = None
 
     def clear_pacgum_at(self, x: int, y: int) -> None:
+        vis = self.vis
         is_eat = self.gameplay.pacgums_maps[self.gameplay.map_idx][y][x][0]
         type_pacgum = self.gameplay.pacgums_maps[
             self.gameplay.map_idx
@@ -207,8 +206,14 @@ class Maze:
             self.gameplay.pacgums_maps[self.gameplay.map_idx]
         )
 
-        pos_x = (x * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 4
-        pos_y = (y * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 4 + MAZE_OFFSET
+        pos_x = (
+            (self.gameplay.player.x * TILE_SIZE) + SCREEN_MIDPOINT[0]
+            - vis.maze_size[0] // 2 + 5
+        )
+        pos_y = (
+            (self.gameplay.player.y * TILE_SIZE) + SCREEN_MIDPOINT[1]
+            - vis.maze_size[1] // 2 + 5
+        )
         pygame.draw.rect(
             self.maze_surface, (0, 0, 0), (pos_x, pos_y, 18, 18)
         )
@@ -230,24 +235,35 @@ class Maze:
                 self.handle_player_lose_life()
                 return
 
-        high_score_surface = self.font.render(
+        high_score = self.font.render(
             f"High Score: {self.score}", True, (255, 255, 255)
         )
-        lives_surface = self.font.render(
+        lives = self.font.render(
             f"Lives: {self.lives}", True, (255, 255, 255)
         )
+
+        time = self.font.render(
+            f"Time: {self.time}", True, (255, 255, 255)
+        )
+
         screen_w, screen_h = self.vis.screen.get_size()
 
         vis.screen.blit(
-            high_score_surface,
-            (screen_w // 2 - high_score_surface.get_width() // 2, 10)
+            high_score, (screen_w // 2 - high_score.get_width() // 2, 10)
         )
-        vis.screen.blit(
-            lives_surface,
-            (20, 10)
-        )
+        vis.screen.blit(time, (screen_w // 2 - time.get_width() // 2, 35))
+        vis.screen.blit(lives, (screen_w // 2 - lives.get_width() // 2, 60))
 
         self.update_player_movement()
+
+        target_px = (
+            (self.gameplay.player.x * TILE_SIZE) + SCREEN_MIDPOINT[0]
+            - vis.maze_size[0] // 2 + 17
+        )
+        target_py = (
+            (self.gameplay.player.y * TILE_SIZE) + SCREEN_MIDPOINT[1]
+            - vis.maze_size[1] // 2 + 15
+        )
 
         px, py = self.gameplay.player.x, self.gameplay.player.y
         if self.gameplay.pacgums_maps[
@@ -276,9 +292,14 @@ class Maze:
         for i, g in enumerate(
             self.gameplay.ghosts_maps[self.gameplay.map_idx]
         ):
-            target_gx = g.x * TILE_SIZE + 16 + (TILE_SIZE) // 2 + 1
-            target_gy = g.y * TILE_SIZE + 16 + (
-                TILE_SIZE) // 2 + 1 + MAZE_OFFSET
+            target_gx = (
+                (g.x * TILE_SIZE) + SCREEN_MIDPOINT[0]
+                - vis.maze_size[0] // 2 + 14
+            )
+            target_gy = (
+                (g.y * TILE_SIZE) + SCREEN_MIDPOINT[1]
+                - vis.maze_size[1] // 2 + 15
+            )
 
             self.ghosts_visual_pos[i]["x"] += (
                 target_gx - self.ghosts_visual_pos[i]["x"]) * self.lerp_speed
@@ -311,11 +332,6 @@ class Maze:
                     )
                 )
                 vis.screen.blit(ghost_current_frame, ghost_rect)
-
-        target_px = self.gameplay.player.x * TILE_SIZE + 16 + (
-            TILE_SIZE - 16) // 2 + 12
-        target_py = self.gameplay.player.y * TILE_SIZE + 16 + (
-            TILE_SIZE - 16) // 2 + 9 + MAZE_OFFSET
 
         self.player_visual_x += (
             target_px - self.player_visual_x) * self.lerp_speed

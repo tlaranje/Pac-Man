@@ -9,6 +9,8 @@ from pygame import Surface
 
 class Visualizer():
     def __init__(self) -> None:
+        self.maze_size: tuple[int, int]
+
         self.config = PacManConfig("./config.json")
         self.gameplay = PacManGameplay(self.config)
 

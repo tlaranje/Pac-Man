@@ -10,7 +10,6 @@ class Button:
     def __init__(
         self,
         screen: pygame.Surface,
-        win_size: tuple[int, int],
         pos: tuple[int | None, int | None] = (None, None),
         size: tuple[int, int] = (150, 50),
         text: str = "Hello",
@@ -18,7 +17,6 @@ class Button:
         action: str | None = None,
     ) -> None:
         self.screen = screen
-        self.win_size = win_size
         self.pos: tuple[int | None, int | None] = pos
         self.size: tuple[int, int] = size
         self.text: str = text

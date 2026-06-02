@@ -1,4 +1,5 @@
 from ._visualizer import Visualizer
+from ._constants import TILE_SIZE
 import pygame
 import sys
 
@@ -22,7 +23,11 @@ class Manager:
         game_over.init_game_over_buttons()
         renderer.init_sprites()
 
-        renderer.draw_walls(maze.maze_grid[vis.gameplay.map_idx].maze)
+        maze_grid = maze.maze_grid[vis.gameplay.map_idx].maze
+        vis.maze_size = (
+            len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+        )
+        renderer.draw_walls(maze_grid)
         renderer.draw_pacgums(
             maze.gameplay.pacgums_maps[maze.gameplay.map_idx],
             maze.fruit_sprites

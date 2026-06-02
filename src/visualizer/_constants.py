@@ -1,15 +1,20 @@
 import pygame
 
-# Menu constansts
+# Menu constants
 TILE_COLOR = pygame.Color("white")
 TEXT_COLOR = pygame.Color("light grey")
-MENU_SIZE = (250, 330)
-BUTTON_SIZE = (150, 50)
-MAZE_SIZE = (1920, 1080)
 
-GAMEOVER_SIZE = (250, 250)
+# Screen constants
+pygame.init()
 
-# Maze constansts
+info = pygame.display.Info()
+x = info.current_w
+y = info.current_h
+
+SCREEN_SIZE = (x, y)
+SCREEN_MIDPOINT = (x / 2, y / 2)
+
+# Maze constants
 TILE_SIZE = 27
 MARGIN = 32
 MAZE_OFFSET = 32

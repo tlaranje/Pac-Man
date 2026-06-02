@@ -1,6 +1,4 @@
-from ._constants import (
-    BUTTON_SIZE, TILE_SIZE, MARGIN, MAZE_OFFSET, TILE_COLOR, TEXT_COLOR
-)
+from ._constants import TILE_COLOR, TEXT_COLOR
 from typing import TYPE_CHECKING
 from ._button import Button
 from pygame import Event
@@ -24,16 +22,13 @@ class GameOver():
 
     def init_game_over_buttons(self) -> None:
         vis = self.vis
-        win_size = self.vis.screen.get_size()
         b1_text = "Restart" if self.title == "GAME_OVER" else "Play again"
         self.gameover_buttons = [
             Button(
-                screen=vis.screen, win_size=win_size,
-                size=BUTTON_SIZE, pos=(None, 110), text=b1_text, action="PLAY"
+                screen=vis.screen, pos=(None, 110), text=b1_text, action="PLAY"
             ),
             Button(
-                screen=vis.screen, win_size=win_size,
-                size=BUTTON_SIZE, pos=(None, 180), text="Exit",
+                screen=vis.screen, pos=(None, 180), text="Exit",
                 action="QUIT_APP"
             )
         ]
@@ -44,11 +39,6 @@ class GameOver():
         for btn in self.gameover_buttons:
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
-                    width = vis.maze.size[0] * TILE_SIZE + MARGIN
-                    height = (
-                        vis.maze.size[1] * TILE_SIZE + MARGIN + MAZE_OFFSET
-                    )
-                    vis.window.update_display_mode(width, height)
                     vis.state = 'GAME_PLAY'
                     vis.renderer.draw_walls(
                         vis.maze.maze_grid[vis.gameplay.map_idx].maze

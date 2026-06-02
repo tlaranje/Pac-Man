@@ -1,4 +1,4 @@
-from ._constants import MENU_SIZE, TILE_COLOR, MARGIN, MAZE_SIZE
+from ._constants import TILE_COLOR, TILE_SIZE
 from typing import TYPE_CHECKING
 from ._button import Button
 import pygame
@@ -39,62 +39,62 @@ class Menu:
 
         self.cheat_menu_buttons = [
             Button(
-                screen=self.cheat_surface, win_size=MENU_SIZE,
-                pos=(None, 90), text="Invincibility", action="CHEAT_INV"
+                screen=self.cheat_surface, pos=(None, 90),
+                text="Invincibility", action="CHEAT_INV"
             ),
             Button(
-                screen=self.cheat_surface, win_size=MENU_SIZE,
-                pos=(None, 150), text="Level skip", action="CHEAT_SKIP"
+                screen=self.cheat_surface, pos=(None, 150),
+                text="Level skip", action="CHEAT_SKIP"
             ),
             Button(
-                screen=self.cheat_surface, win_size=MENU_SIZE,
-                pos=(None, 210), text="Ghost freeze", action="CHEAT_FREEZE"
+                screen=self.cheat_surface, pos=(None, 210),
+                text="Ghost freeze", action="CHEAT_FREEZE"
             ),
             Button(
-                screen=self.cheat_surface, win_size=MENU_SIZE,
-                pos=(None, 270), text="Extra lives", action="CHEAT_LIVES"
+                screen=self.cheat_surface, pos=(None, 270),
+                text="Extra lives", action="CHEAT_LIVES"
             ),
             Button(
-                screen=self.cheat_surface, win_size=MENU_SIZE,
-                pos=(None, 330), text="Player speed", action="NONE"
+                screen=self.cheat_surface, pos=(None, 330),
+                text="Player speed", action="NONE"
             ),
             Button(
-                screen=self.cheat_surface, size=(25, 25), win_size=MENU_SIZE,
-                pos=(110, 340), text="+", action="CHEAT_SPEED+"
+                screen=self.cheat_surface, size=(25, 25), pos=(110, 340),
+                text="+", action="CHEAT_SPEED+"
             ),
             Button(
-                screen=self.cheat_surface, size=(25, 25), win_size=MENU_SIZE,
-                pos=(300, 340), text="-", action="CHEAT_SPEED-"
+                screen=self.cheat_surface, size=(25, 25), pos=(300, 340),
+                text="-", action="CHEAT_SPEED-"
             ),
         ]
 
         self.pause_menu_buttons = [
             Button(
-                screen=self.pause_surface, win_size=MENU_SIZE,
-                pos=(None, 120), text="Return", action="PLAY"
+                screen=self.pause_surface, pos=(None, 120),
+                text="Return", action="PLAY"
             ),
             Button(
-                screen=self.pause_surface, win_size=MENU_SIZE,
-                pos=(None, 180), text="Cheat mode", action="Cheat"
+                screen=self.pause_surface, pos=(None, 180),
+                text="Cheat mode", action="Cheat"
             ),
             Button(
-                screen=self.pause_surface, win_size=MENU_SIZE,
-                pos=(None, 240), text="Main Menu", action="RMain"
+                screen=self.pause_surface, pos=(None, 240),
+                text="Main Menu", action="RMain"
             ),
             Button(
-                screen=self.pause_surface, win_size=MENU_SIZE,
-                pos=(None, 300), text="Exit", action="QUIT_APP"
+                screen=self.pause_surface, pos=(None, 300),
+                text="Exit", action="QUIT_APP"
             ),
         ]
 
         self.menu_buttons = [
             Button(
-                screen=vis.screen, win_size=MENU_SIZE,
-                pos=(None, 180), text="Play", action="PLAY"
+                screen=vis.screen, pos=(None, 180),
+                text="Play", action="PLAY"
             ),
             Button(
-                screen=vis.screen, win_size=MENU_SIZE,
-                pos=(None, 250), text="Exit", action="QUIT_APP"
+                screen=vis.screen, pos=(None, 250),
+                text="Exit", action="QUIT_APP"
             )
         ]
 
@@ -138,6 +138,10 @@ class Menu:
                     vis.maze_surface.fill((0, 0, 0))
                     vis.gameplay.next_level()
                     vis.maze.init_level()
+                    maze_grid = vis.maze.maze_grid[vis.gameplay.map_idx].maze
+                    vis.maze_size = (
+                        len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+                    )
                     return
                 elif btn.action_value == "CHEAT_FREEZE":
                     vis.gameplay.toggle_freeze_ghosts()
@@ -188,9 +192,6 @@ class Menu:
                         return
 
                     vis.user_name = username
-                    width = MAZE_SIZE[0] + MARGIN
-                    height = MAZE_SIZE[1] + MARGIN
-                    vis.window.update_display_mode(width, height)
                     vis.state = 'GAME_PLAY'
                     vis.renderer.draw_walls(
                         vis.maze.maze_grid[vis.gameplay.map_idx].maze
@@ -257,7 +258,6 @@ class Menu:
             self.pause_surface = pygame.Surface(current_size, pygame.SRCALPHA)
             for btn in self.pause_menu_buttons:
                 btn.screen = self.pause_surface
-                btn.win_size = current_size
                 btn.setup_button()
 
         self.pause_surface.fill((0, 0, 0, 0))
@@ -282,10 +282,6 @@ class Menu:
 
     def draw_main_menu(self) -> None:
         vis = self.vis
-
-        if vis.screen.get_size() != MENU_SIZE and vis.state == "MAIN_MENU":
-            x, y = MENU_SIZE
-            self.vis.window.update_display_mode(x, y)
 
         vis.screen.fill((50, 50, 50))
 
@@ -313,7 +309,6 @@ class Menu:
             self.cheat_surface = pygame.Surface(current_size, pygame.SRCALPHA)
             for btn in self.cheat_menu_buttons:
                 btn.screen = self.cheat_surface
-                btn.win_size = current_size
                 btn.setup_button()
 
         self.cheat_surface.fill((0, 0, 0, 0))
