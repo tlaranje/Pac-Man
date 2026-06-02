@@ -197,10 +197,10 @@ class Maze:
         ][y][x][1]
 
         if type_pacgum == "normal" and is_eat is True:
-            self.score += 10
+            self.score += self.gameplay.config.settings.points_per_pacgum
         if type_pacgum == "super" and is_eat is True:
             self.gameplay.player.turn_on_super()
-            self.score += 100
+            self.score += self.gameplay.config.settings.points_per_super_pacgum
 
         self.gameplay.player.eat(
             self.gameplay.pacgums_maps[self.gameplay.map_idx]
@@ -273,7 +273,7 @@ class Maze:
         if self.gameplay.player.is_on_super():
             if self.gameplay.player.is_on_ghost():
                 ghosts_ate: int = self.gameplay.player.eat_ghosts()
-                self.score += ghosts_ate * 200
+                self.score += ghosts_ate * self.gameplay.config.settings.points_per_ghost
         else:
             for ghost in self.gameplay.ghosts_maps[self.gameplay.map_idx]:
                 ghost.is_scared = False

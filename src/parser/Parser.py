@@ -51,7 +51,7 @@ class PacManConfig:
 
     def load_maps(self) -> list[PacManMap]:
         maps: list[PacManMap] = []
-        for level in self.settings.levels:
+        for i, level in enumerate(self.settings.levels):
             size: tuple[int, int] = (level.width, level.height)
             start_position: tuple[int, int] = (level.start_x, level.start_y)
             maps.append(
@@ -59,7 +59,7 @@ class PacManConfig:
                     size=size,
                     entry_cell=start_position,
                     perfect=False,
-                    seed=self.settings.seed
+                    seed=self.settings.seeds[i]
                     )
                 )
         return maps
@@ -84,31 +84,54 @@ class PacManConfig:
             for x, y in chosen:
                 pacgums_map[y][x] = (True, "normal")
 
-            num_super = int(count * 0.05)
-            super_gums = random.sample(chosen, num_super)
-
-            for x, y in super_gums:
+            for x, y in self.load_corners(map):
                 pacgums_map[y][x] = (True, "super")
 
             pacgums_maps.append(pacgums_map)
 
         return pacgums_maps
 
+    def load_corners(self, map: PacManMap) -> list[tuple[int, int]]:
+        return [
+                (0, 0),
+                (map._width - 1, 0),
+                (0, map._height - 1),
+                (map._width - 1, map._height - 1)
+            ]
+
+    def load_maps_middle(self, maps: list[PacManMap]) -> list[tuple[int, int]]:
+        return [self._find_closest_walkable_center(map) for map in maps]
+
+    def _find_closest_walkable_center(self, map: PacManMap) -> tuple[int, int]:
+        center_x = map._width // 2
+        center_y = map._height // 2
+
+        walkable = [
+            (x, y)
+            for y in range(map._height)
+            for x in range(map._width)
+            if (map.maze[y][x] & 0b1111) != 0b1111
+        ]
+
+        return min(
+            walkable,
+            key=lambda pos: abs(pos[0] - center_x) + abs(pos[1] - center_y)
+        )
+
     def load_ghosts(self,
-                    maps: list[PacManMap],
-                    corners: list[list[tuple[int, int]]]) -> list[list]:
+                    maps: list[PacManMap]) -> list[list]:
         from ..gameplay import PacManGhost
         ghosts_maps: list[list[PacManGhost]] = []
 
         for i, map in enumerate(maps):
             ghosts: list[PacManGhost] = []
+            corners: list[tuple[int, int]] = self.load_corners(map)
 
-            for _ in range(5):
+            for j in range(4):
                 ghost = PacManGhost(
-                    x=map._exitx,
-                    y=map._exity,
+                    x=corners[j][0],
+                    y=corners[j][1],
                     map=map,
-                    map_corners=corners[i]
                 )
 
                 ghosts.append(ghost)
