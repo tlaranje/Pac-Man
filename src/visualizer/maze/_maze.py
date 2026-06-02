@@ -132,6 +132,11 @@ class Maze:
         self.reset_visual_positions()
 
     def handle_game_play_events(self, event: Event) -> None:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.vis.state = 'PAUSE'
+                return
+
         new_dir = MovementController.get_direction_from_input(
             pygame.key.get_pressed()
         )

@@ -83,3 +83,7 @@ class GameOver():
         for button in self.gameover_buttons:
             button.setup_button()
             button.draw()
+
+        mouse_pos = pygame.mouse.get_pos()
+        for btn in self.gameover_buttons:
+            btn.update(mouse_pos)
