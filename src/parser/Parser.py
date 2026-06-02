@@ -67,11 +67,13 @@ class PacManConfig:
     def load_pacgums(self, maps: list[PacManMap]) -> list[PacGumsMap]:
         pacgums_maps: list[PacGumsMap] = []
         for map in maps:
+            corners = self.load_corners(map)
             walkable: list[tuple[int, int]] = [
                 (x, y)
                 for y in range(map._height)
                 for x in range(map._width)
                 if (map._maze[y][x] & 0b1111) != 0b1111
+                if (x, y) not in corners
             ]
             count: int = min(self.settings.pacgum, len(walkable))
             chosen = random.sample(walkable, count)
@@ -84,7 +86,7 @@ class PacManConfig:
             for x, y in chosen:
                 pacgums_map[y][x] = (True, "normal")
 
-            for x, y in self.load_corners(map):
+            for x, y in corners:
                 pacgums_map[y][x] = (True, "super")
 
             pacgums_maps.append(pacgums_map)

@@ -53,10 +53,9 @@ class Manager:
                     menu.handle_menu_events(event)
                 elif state == "GAME_PLAY":
                     maze.handle_game_play_events(event)
+                    menu.handle_cheat_menu_events(event)
                 elif state == "PAUSE":
                     menu.handle_pause_menu_events(event)
-                elif state == "CHEAT_MENU":
-                    menu.handle_cheat_menu_events(event)
                 elif state == "GAME_OVER":
                     game_over.handle_game_over_events(event)
 
@@ -64,6 +63,7 @@ class Manager:
                 menu.draw_main_menu()
             elif state == "GAME_PLAY":
                 maze.move_player_ghosts()
+                menu.draw_cheat_menu()
             elif state == "GAME_OVER":
                 game_over.draw_game_over()
             elif state == 'PAUSE':
@@ -73,13 +73,6 @@ class Manager:
                     maze.fruit_sprites
                 )
                 menu.draw_pause_menu()
-            elif state == 'CHEAT_MENU':
-                renderer.draw_walls(maze.maze_grid[vis.gameplay.map_idx].maze)
-                renderer.draw_pacgums(
-                    maze.gameplay.pacgums_maps[maze.gameplay.map_idx],
-                    maze.fruit_sprites
-                )
-                menu.draw_cheat_menu()
 
             pygame.display.flip()
             clock.tick(60)

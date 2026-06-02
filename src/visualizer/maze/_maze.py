@@ -247,12 +247,23 @@ class Maze:
         )
 
         screen_w, screen_h = self.vis.screen.get_size()
+        mid_x = screen_w // 2
 
-        vis.screen.blit(
-            high_score, (screen_w // 2 - high_score.get_width() // 2, 10)
-        )
-        vis.screen.blit(time, (screen_w // 2 - time.get_width() // 2, 35))
-        vis.screen.blit(lives, (screen_w // 2 - lives.get_width() // 2, 60))
+        container_w = 600
+        slice_w = container_w // 3
+        start_x = mid_x - (container_w // 2)
+
+        center_1 = start_x + (slice_w // 2)
+        center_2 = start_x + slice_w + (slice_w // 2)
+        center_3 = start_x + (slice_w * 2) + (slice_w // 2)
+
+        live_x = center_1 - lives.get_width() // 2
+        high_x = center_2 - high_score.get_width() // 2
+        time_x = center_3 - time.get_width() // 2
+
+        vis.screen.blit(lives, (live_x, 10))
+        vis.screen.blit(high_score, (high_x, 10))
+        vis.screen.blit(time, (time_x, 10))
 
         self.update_player_movement()
 
@@ -273,7 +284,9 @@ class Maze:
         if self.gameplay.player.is_on_super():
             if self.gameplay.player.is_on_ghost():
                 ghosts_ate: int = self.gameplay.player.eat_ghosts()
-                self.score += ghosts_ate * self.gameplay.config.settings.points_per_ghost
+                self.score += (
+                    ghosts_ate * self.gameplay.config.settings.points_per_ghost
+                )
         else:
             for ghost in self.gameplay.ghosts_maps[self.gameplay.map_idx]:
                 ghost.is_scared = False
@@ -331,7 +344,8 @@ class Maze:
                         int(self.ghosts_visual_pos[i]["y"])
                     )
                 )
-                vis.screen.blit(ghost_current_frame, ghost_rect)
+                if not g.is_dead():
+                    vis.screen.blit(ghost_current_frame, ghost_rect)
 
         self.player_visual_x += (
             target_px - self.player_visual_x) * self.lerp_speed

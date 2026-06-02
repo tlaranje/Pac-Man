@@ -143,8 +143,6 @@ class MazeRenderer:
 
         for y, row in enumerate(pacgums_map):
             for x, cell in enumerate(row):
-                if (0, 0) == (x, y):
-                    continue
                 if cell[0]:
                     pacgums_size = 16
                     pos_x = (
