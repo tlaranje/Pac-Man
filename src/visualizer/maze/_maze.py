@@ -1,4 +1,6 @@
-from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET, GAMEOVER_SIZE, MAX_PLAYER_DELAY
+from .._constants import (
+    TILE_SIZE, MARGIN, MAZE_OFFSET, GAMEOVER_SIZE, MAX_PLAYER_DELAY, MAZE_SIZE
+)
 from ._movement import MovementController
 from typing import TYPE_CHECKING
 from pygame import Surface
@@ -13,17 +15,8 @@ class Maze:
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
 
-        # Variables of Maze
-        self.maze_grid = self.vis.gameplay.maps[self.vis.gameplay.map_idx]
-
-        self.size = (self.maze_grid._width, self.maze_grid._height)
-        self.perfect = self.maze_grid._perfect
-        self.entry_cell = self.maze_grid.maze_entry
-        self.exit_cell = self.maze_grid.maze_exit
-        self.seed = self.maze_grid._seed
-
-        # MovementController class
-        self.movement_controller = MovementController(self.maze_grid.maze)
+        self.gameplay = self.vis.gameplay
+        self.gameplay.gameplay_init(0)
 
         self.ghost_delay = 500
         self.last_ghost_move = pygame.time.get_ticks()
@@ -36,16 +29,12 @@ class Maze:
         self.game_started: bool = False
 
         # Static maze surface for walls and pacgums
-        maze_width = self.size[0] * TILE_SIZE + MARGIN
-        maze_height = self.size[1]*TILE_SIZE + MARGIN + MAZE_OFFSET
+        maze_width = MAZE_SIZE[0] + MARGIN
+        maze_height = MAZE_SIZE[1] + MARGIN + MAZE_OFFSET
         self.maze_surface = pygame.Surface((maze_width, maze_height))
 
         # Score count for HighScore text
         self.score: int = 0
-
-        # Gameplay class
-        self.gameplay = self.vis.gameplay
-        self.gameplay.gameplay_init(0)
 
         # Variables for smooth movement
         self.current_frame = 0
@@ -67,6 +56,24 @@ class Maze:
         )
         self.lives: int = 3
         self.is_cheat_mode: bool = False
+
+        self.init_level()
+
+    def init_level(self) -> None:
+        self.maze_grid = self.vis.gameplay.maps
+
+        self.size = (
+            self.maze_grid[self.gameplay.map_idx]._width,
+            self.maze_grid[self.gameplay.map_idx]._height
+        )
+        self.perfect = self.maze_grid[self.gameplay.map_idx]._perfect
+        self.entry_cell = self.maze_grid[self.gameplay.map_idx].maze_entry
+        self.exit_cell = self.maze_grid[self.gameplay.map_idx].maze_exit
+        self.seed = self.maze_grid[self.gameplay.map_idx]._seed
+
+        self.movement_controller = MovementController(
+            self.maze_grid[self.gameplay.map_idx].maze
+        )
 
     def give_extra_lives(self) -> None:
         self.lives += 1
@@ -124,9 +131,12 @@ class Maze:
             g.reset_position()
 
         self.maze_surface.fill((0, 0, 0))
-        self.vis.renderer.draw_walls(self.maze_grid.maze)
+        self.vis.renderer.draw_walls(
+            self.maze_grid[self.gameplay.map_idx].maze
+        )
         self.vis.renderer.draw_pacgums(
-            self.gameplay.pacgums_maps[self.gameplay.map_idx], self.fruit_sprites
+            self.gameplay.pacgums_maps[self.gameplay.map_idx],
+            self.fruit_sprites
         )
 
         self.reset_visual_positions()
@@ -142,25 +152,6 @@ class Maze:
         )
         if new_dir:
             self.next_dir = new_dir
-
-        if event.type != pygame.KEYDOWN:
-            return
-        if event.key == pygame.K_c:
-            self.toggle_cheat_mode()
-        elif event.key == pygame.K_i and self.is_cheat_mode:
-            self.gameplay.player.toggle_invencibility()
-        elif event.key == pygame.K_g and self.is_cheat_mode:
-            self.gameplay.toggle_freeze_ghosts()
-        elif event.key == pygame.K_l and self.is_cheat_mode:
-            self.give_extra_lives()
-        elif event.key == pygame.K_k and self.is_cheat_mode:
-            self.increase_player_speed()
-        elif event.key == pygame.K_j and self.is_cheat_mode:
-            self.decrease_player_speed()
-        print(self.player_delay)
-        print("is cheat mode:", self.is_cheat_mode)
-        print("is freeze ghosts:", self.gameplay.freeze_ghosts)
-        print("=====")
 
     def update_player_movement(self) -> None:
         curr_time = pygame.time.get_ticks()
@@ -202,7 +193,9 @@ class Maze:
 
     def clear_pacgum_at(self, x: int, y: int) -> None:
         is_eat = self.gameplay.pacgums_maps[self.gameplay.map_idx][y][x][0]
-        type_pacgum = self.gameplay.pacgums_maps[self.gameplay.map_idx][y][x][1]
+        type_pacgum = self.gameplay.pacgums_maps[
+            self.gameplay.map_idx
+        ][y][x][1]
 
         if type_pacgum == "normal" and is_eat is True:
             self.score += 10
@@ -257,7 +250,8 @@ class Maze:
         self.update_player_movement()
 
         px, py = self.gameplay.player.x, self.gameplay.player.y
-        if self.gameplay.pacgums_maps[self.gameplay.map_idx][py][px][0] is True:
+        if self.gameplay.pacgums_maps[
+           self.gameplay.map_idx][py][px][0] is True:
             self.clear_pacgum_at(px, py)
 
         if self.gameplay.player.is_on_super():
@@ -279,7 +273,9 @@ class Maze:
             self.gameplay.move_ghosts()
             self.last_ghost_move = curr_time
 
-        for i, g in enumerate(self.gameplay.ghosts_maps[self.gameplay.map_idx]):
+        for i, g in enumerate(
+            self.gameplay.ghosts_maps[self.gameplay.map_idx]
+        ):
             target_gx = g.x * TILE_SIZE + 16 + (TILE_SIZE) // 2 + 1
             target_gy = g.y * TILE_SIZE + 16 + (
                 TILE_SIZE) // 2 + 1 + MAZE_OFFSET

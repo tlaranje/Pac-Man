@@ -275,9 +275,10 @@ class PacManPlayer(PacManEntity):
         ghosts_ate: int = 0
         for ghost in self.ghosts_map:
             if ghost.x == self.x \
-                    and ghost.y == self.y:
+                    and ghost.y == self.y and ghost.is_scared:
                 ghosts_ate += 1
                 ghost.reset_position_after_die()
+
         return ghosts_ate
 
 
@@ -305,6 +306,17 @@ class PacManGameplay:
 
     def toggle_freeze_ghosts(self) -> None:
         self.freeze_ghosts = not self.freeze_ghosts
+
+    def next_level(self) -> bool:
+        index_map = self.map_idx + 1
+
+        if index_map >= len(self.config.settings.levels):
+            return False
+
+        self.map_idx = index_map
+        self.gameplay_init(self.map_idx)
+
+        return True
 
     def is_win(self) -> bool:
         for row in self.pacgums_maps[self.map_idx]:

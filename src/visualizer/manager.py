@@ -22,9 +22,10 @@ class Manager:
         game_over.init_game_over_buttons()
         renderer.init_sprites()
 
-        renderer.draw_walls(maze.maze_grid.maze)
+        renderer.draw_walls(maze.maze_grid[vis.gameplay.map_idx].maze)
         renderer.draw_pacgums(
-            maze.gameplay.pacgums_maps[maze.gameplay.map_idx], maze.fruit_sprites
+            maze.gameplay.pacgums_maps[maze.gameplay.map_idx],
+            maze.fruit_sprites
         )
 
         clock: pygame.time.Clock = pygame.time.Clock()
@@ -61,15 +62,17 @@ class Manager:
             elif state == "GAME_OVER":
                 game_over.draw_game_over()
             elif state == 'PAUSE':
-                renderer.draw_walls(maze.maze_grid.maze)
+                renderer.draw_walls(maze.maze_grid[vis.gameplay.map_idx].maze)
                 renderer.draw_pacgums(
-                    maze.gameplay.pacgums_maps[0], maze.fruit_sprites
+                    maze.gameplay.pacgums_maps[maze.gameplay.map_idx],
+                    maze.fruit_sprites
                 )
                 menu.draw_pause_menu()
             elif state == 'CHEAT_MENU':
-                renderer.draw_walls(maze.maze_grid.maze)
+                renderer.draw_walls(maze.maze_grid[vis.gameplay.map_idx].maze)
                 renderer.draw_pacgums(
-                    maze.gameplay.pacgums_maps[0], maze.fruit_sprites
+                    maze.gameplay.pacgums_maps[maze.gameplay.map_idx],
+                    maze.fruit_sprites
                 )
                 menu.draw_cheat_menu()
 

@@ -23,7 +23,7 @@ class Button:
         self.size: tuple[int, int] = size
         self.text: str = text
         self.font = font or pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 25
+            "assets/fonts/Rajdhani-Bold.ttf", 24
         )
         self.action_value: str | None = action
 

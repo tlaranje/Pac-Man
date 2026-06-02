@@ -1,4 +1,15 @@
 {
-    "levels": [{"width": 15, "height": 15}],
+    "levels": [
+        {"width": 10, "height": 10},
+        {"width": 15, "height": 15},
+        {"width": 20, "height": 20},
+        {"width": 25, "height": 25},
+        {"width": 30, "height": 30},
+        {"width": 35, "height": 35},
+        {"width": 35, "height": 35},
+        {"width": 35, "height": 35},
+        {"width": 35, "height": 35},
+        {"width": 35, "height": 35}
+    ],
     "pacgum": 100
 }

@@ -126,11 +126,11 @@ class PacManConfigModel:
 
     def _parse_level(self, data: dict) -> PacManLevel:
         level = PacManLevel()
-        level.width = self._parse_positive_int(
-            data, "width", DEFAULT_WIDTH
+        level.width = self._parse_bounded_int(
+            data, "width", DEFAULT_WIDTH, 10, 35
         )
-        level.height = self._parse_positive_int(
-            data, "height", DEFAULT_HEIGHT
+        level.height = self._parse_bounded_int(
+            data, "height", DEFAULT_HEIGHT, 10, 35
         )
         level.start_x = self._parse_bounded_int(
             data, "start_x", DEFAULT_START_X, 0, level.width - 1

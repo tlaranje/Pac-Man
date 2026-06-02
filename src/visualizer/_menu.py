@@ -1,6 +1,4 @@
-from ._constants import (
-    MENU_SIZE, TILE_COLOR, TILE_SIZE, MARGIN, MAZE_OFFSET
-)
+from ._constants import MENU_SIZE, TILE_COLOR, MARGIN, MAZE_SIZE
 from typing import TYPE_CHECKING
 from ._button import Button
 import pygame
@@ -25,7 +23,7 @@ class Menu:
             "assets/fonts/Rajdhani-Bold.ttf", 25
         )
         self.text_box_font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 20
+            "assets/fonts/Rajdhani-Bold.ttf", 19
         )
 
         self.active: bool = False
@@ -42,23 +40,31 @@ class Menu:
         self.cheat_menu_buttons = [
             Button(
                 screen=self.cheat_surface, win_size=MENU_SIZE,
-                pos=(None, 120), text="Invincibility", action="CHEAT_INV"
+                pos=(None, 90), text="Invincibility", action="CHEAT_INV"
             ),
             Button(
                 screen=self.cheat_surface, win_size=MENU_SIZE,
-                pos=(None, 180), text="Level skip", action="CHEAT_SKIP"
+                pos=(None, 150), text="Level skip", action="CHEAT_SKIP"
             ),
             Button(
                 screen=self.cheat_surface, win_size=MENU_SIZE,
-                pos=(None, 240), text="Ghost freeze", action="CHEAT_FREEZE"
+                pos=(None, 210), text="Ghost freeze", action="CHEAT_FREEZE"
             ),
             Button(
                 screen=self.cheat_surface, win_size=MENU_SIZE,
-                pos=(None, 300), text="Extra lives", action="CHEAT_LIVES"
+                pos=(None, 270), text="Extra lives", action="CHEAT_LIVES"
             ),
             Button(
                 screen=self.cheat_surface, win_size=MENU_SIZE,
-                pos=(None, 360), text="Increased speed", action="CHEAT_SPEED"
+                pos=(None, 330), text="Player speed", action="NONE"
+            ),
+            Button(
+                screen=self.cheat_surface, size=(25, 25), win_size=MENU_SIZE,
+                pos=(110, 340), text="+", action="CHEAT_SPEED+"
+            ),
+            Button(
+                screen=self.cheat_surface, size=(25, 25), win_size=MENU_SIZE,
+                pos=(300, 340), text="-", action="CHEAT_SPEED-"
             ),
         ]
 
@@ -125,19 +131,24 @@ class Menu:
         for btn in self.cheat_menu_buttons:
             if btn.is_clicked(event):
                 if btn.action_value == "CHEAT_INV":
-                    vis.state = 'GAME_PLAY'
+                    vis.gameplay.player.toggle_invencibility()
                     return
                 elif btn.action_value == "CHEAT_SKIP":
-                    vis.state = 'GAME_PLAY'
+                    vis.state = "GAME_PLAY"
+                    vis.maze_surface.fill((0, 0, 0))
+                    vis.gameplay.next_level()
+                    vis.maze.init_level()
                     return
                 elif btn.action_value == "CHEAT_FREEZE":
-                    vis.state = 'GAME_PLAY'
+                    vis.gameplay.toggle_freeze_ghosts()
                     return
                 elif btn.action_value == "CHEAT_LIVES":
-                    vis.state = 'GAME_PLAY'
+                    vis.maze.give_extra_lives()
                     return
-                elif btn.action_value == "CHEAT_SPEED":
-                    vis.state = 'GAME_PLAY'
+                elif btn.action_value == "CHEAT_SPEED+":
+                    vis.maze.increase_player_speed()
+                elif btn.action_value == "CHEAT_SPEED-":
+                    vis.maze.decrease_player_speed()
                     return
 
     def handle_text_box_events(self, event) -> None:
@@ -170,22 +181,24 @@ class Menu:
         for btn in self.menu_buttons:
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
-                    username_limpo = self.text.strip()
+                    username = self.text.strip()
 
-                    if username_limpo == "":
+                    if username == "":
                         self.show_error = True
                         return
 
-                    vis.user_name = username_limpo
-                    width = vis.maze.size[0] * TILE_SIZE + MARGIN
-                    height = (
-                        vis.maze.size[1] * TILE_SIZE + MARGIN + MAZE_OFFSET
-                    )
+                    vis.user_name = username
+                    width = MAZE_SIZE[0] + MARGIN
+                    height = MAZE_SIZE[1] + MARGIN
                     vis.window.update_display_mode(width, height)
                     vis.state = 'GAME_PLAY'
-                    vis.renderer.draw_walls(vis.maze.maze_grid.maze)
+                    vis.renderer.draw_walls(
+                        vis.maze.maze_grid[vis.gameplay.map_idx].maze
+                    )
                     vis.renderer.draw_pacgums(
-                        vis.maze.gameplay.pacgums_maps[vis.maze.gameplay.map_idx],
+                        vis.maze.gameplay.pacgums_maps[
+                            vis.maze.gameplay.map_idx
+                        ],
                         vis.maze.fruit_sprites
                     )
                     return

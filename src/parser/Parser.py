@@ -60,8 +60,8 @@ class PacManConfig:
                     entry_cell=start_position,
                     perfect=False,
                     seed=self.settings.seed
+                    )
                 )
-            )
         return maps
 
     def load_pacgums(self, maps: list[PacManMap]) -> list[PacGumsMap]:
