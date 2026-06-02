@@ -1,4 +1,4 @@
-from ._constants import TILE_COLOR, TILE_SIZE
+from ._constants import TILE_COLOR, TILE_SIZE, SCREEN_SIZE
 from typing import TYPE_CHECKING
 from ._button import Button
 import pygame
@@ -36,34 +36,35 @@ class Menu:
 
     def init_buttons(self) -> None:
         vis = self.vis
+        x = SCREEN_SIZE[0] - 170
 
         self.cheat_menu_buttons = [
             Button(
-                screen=self.cheat_surface, pos=(20, 90),
+                screen=self.cheat_surface, pos=(x, 20),
                 text="Invincibility", action="CHEAT_INV"
             ),
             Button(
-                screen=self.cheat_surface, pos=(20, 150),
+                screen=self.cheat_surface, pos=(x, 80),
                 text="Level skip", action="CHEAT_SKIP"
             ),
             Button(
-                screen=self.cheat_surface, pos=(20, 210),
+                screen=self.cheat_surface, pos=(x, 140),
                 text="Ghost freeze", action="CHEAT_FREEZE"
             ),
             Button(
-                screen=self.cheat_surface, pos=(20, 270),
+                screen=self.cheat_surface, pos=(x, 200),
                 text="Extra lives", action="CHEAT_LIVES"
             ),
             Button(
-                screen=self.cheat_surface, pos=(20, 330),
-                text="Player speed", action="NONE"
+                screen=self.cheat_surface, pos=(x, 260),
+                text="Player speed", action="NONE", disabled=True
             ),
             Button(
-                screen=self.cheat_surface, size=(25, 25), pos=(20, 380),
+                screen=self.cheat_surface, size=(50, 50), pos=(x, 320),
                 text="+", action="CHEAT_SPEED+"
             ),
             Button(
-                screen=self.cheat_surface, size=(25, 25), pos=(60, 380),
+                screen=self.cheat_surface, size=(50, 50), pos=(x + 100, 320),
                 text="-", action="CHEAT_SPEED-"
             ),
         ]
@@ -310,7 +311,7 @@ class Menu:
         self.cheat_surface.fill((0, 0, 0, 0))
 
         wx, wy = current_size
-        pw, ph = 260, wy
+        pw, ph = 190, wy
         popup_rect = pygame.Rect(wx - pw, 0, pw, ph)
 
         pygame.draw.rect(self.cheat_surface, (40, 40, 40), popup_rect)
@@ -318,22 +319,10 @@ class Menu:
             self.cheat_surface, TILE_COLOR, (wx - pw, 0), (wx - pw, wy), 2
         )
 
-        for i, btn in enumerate(self.cheat_menu_buttons):
-            if btn.action_value.startswith("CHEAT_SPEED"):
-                continue
-            btn.rect.x = popup_rect.x + 20
-            btn.rect.y = 90 + i * 60
-
-        for btn in self.cheat_menu_buttons:
-            if btn.action_value == "CHEAT_SPEED+":
-                btn.rect.x = popup_rect.x + 20
-                btn.rect.y = 380
-            elif btn.action_value == "CHEAT_SPEED-":
-                btn.rect.x = popup_rect.x + 80
-                btn.rect.y = 380
-
         mouse_pos = pygame.mouse.get_pos()
         for btn in self.cheat_menu_buttons:
+            if btn.action_value == "NONE":
+                btn.text = f"Speed: {vis.maze.player_ctrl.speed}"
             btn.update(mouse_pos)
             btn.draw()
 
