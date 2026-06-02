@@ -13,7 +13,7 @@ class Button:
         self,
         screen: pygame.Surface,
         pos: tuple[int | None, int | None] = (None, None),
-        size: tuple[int, int] = (150, 50),
+        size: tuple[int, int] = (160, 50),
         text: str = "Hello",
         font: pygame.font.Font | None = None,
         action: str | None = None,

@@ -36,7 +36,7 @@ class Menu:
 
     def init_buttons(self) -> None:
         vis = self.vis
-        x = SCREEN_SIZE[0] - 170
+        x = SCREEN_SIZE[0] - 180
 
         self.cheat_menu_buttons = [
             Button(
@@ -64,7 +64,7 @@ class Menu:
                 text="+", action="CHEAT_SPEED+"
             ),
             Button(
-                screen=self.cheat_surface, size=(50, 50), pos=(x + 100, 320),
+                screen=self.cheat_surface, size=(50, 50), pos=(x + 110, 320),
                 text="-", action="CHEAT_SPEED-"
             ),
         ]
@@ -284,7 +284,7 @@ class Menu:
         self.pause_surface.fill((0, 0, 0, 0))
 
         wx, wy = current_size
-        pw, ph = 190, wy
+        pw, ph = 200, wy
         popup_rect = pygame.Rect(0, 0, pw, ph)
 
         pygame.draw.rect(self.pause_surface, (40, 40, 40), popup_rect)
@@ -311,7 +311,7 @@ class Menu:
         self.cheat_surface.fill((0, 0, 0, 0))
 
         wx, wy = current_size
-        pw, ph = 190, wy
+        pw, ph = 200, wy
         popup_rect = pygame.Rect(wx - pw, 0, pw, ph)
 
         pygame.draw.rect(self.cheat_surface, (40, 40, 40), popup_rect)
