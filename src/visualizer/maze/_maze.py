@@ -65,7 +65,7 @@ class Maze:
         self.font = pygame.font.Font(
             "assets/fonts/Rajdhani-Bold.ttf", 20
         )
-        self.lives: int = 0
+        self.lives: int = 3
 
     def reset_visual_positions(self) -> None:
         start_px = self.gameplay.player.x * TILE_SIZE + 16 + (
@@ -117,6 +117,11 @@ class Maze:
         self.reset_visual_positions()
 
     def handle_game_play_events(self, event: Event) -> None:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.vis.state = 'PAUSE'
+                return
+
         new_dir = MovementController.get_direction_from_input(
             pygame.key.get_pressed()
         )

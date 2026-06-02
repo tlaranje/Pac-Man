@@ -26,4 +26,4 @@ class Visualizer():
         self.game_play_size: tuple[int, int] = (500, 500)
         self.state: str = "MAIN_MENU"
 
-        self.user_name: str = "PacMan"
+        self.user_name: str = ""
