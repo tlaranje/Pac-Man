@@ -51,7 +51,7 @@ class PacManConfig:
 
     def load_maps(self) -> list[PacManMap]:
         maps: list[PacManMap] = []
-        for level in self.settings.levels:
+        for i, level in enumerate(self.settings.levels):
             size: tuple[int, int] = (level.width, level.height)
             start_position: tuple[int, int] = (level.start_x, level.start_y)
             maps.append(
@@ -59,7 +59,7 @@ class PacManConfig:
                     size=size,
                     entry_cell=start_position,
                     perfect=False,
-                    seed=self.settings.seed
+                    seed=self.settings.seeds[i]
                     )
                 )
         return maps

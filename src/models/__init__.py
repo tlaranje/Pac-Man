@@ -1,3 +1,4 @@
+import random
 from typing import Any
 from dataclasses import dataclass
 from mazegenerator import MazeGenerator
@@ -72,6 +73,10 @@ class PacManConfigModel:
         self.levels = self._parse_levels(
             data
         )
+        self.seeds = [self.seed] + [
+            random.randint(0, 2**32 - 1)
+            for _ in range(len(self.levels) - 1)
+        ]
 
     @staticmethod
     def _warning(field: str, value: Any, default: Any) -> None:
