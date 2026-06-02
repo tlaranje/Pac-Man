@@ -1,4 +1,4 @@
-from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET, GAMEOVER_SIZE
+from .._constants import TILE_SIZE, MARGIN, MAZE_OFFSET, GAMEOVER_SIZE, MAX_PLAYER_DELAY
 from ._movement import MovementController
 from typing import TYPE_CHECKING
 from pygame import Surface
@@ -14,7 +14,7 @@ class Maze:
         self.vis = visualizer
 
         # Variables of Maze
-        self.maze_grid = self.vis.gameplay.maps[0]
+        self.maze_grid = self.vis.gameplay.maps[self.vis.gameplay.map_idx]
 
         self.size = (self.maze_grid._width, self.maze_grid._height)
         self.perfect = self.maze_grid._perfect
@@ -66,6 +66,21 @@ class Maze:
             "assets/fonts/Rajdhani-Bold.ttf", 20
         )
         self.lives: int = 3
+        self.is_cheat_mode: bool = False
+
+    def give_extra_lives(self) -> None:
+        self.lives += 1
+
+    def increase_player_speed(self) -> None:
+        if self.player_delay >= 10:
+            self.player_delay -= 10
+
+    def decrease_player_speed(self) -> None:
+        if self.player_delay + 10 < MAX_PLAYER_DELAY:
+            self.player_delay += 10
+
+    def toggle_cheat_mode(self) -> None:
+        self.is_cheat_mode = not self.is_cheat_mode
 
     def reset_visual_positions(self) -> None:
         start_px = self.gameplay.player.x * TILE_SIZE + 16 + (
@@ -76,7 +91,7 @@ class Maze:
         self.player_visual_y = float(start_py)
 
         self.ghosts_visual_pos = []
-        for g in self.gameplay.ghosts_maps[0]:
+        for g in self.gameplay.ghosts_maps[self.gameplay.map_idx]:
             start_gx = g.x * TILE_SIZE + 16 + (TILE_SIZE) // 2 + 1
             start_gy = g.y * TILE_SIZE + 16 + (TILE_SIZE) // 2 + 1
             self.ghosts_visual_pos.append(
@@ -105,13 +120,13 @@ class Maze:
         self.player_angle = 0
 
         self.gameplay.player.reset_position()
-        for g in self.gameplay.ghosts_maps[0]:
+        for g in self.gameplay.ghosts_maps[self.gameplay.map_idx]:
             g.reset_position()
 
         self.maze_surface.fill((0, 0, 0))
         self.vis.renderer.draw_walls(self.maze_grid.maze)
         self.vis.renderer.draw_pacgums(
-            self.gameplay.pacgums_maps[0], self.fruit_sprites
+            self.gameplay.pacgums_maps[self.gameplay.map_idx], self.fruit_sprites
         )
 
         self.reset_visual_positions()
@@ -127,6 +142,25 @@ class Maze:
         )
         if new_dir:
             self.next_dir = new_dir
+
+        if event.type != pygame.KEYDOWN:
+            return
+        if event.key == pygame.K_c:
+            self.toggle_cheat_mode()
+        elif event.key == pygame.K_i and self.is_cheat_mode:
+            self.gameplay.player.toggle_invencibility()
+        elif event.key == pygame.K_g and self.is_cheat_mode:
+            self.gameplay.toggle_freeze_ghosts()
+        elif event.key == pygame.K_l and self.is_cheat_mode:
+            self.give_extra_lives()
+        elif event.key == pygame.K_k and self.is_cheat_mode:
+            self.increase_player_speed()
+        elif event.key == pygame.K_j and self.is_cheat_mode:
+            self.decrease_player_speed()
+        print(self.player_delay)
+        print("is cheat mode:", self.is_cheat_mode)
+        print("is freeze ghosts:", self.gameplay.freeze_ghosts)
+        print("=====")
 
     def update_player_movement(self) -> None:
         curr_time = pygame.time.get_ticks()
@@ -167,8 +201,8 @@ class Maze:
             self.current_dir = None
 
     def clear_pacgum_at(self, x: int, y: int) -> None:
-        is_eat = self.gameplay.pacgums_maps[0][y][x][0]
-        type_pacgum = self.gameplay.pacgums_maps[0][y][x][1]
+        is_eat = self.gameplay.pacgums_maps[self.gameplay.map_idx][y][x][0]
+        type_pacgum = self.gameplay.pacgums_maps[self.gameplay.map_idx][y][x][1]
 
         if type_pacgum == "normal" and is_eat is True:
             self.score += 10
@@ -176,7 +210,9 @@ class Maze:
             self.gameplay.player.turn_on_super()
             self.score += 100
 
-        self.gameplay.player.eat(self.gameplay.pacgums_maps[0])
+        self.gameplay.player.eat(
+            self.gameplay.pacgums_maps[self.gameplay.map_idx]
+        )
 
         pos_x = (x * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 4
         pos_y = (y * TILE_SIZE) + 16 + (TILE_SIZE - 8) // 2 - 4 + MAZE_OFFSET
@@ -221,7 +257,7 @@ class Maze:
         self.update_player_movement()
 
         px, py = self.gameplay.player.x, self.gameplay.player.y
-        if self.gameplay.pacgums_maps[0][py][px][0] is True:
+        if self.gameplay.pacgums_maps[self.gameplay.map_idx][py][px][0] is True:
             self.clear_pacgum_at(px, py)
 
         if self.gameplay.player.is_on_super():
@@ -243,7 +279,7 @@ class Maze:
             self.gameplay.move_ghosts()
             self.last_ghost_move = curr_time
 
-        for i, g in enumerate(self.gameplay.ghosts_maps[0]):
+        for i, g in enumerate(self.gameplay.ghosts_maps[self.gameplay.map_idx]):
             target_gx = g.x * TILE_SIZE + 16 + (TILE_SIZE) // 2 + 1
             target_gy = g.y * TILE_SIZE + 16 + (
                 TILE_SIZE) // 2 + 1 + MAZE_OFFSET

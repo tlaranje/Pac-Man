@@ -185,7 +185,7 @@ class Menu:
                     vis.state = 'GAME_PLAY'
                     vis.renderer.draw_walls(vis.maze.maze_grid.maze)
                     vis.renderer.draw_pacgums(
-                        vis.maze.gameplay.pacgums_maps[0],
+                        vis.maze.gameplay.pacgums_maps[vis.maze.gameplay.map_idx],
                         vis.maze.fruit_sprites
                     )
                     return
