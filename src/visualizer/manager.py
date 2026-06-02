@@ -23,7 +23,7 @@ class Manager:
 
         renderer.draw_walls(maze.maze_grid.maze)
         renderer.draw_pacgums(
-            maze.gameplay.pacgums_maps[0], maze.fruit_sprites
+            maze.gameplay.pacgums_maps[maze.gameplay.map_idx], maze.fruit_sprites
         )
 
         clock: pygame.time.Clock = pygame.time.Clock()

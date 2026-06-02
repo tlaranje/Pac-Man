@@ -3,7 +3,6 @@ import pygame
 from ..parser import PacManConfig
 from ..models import PacManMap, PacGumsMap
 from typing import Any
-from random import randrange
 
 NORTH: int = 1
 EAST: int = 2
@@ -113,7 +112,11 @@ class PacManGhost(PacManEntity):
         self.is_scared = False
 
     def reset_position_after_die(self) -> None:
-        self.x, self.y = self.map_corners[randrange(4)]
+        available_corners: list[tuple[int, int]] = [
+            corner for corner in self.map_corners
+            if corner != (self.x, self.y)
+        ]
+        self.x, self.y = random.choice(available_corners)
         self.shortest_path = ""
         self.last_chase_x = 0
         self.last_chase_y = 0
