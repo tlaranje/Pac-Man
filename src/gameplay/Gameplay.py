@@ -21,6 +21,19 @@ class PacManEntity:
         self.x: int = x
         self.y: int = y
 
+    def get_possible_moves(self) -> list[str]:
+        possible_moves: list[str] = []
+        cell: int = self.maze[self.y][self.x]
+        if not cell & NORTH:
+            possible_moves.append("N")
+        if not cell & SOUTH:
+            possible_moves.append("S")
+        if not cell & EAST:
+            possible_moves.append("E")
+        if not cell & WEST:
+            possible_moves.append("W")
+        return possible_moves
+
     def eat(self, objects_map: list[list[tuple[bool, str]]]) -> None:
         cell_type: str = objects_map[self.y][self.x][1]
         objects_map[self.y][self.x] = (False, cell_type)
@@ -82,15 +95,15 @@ class PacManGhost(PacManEntity):
     :TODO
     """
 
+    TIME_TO_RESPAWN = 5000
+
     def __init__(self,
                  x: int,
                  y: int,
-                 map: PacManMap,
-                 map_corners: list[tuple[int, int]]) -> None:
+                 map: PacManMap) -> None:
         super().__init__(x, y, map)
         self.spawn_x: int = x
         self.spawn_y: int = y
-        self.map_corners: list[tuple[int, int]] = map_corners
 
         self.repeat_move: int = 0
         self.last_diretion: int = 0
@@ -100,23 +113,19 @@ class PacManGhost(PacManEntity):
         self.last_move: Any
         self.ghost_angle: int = 0
         self.is_scared: bool = False
+        self.last_death = None
+
+    def die(self) -> None:
+        self.last_death = pygame.time.get_ticks()
+
+    def is_dead(self) -> bool:
+        if self.last_death is None:
+            return False
+        return pygame.time.get_ticks() - self.last_death < self.TIME_TO_RESPAWN
 
     def reset_position(self) -> None:
         self.x = self.spawn_x
         self.y = self.spawn_y
-        self.shortest_path = ""
-        self.last_chase_x = 0
-        self.last_chase_y = 0
-        self.repeat_move = 0
-        self.last_diretion = 0
-        self.is_scared = False
-
-    def reset_position_after_die(self) -> None:
-        available_corners: list[tuple[int, int]] = [
-            corner for corner in self.map_corners
-            if corner != (self.x, self.y)
-        ]
-        self.x, self.y = random.choice(available_corners)
         self.shortest_path = ""
         self.last_chase_x = 0
         self.last_chase_y = 0
@@ -147,6 +156,15 @@ class PacManGhost(PacManEntity):
             self.last_diretion = WEST
 
         self.update_ghost_angle()
+
+    def move_away(self, direction: str) -> None:
+        possible_moves = [
+            move for move in super().get_possible_moves()
+            if move != direction
+        ]
+        if not possible_moves:
+            return
+        self.move(random.choice(possible_moves))
 
     def move_randomly(self) -> None:
         map = self.maze
@@ -218,6 +236,27 @@ class PacManGhost(PacManEntity):
         self.map._exitx = save_exitx
         self.map._exity = save_exity
 
+    def run_away(self, x: int, y: int) -> None:
+        self.shortest_path = None
+        save_entryx: int = self.map._entryx
+        save_entryy: int = self.map._entryy
+        save_exitx: int = self.map._exitx
+        save_exity: int = self.map._exity
+
+        self.map._entryx = self.x
+        self.map._entryy = self.y
+        self.map._exitx = x
+        self.map._exity = y
+
+        self.map._find_short_path()
+        if self.map._shortest_path:
+            self.move_away(self.map._shortest_path[0])
+
+        self.map._entryx = save_entryx
+        self.map._entryy = save_entryy
+        self.map._exitx = save_exitx
+        self.map._exity = save_exity
+
 
 class PacManPlayer(PacManEntity):
     """
@@ -254,6 +293,8 @@ class PacManPlayer(PacManEntity):
 
     def is_on_ghost(self) -> bool:
         for ghost in self.ghosts_map:
+            if ghost.is_dead():
+                continue
             if ghost.x == self.x \
                     and ghost.y == self.y:
                 return True
@@ -265,6 +306,8 @@ class PacManPlayer(PacManEntity):
         if not self.is_on_super():
             return self.is_on_ghost()
         for ghost in self.ghosts_map:
+            if ghost.is_dead():
+                continue
             if ghost.x == self.x \
                     and ghost.y == self.y \
                     and (not ghost.is_scared):
@@ -274,10 +317,13 @@ class PacManPlayer(PacManEntity):
     def eat_ghosts(self) -> int:
         ghosts_ate: int = 0
         for ghost in self.ghosts_map:
+            if ghost.is_dead():
+                continue
             if ghost.x == self.x \
                     and ghost.y == self.y and ghost.is_scared:
                 ghosts_ate += 1
-                ghost.reset_position_after_die()
+                ghost.die()
+                ghost.reset_position()
 
         return ghosts_ate
 
@@ -290,13 +336,15 @@ class PacManGameplay:
     def __init__(self, config: PacManConfig) -> None:
         self.config: PacManConfig = config
         self.maps: list[PacManMap] = config.load_maps()
-        self.maps_corners: list[list[tuple[int, int]]] = self.get_corners()
+        self.maps_middle: list[tuple[int, int]] = config.load_maps_middle(
+            self.maps
+        )
         self.maps_count: int = len(self.maps)
         self.pacgums_maps: list[PacGumsMap] = config.load_pacgums(
             self.maps
         )
         self.ghosts_maps: list[list[PacManGhost]] = config.load_ghosts(
-            self.maps, self.maps_corners
+            self.maps
         )
         self.player: PacManPlayer
         self.map_idx: int = 0
@@ -325,21 +373,10 @@ class PacManGameplay:
                     return False
         return True
 
-    def get_corners(self) -> list[list[tuple[int, int]]]:
-        corners: list[list[tuple[int, int]]] = []
-        for map in self.maps:
-            corners.append([
-                (0, 0),
-                (0, map._width - 1),
-                (0, map._height - 1),
-                (map._width - 1, map._height - 1)
-            ])
-        return corners
-
     def reset(self) -> None:
         self.pacgums_maps = self.config.load_pacgums(self.maps)
         self.ghosts_maps = self.config.load_ghosts(
-            self.maps, self.maps_corners
+            self.maps
         )
         self.gameplay_init(0)
 
@@ -347,8 +384,8 @@ class PacManGameplay:
         if map_idx < 0 or map_idx >= self.maps_count:
             return
         self.map_idx = map_idx
-        x: int = self.maps[map_idx]._entryx
-        y: int = self.maps[map_idx]._entryy
+        x: int = self.maps_middle[map_idx][0]
+        y: int = self.maps_middle[map_idx][1]
         self.player = PacManPlayer(
             x, y, self.maps[map_idx],
             self.ghosts_maps[self.map_idx]
@@ -358,11 +395,12 @@ class PacManGameplay:
         if self.freeze_ghosts:
             return
         for i, ghost in enumerate(self.ghosts_maps[self.map_idx]):
+            if ghost.is_dead():
+                continue
             player_x: int = self.player.x
             player_y: int = self.player.y
             if ghost.is_scared:
-                corner = self.maps_corners[self.map_idx][i % 4]
-                ghost.chase_position(corner[0], corner[1])
+                ghost.run_away(player_x, player_y)
                 continue
             if ghost.is_on_corridor_pos(player_x, player_y):
                 self.chase_moves[i] = 20
