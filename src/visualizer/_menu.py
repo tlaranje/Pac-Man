@@ -94,7 +94,7 @@ class Menu:
                 text="Play", action="PLAY"
             ),
             Button(
-                screen=vis.screen, pos=(None, 250),
+                screen=vis.screen, pos=(None, 240),
                 text="Exit", action="QUIT_APP"
             )
         ]

@@ -39,12 +39,23 @@ class PlayerController:
         self.reset_visual_position()
 
     def reset_visual_position(self) -> None:
-        player = self.vis.gameplay.player
+        vis = self.vis
+        player = vis.gameplay.player
+        if not hasattr(vis, 'maze_size'):
+            self.visual_x = float(
+                player.x * TILE_SIZE + 16 + (TILE_SIZE - 16) // 2 + 1
+            )
+            self.visual_y = float(
+                player.y * TILE_SIZE + 16 + (TILE_SIZE - 16) // 2 + 1
+            )
+            return
         self.visual_x = float(
-            player.x * TILE_SIZE + 16 + (TILE_SIZE - 16) // 2 + 1
+            (player.x * TILE_SIZE) + SCREEN_MIDPOINT[0]
+            - vis.maze_size[0] // 2 + 17
         )
         self.visual_y = float(
-            player.y * TILE_SIZE + 16 + (TILE_SIZE - 16) // 2 + 1
+            (player.y * TILE_SIZE) + SCREEN_MIDPOINT[1]
+            - vis.maze_size[1] // 2 + 15
         )
 
     def reset_state(self) -> None:

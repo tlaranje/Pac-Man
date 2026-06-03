@@ -180,9 +180,8 @@ class Maze:
             self.last_ghost_move = curr_time
 
         self.ghost_renderer.update_and_draw(
-            self.ghosts_frames,
-            self.scared_ghosts_sprites,
-            self.current_frame,
+            self.ghosts_frames, self.scared_ghosts_sprites,
+            self.end_ghosts_sprites, self.current_frame,
         )
 
         self.player_ctrl.update_visual_position()

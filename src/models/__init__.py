@@ -23,7 +23,7 @@ class PacManLevel:
 DEFAULT_HIGHSCORE_FILENAME: str = "output_test.txt"
 DEFAULT_LEVELS: list[PacManLevel] = [PacManLevel()]
 DEFAULT_LIVES: int = 3
-DEFAULT_PACGUM: int = 42 * 2
+DEFAULT_PACGUM: int = 42
 DEFAULT_POINTS_PER_PACGUM: int = 10
 DEFAULT_POINTS_PER_SUPER_PACGUM: int = 50
 DEFAULT_POINTS_PER_GHOST: int = 200
@@ -52,7 +52,7 @@ class PacManConfigModel:
         self.lives = self._parse_positive_int(
             data, "lives", DEFAULT_LIVES
         )
-        self.pacgum = self._parse_positive_int(
+        self.pacgum = self._parse_unsigned_int(
             data, "pacgum", DEFAULT_PACGUM
         )
         self.points_per_pacgum = self._parse_positive_int(
@@ -84,6 +84,13 @@ class PacManConfigModel:
             f"[Warning] Invalid value \"{value}\" for field \"{field}\". "
             f"Setting to default: \"{default}\"."
         )
+
+    def _parse_unsigned_int(self, data: dict, field: str, default: int) -> int:
+        v = data.get(field, default)
+        if not isinstance(v, int) or v < 0:
+            self._warning(field, v, default)
+            return default
+        return v
 
     def _parse_positive_int(self, data: dict, field: str, default: int) -> int:
         v = data.get(field, default)

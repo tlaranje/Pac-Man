@@ -1,8 +1,9 @@
-from ._constants import TILE_COLOR, TEXT_COLOR
+from ._constants import TILE_COLOR, TEXT_COLOR, TILE_SIZE
 from typing import TYPE_CHECKING
 from ._button import Button
 from pygame import Event
 import pygame
+import sys
 
 if TYPE_CHECKING:
     from .._visualizer import Visualizer
@@ -25,10 +26,14 @@ class GameOver():
         b1_text = "Restart" if self.title == "GAME_OVER" else "Play again"
         self.gameover_buttons = [
             Button(
-                screen=vis.screen, pos=(None, 110), text=b1_text, action="PLAY"
+                screen=vis.screen, pos=(None, 110), text="Next Level",
+                action="NEXT_LEVEL"
             ),
             Button(
-                screen=vis.screen, pos=(None, 180), text="Exit",
+                screen=vis.screen, pos=(None, 170), text=b1_text, action="PLAY"
+            ),
+            Button(
+                screen=vis.screen, pos=(None, 230), text="Exit",
                 action="QUIT_APP"
             )
         ]
@@ -42,18 +47,31 @@ class GameOver():
                     vis.state = 'GAME_PLAY'
                     vis.maze.reset_maze()
                     return
+                elif btn.action_value == "NEXT_LEVEL":
+                    vis.state = "GAME_PLAY"
+                    vis.maze_surface.fill((0, 0, 0))
+                    vis.gameplay.next_level()
+                    vis.maze.init_level()
+                    maze_grid = vis.maze.maze_grid[vis.gameplay.map_idx].maze
+                    vis.maze_size = (
+                        len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+                    )
+                    vis.maze.reset_maze()
+                    return
                 elif btn.action_value == "QUIT_APP":
-                    vis.state = "MAIN_MENU"
+                    pygame.quit()
+                    sys.exit()
 
     def draw_game_over(self) -> None:
         vis = self.vis
+        gameplay = vis.gameplay
 
         vis.screen.fill((50, 50, 50))
         title_surface = self.title_font.render(
             self.title, True, TILE_COLOR
         )
         high_score_surface = self.font.render(
-            f"Score: {str(vis.gameplay.scores[-1])}", True, TEXT_COLOR
+            f"Score: {str(gameplay.scores[-1])}", True, TEXT_COLOR
         )
         screen_w, screen_h = self.vis.screen.get_size()
 
@@ -65,9 +83,22 @@ class GameOver():
             high_score_surface,
             (screen_w // 2 - high_score_surface.get_width() // 2, 60)
         )
+        levels = gameplay.config.settings.levels
 
-        for button in self.gameover_buttons:
-            button.setup_button()
+        if gameplay.map_idx + 1 >= len(levels):
+            buttons = self.gameover_buttons[1:]
+        else:
+            buttons = self.gameover_buttons
+
+        btn_width = 160
+        popup_x = screen_w // 2 - btn_width // 2
+        popup_rect = pygame.Rect(popup_x, 0, btn_width, screen_h)
+
+        for i, btn in enumerate(buttons):
+            btn.rect.x = popup_rect.x
+            btn.rect.y = 100 + i * 60
+
+        for button in buttons:
             button.draw()
 
         mouse_pos = pygame.mouse.get_pos()

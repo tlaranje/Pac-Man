@@ -14,6 +14,8 @@ y = info.current_h
 SCREEN_SIZE = (x, y)
 SCREEN_MIDPOINT = (x / 2, y / 2)
 
+SUPER_TIME = 10000
+
 # Maze constants
 TILE_SIZE = 27
 MARGIN = 32

@@ -1,8 +1,9 @@
+from ..models import PacManMap, PacGumsMap
+from src.visualizer._constants import SUPER_TIME
+from ..parser import PacManConfig
+from typing import Any
 import random
 import pygame
-from ..parser import PacManConfig
-from ..models import PacManMap, PacGumsMap
-from typing import Any
 
 NORTH: int = 1
 EAST: int = 2
@@ -262,9 +263,6 @@ class PacManPlayer(PacManEntity):
     """
     :TODO
     """
-
-    SUPER_TIME = 10000
-
     def __init__(self, x: int, y: int, map: PacManMap,
                  ghosts_map: list[PacManGhost]) -> None:
         super().__init__(x, y, map)
@@ -285,7 +283,7 @@ class PacManPlayer(PacManEntity):
     def is_on_super(self) -> bool:
         if self.super_start is None:
             return False
-        return pygame.time.get_ticks() - self.super_start <= self.SUPER_TIME
+        return pygame.time.get_ticks() - self.super_start <= SUPER_TIME
 
     def reset_position(self) -> None:
         self.x = self.spawn_x

@@ -27,6 +27,8 @@ class Manager:
         vis.maze_size = (
             len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
         )
+        maze.player_ctrl.reset_visual_position()
+        maze.ghost_renderer.reset_visual_positions()
         maze.reset_maze()
 
         clock: pygame.time.Clock = pygame.time.Clock()
