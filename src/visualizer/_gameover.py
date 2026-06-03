@@ -68,7 +68,7 @@ class GameOver():
                     gameplay.level_start = None
                     gameplay.scores.pop()
                     vis.maze.score = sum(vis.gameplay.scores)
-                    vis.maze.lives = 3
+                    vis.maze.lives = vis.gameplay.config.settings.lives
                     gameplay.reset()
                     vis.maze.player_ctrl.reset_state()
                     vis.maze.ghost_renderer.reset_visual_positions()

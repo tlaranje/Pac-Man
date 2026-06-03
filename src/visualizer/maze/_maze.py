@@ -114,7 +114,7 @@ class Maze:
 
         if not is_win:
             self.score = 0
-            self.lives = 3
+            self.lives = self.gameplay.config.settings.lives
         elif vis.gameplay.map_idx + 1 >= len(
              vis.gameplay.config.settings.levels):
             vis.leaderboard.append({vis.user_name: self.score})
