@@ -279,7 +279,8 @@ class PacManPlayer(PacManEntity):
     def turn_on_super(self) -> None:
         self.super_start = pygame.time.get_ticks()
         for ghost in self.ghosts_map:
-            ghost.is_scared = True
+            if not ghost.is_dead():
+                ghost.is_scared = True
 
     def is_on_super(self) -> bool:
         if self.super_start is None:
@@ -348,7 +349,6 @@ class PacManGameplay:
         self.player: PacManPlayer
         self.map_idx: int = 0
         self.chase_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
-        self.scores: list[int] = [0]
         self.freeze_ghosts: bool = False
         self.level_start: int | None = None
 

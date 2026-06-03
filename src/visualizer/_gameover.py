@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from ._button import Button
 from pygame import Event
 import pygame
+import json
 import sys
 
 if TYPE_CHECKING:
@@ -38,6 +39,17 @@ class GameOver():
             )
         ]
 
+    def save_score(self) -> None:
+        vis = self.vis
+        file_name = vis.gameplay.config.settings.highscore_filename
+        gameplay = vis.gameplay
+        settings = gameplay.config.settings
+
+        if gameplay.map_idx + 1 >= len(settings.levels) or vis.maze.lives <= 0:
+            vis.leaderboard.append({vis.user_name: vis.maze.score})
+            with open(file_name, "w") as fd:
+                fd.write(json.dumps(vis.leaderboard, indent=4))
+
     def handle_game_over_events(self, event: Event) -> None:
         vis = self.vis
         gameplay = vis.gameplay
@@ -46,8 +58,6 @@ class GameOver():
             if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
                 self.show_error = False
             return
-
-        self.handle_text_box_events(event)
 
         levels = gameplay.config.settings.levels
         if gameplay.map_idx >= len(levels) or self.title == "Game Over":
@@ -66,8 +76,7 @@ class GameOver():
 
                     vis.user_name = username
                     gameplay.level_start = None
-                    gameplay.scores.pop()
-                    vis.maze.score = sum(vis.gameplay.scores)
+                    self.save_score()
                     vis.maze.lives = 3
                     gameplay.reset()
                     vis.maze.player_ctrl.reset_state()
@@ -91,6 +100,8 @@ class GameOver():
                     pygame.quit()
                     sys.exit()
 
+        self.handle_text_box_events(event)
+
     def handle_text_box_events(self, event) -> None:
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.active = self.rect.collidepoint(event.pos)
@@ -100,6 +111,7 @@ class GameOver():
                 self.text = self.text[:-1]
             elif event.key == pygame.K_RETURN:
                 self.vis.user_name = self.text
+                self.save_score()
                 self.text = ""
             else:
                 test = self.vis.text_box_font.render(
@@ -164,7 +176,7 @@ class GameOver():
             self.title, True, TILE_COLOR
         )
         high_score_surface = vis.font.render(
-            f"Score: {str(gameplay.scores[-1])}", True, TEXT_COLOR
+            f"Score: {str(vis.maze.score)}", True, TEXT_COLOR
         )
         screen_w, screen_h = self.vis.screen.get_size()
         center_y = screen_h // 2

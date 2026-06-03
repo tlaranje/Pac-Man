@@ -6,7 +6,6 @@ from ._hud import HudRenderer
 from pygame import Surface
 from pygame import Event
 import pygame
-import json
 
 if TYPE_CHECKING:
     from .._visualizer import Visualizer
@@ -102,26 +101,16 @@ class Maze:
     # Death / life handling
     def handle_player_death(self, score: int, is_win: bool = False) -> None:
         vis = self.vis
-        self.gameplay.scores.append(self.score)
         vis.state = "GAME_OVER"
         vis.game_over.title = "Game Over" if not is_win else "Win"
         self.maze_surface.fill((0, 0, 0))
         self.gameplay.reset()
-        self.score = 0
         self.lives = self.gameplay.config.settings.lives
         self.player_ctrl.reset_state()
         self.ghost_renderer.reset_visual_positions()
-
         if not is_win:
             self.score = 0
             self.lives = 3
-        elif vis.gameplay.map_idx + 1 >= len(
-             vis.gameplay.config.settings.levels):
-            vis.leaderboard.append({vis.user_name: self.score})
-            with open(
-                vis.gameplay.config.settings.highscore_filename, "w"
-            ) as fd:
-                fd.write(json.dumps(vis.leaderboard, indent=4))
 
     def handle_player_lose_life(self) -> None:
         self.player_ctrl.reset_state()
