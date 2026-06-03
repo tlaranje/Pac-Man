@@ -27,7 +27,7 @@ class Visualizer():
 
         self.screen: Surface
         self.game_play_size: tuple[int, int] = (500, 500)
-        self.state: str = "GAME_OVER"
+        self.state: str = "MAIN_MENU"
 
         self.user_name: str = ""
         self.leaderboard: list[dict[str, int]] = []
