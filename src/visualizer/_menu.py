@@ -113,7 +113,7 @@ class Menu:
                     return
                 elif btn.action_value == "RESTART":
                     vis.maze.score = 0
-                    vis.maze.lives = 3
+                    vis.maze.lives = vis.gameplay.config.settings.lives
                     vis.gameplay.reset()
                     vis.maze.player_ctrl.reset_state()
                     vis.maze.ghost_renderer.reset_visual_positions()
