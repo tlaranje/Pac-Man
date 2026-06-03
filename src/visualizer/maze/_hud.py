@@ -18,7 +18,7 @@ class HudRenderer:
         level_surf = self.font.render(
             f"Level: {self.vis.gameplay.map_idx}", True, (255, 255, 255)
         )
-        high_score_surf = self.font.render(
+        high_surf = self.font.render(
             f"High Score: {score}", True, (255, 255, 255)
         )
         lives_surf = self.font.render(
@@ -29,21 +29,25 @@ class HudRenderer:
         )
 
         screen_w, _ = screen.get_size()
-        mid_x = screen_w // 2
 
-        container_w = 600
-        slice_w = container_w // 3
-        start_x = mid_x - (container_w // 2)
+        container_w = 370
+        rect = pygame.Rect(
+            screen_w // 2 - container_w // 2, -2, container_w, 68
+        )
+        pygame.draw.rect(
+            screen, (50, 50, 50), rect,
+            border_bottom_left_radius=10, border_bottom_right_radius=10
+        )
+        pygame.draw.rect(
+            screen, (255, 255, 255), rect, 2,
+            border_bottom_left_radius=10, border_bottom_right_radius=10
+        )
 
-        center_1 = start_x + (slice_w // 2)
-        center_2 = start_x + slice_w + (slice_w // 2)
-        center_3 = start_x + (slice_w * 2) + (slice_w // 2)
+        left_x = rect.x + 20
+        mid_x_text = rect.centerx
+        right_x = rect.right - 20
 
-        live_x = center_1 - lives_surf.get_width() // 2
-        high_x = center_2 - high_score_surf.get_width() // 2
-        time_x = center_3 - time_surf.get_width() // 2
-
-        screen.blit(lives_surf, (live_x, 10))
-        screen.blit(high_score_surf, (high_x, 10))
-        screen.blit(level_surf, (high_x, 30))
-        screen.blit(time_surf, (time_x, 10))
+        screen.blit(lives_surf, (left_x, 8))
+        screen.blit(high_surf, (mid_x_text - high_surf.get_width() // 2, 8))
+        screen.blit(level_surf, (mid_x_text - level_surf.get_width() // 2, 30))
+        screen.blit(time_surf, (right_x - time_surf.get_width(), 8))

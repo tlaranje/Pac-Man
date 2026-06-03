@@ -378,7 +378,7 @@ class PacManGameplay:
         self.ghosts_maps = self.config.load_ghosts(
             self.maps
         )
-        self.gameplay_init(0)
+        self.gameplay_init(self.map_idx)
 
     def get_level_time(self) -> int:
         if self.level_start is None:

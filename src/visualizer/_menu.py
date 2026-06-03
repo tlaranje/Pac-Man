@@ -18,20 +18,7 @@ class Menu:
         self.pause_menu_buttons: list[Button] = []
         self.cheat_menu_buttons: list[Button] = []
 
-        self.title_font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 150
-        )
-        self.font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 30
-        )
-        self.text_box_font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 19
-        )
-
-        self.active: bool = False
         self.rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
-        self.text: str = "Hi"
-        self.show_error: bool = False
 
         self.pause_surface = pygame.Surface((0, 0), pygame.SRCALPHA)
         self.cheat_surface = pygame.Surface((0, 0), pygame.SRCALPHA)
@@ -92,14 +79,16 @@ class Menu:
 
         self.menu_buttons = [
             Button(
-                size=BUTTON_SIZE, screen=vis.screen, text="Play", action="PLAY"
+                size=BUTTON_SIZE, screen=vis.screen, text="Play",
+                action="PLAY", text_size=40
+
             ),
             Button(
-                size=BUTTON_SIZE, screen=vis.screen,
+                size=BUTTON_SIZE, screen=vis.screen, text_size=40,
                 text="Leaderboard", action="LEADERBOARD"
             ),
             Button(
-                size=BUTTON_SIZE, screen=vis.screen,
+                size=BUTTON_SIZE, screen=vis.screen, text_size=40,
                 text="Exit", action="QUIT_APP"
             )
         ]
@@ -169,43 +158,12 @@ class Menu:
                     vis.maze.decrease_player_speed()
                     return
 
-    def handle_text_box_events(self, event) -> None:
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            self.active = self.rect.collidepoint(event.pos)
-
-        if event.type == pygame.KEYDOWN and self.active:
-            if event.key == pygame.K_BACKSPACE:
-                self.text = self.text[:-1]
-            elif event.key == pygame.K_RETURN:
-                self.vis.user_name = self.text
-                self.text = ""
-            else:
-                test = self.text_box_font.render(
-                    self.text + event.unicode, True, (255, 255, 255)
-                )
-                if test.get_width() < self.rect.width - 10:
-                    self.text += event.unicode
-
     def handle_menu_events(self, event: pygame.event.Event) -> None:
         vis = self.vis
-
-        if self.show_error:
-            if event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
-                self.show_error = False
-            return
-
-        self.handle_text_box_events(event)
 
         for btn in self.menu_buttons:
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
-                    username = self.text.strip()
-
-                    if username == "":
-                        self.show_error = True
-                        return
-
-                    vis.user_name = username
                     vis.maze.reset_maze()
                     vis.state = 'GAME_PLAY'
                     return
@@ -213,68 +171,21 @@ class Menu:
                     pygame.quit()
                     sys.exit()
 
-    def draw_error_popup(self, error_message: str = "") -> None:
-        vis = self.vis
-        wx, wy = vis.screen.get_size()
-
-        overlay = pygame.Surface((wx, wy), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 50))
-        vis.screen.blit(overlay, (0, 0))
-
-        pw, ph = 250, 60
-        popup_rect = pygame.Rect(wx // 2 - pw // 2, wy // 2 - ph // 2, pw, ph)
-        pygame.draw.rect(
-            vis.screen, (40, 40, 40), popup_rect, border_radius=8
-        )
-        pygame.draw.rect(
-            vis.screen, (220, 50, 50), popup_rect, 2, border_radius=8
-        )
-
-        txt = self.font.render(error_message, True, (255, 255, 255))
-        vis.screen.blit(txt, (
-            popup_rect.centerx - txt.get_width() // 2,
-            popup_rect.centery - txt.get_height() // 2
-        ))
-
-    def draw_user_selection(self) -> None:
-        vis = self.vis
-        wx, wy = vis.screen.get_size()
-        centerx = wx // 2
-
-        text = self.font.render("Enter username", True, TILE_COLOR)
-        text_rect = text.get_rect(centerx=centerx, y=250)
-        vis.screen.blit(text, text_rect)
-
-        text_box_size = (150, 40)
-        tx, ty = text_box_size
-        self.rect = pygame.Rect(centerx - tx // 2, 300, tx, ty)
-
-        pygame.draw.rect(vis.screen, (60, 60, 60), self.rect)
-        color = (255, 255, 255) if self.active else (100, 100, 100)
-        pygame.draw.rect(vis.screen, color, self.rect, 2)
-
-        txt_surface = self.text_box_font.render(
-            self.text, True, (255, 255, 255)
-        )
-        vis.screen.blit(txt_surface, (self.rect.x + 5, self.rect.y + 7))
-
     def draw_main_menu(self) -> None:
         vis = self.vis
         vis.screen.fill((50, 50, 50))
 
         screen_w, screen_h = vis.screen.get_size()
-        centerx = screen_w // 2
+        center_x = screen_w // 2
         center_y = screen_h // 2
 
-        text_surf = self.title_font.render("Pac-Man", True, TILE_COLOR)
-        text_rect = text_surf.get_rect(centerx=centerx, y=50)
+        text_surf = vis.title_font.render("Pac-Man", True, TILE_COLOR)
+        text_rect = text_surf.get_rect(centerx=center_x, y=50)
         vis.screen.blit(text_surf, text_rect)
 
-        self.draw_user_selection()
-
         btn_width = BUTTON_SIZE[0]
-        popup_x = centerx - btn_width // 2
-        btn_start_y = center_y - 20
+        popup_x = center_x - btn_width // 2
+        btn_start_y = center_y - 160
 
         for i, btn in enumerate(self.menu_buttons):
             btn.rect.x = popup_x
@@ -284,9 +195,6 @@ class Menu:
         for btn in self.menu_buttons:
             btn.update(mouse_pos)
             btn.draw()
-
-        if self.show_error:
-            self.draw_error_popup("Empty username!")
 
     def draw_pause_menu(self) -> None:
         vis = self.vis

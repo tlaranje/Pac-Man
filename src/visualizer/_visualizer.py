@@ -5,6 +5,7 @@ from ._gameover import GameOver
 from ._menu import Menu
 from ._window import Window
 from pygame import Surface
+import pygame
 
 
 class Visualizer():
@@ -26,7 +27,19 @@ class Visualizer():
 
         self.screen: Surface
         self.game_play_size: tuple[int, int] = (500, 500)
-        self.state: str = "MAIN_MENU"
+        self.state: str = "GAME_OVER"
 
         self.user_name: str = ""
-        self.leaderboard: list[dict[str, int]]
+        self.leaderboard: list[dict[str, int]] = []
+
+        self.title_font = pygame.font.Font(
+            "assets/fonts/Rajdhani-Bold.ttf", 150
+        )
+
+        self.font = pygame.font.Font(
+            "assets/fonts/Rajdhani-Bold.ttf", 30
+        )
+
+        self.text_box_font = pygame.font.Font(
+            "assets/fonts/Rajdhani-Bold.ttf", 19
+        )

@@ -18,10 +18,6 @@ class Window:
         self.vis.screen = pygame.display.set_mode(SCREEN_SIZE, flags)
         pygame.display.set_caption("Pac-Man")
 
-        pygame.display.iconify()
-        pygame.event.pump()
-
-        self.vis.screen = pygame.display.set_mode(SCREEN_SIZE, flags)
         pygame.event.pump()
 
     def update_display_mode(self, width: int, height: int) -> None:
