@@ -43,7 +43,8 @@ class Maze:
 
         # Game state
         self.score: int = 0
-        self.lives: int = 1
+        self.lives: int = self.gameplay.config.settings.lives
+        self.time: int = 90
         self.is_cheat_mode: bool = False
 
         # Sub-controllers
@@ -106,6 +107,8 @@ class Maze:
         vis.game_over.title = "Game Over" if not is_win else "Win"
         self.maze_surface.fill((0, 0, 0))
         self.gameplay.reset()
+        self.score = 0
+        self.lives = self.gameplay.config.settings.lives
         self.player_ctrl.reset_state()
         self.ghost_renderer.reset_visual_positions()
 
