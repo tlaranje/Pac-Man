@@ -1,5 +1,6 @@
 from ._constants import TILE_COLOR, TEXT_COLOR, TILE_SIZE
 from typing import TYPE_CHECKING
+from src.utils import RoundRect
 from ._button import Button
 from pygame import Event
 import pygame
@@ -145,10 +146,15 @@ class GameOver():
 
     def draw_user_selection(self) -> None:
         vis = self.vis
-        wx, wy = vis.screen.get_size()
-        centerx = wx // 2
+        sw, sh = vis.screen.get_size()
+        centerx = sw // 2
 
-        text = vis.font.render("Enter username", True, TILE_COLOR)
+        container_w = 370
+        rect = pygame.Rect(
+            sw // 2 - container_w // 2, -2, container_w, 68
+        )
+        RoundRect.draw(vis.screen, rect)
+        text = vis.font.render("Enter username", True, TEXT_COLOR)
         text_rect = text.get_rect(centerx=centerx, y=250)
         vis.screen.blit(text, text_rect)
 
@@ -161,7 +167,7 @@ class GameOver():
         pygame.draw.rect(vis.screen, color, self.rect, 2)
 
         txt_surface = vis.text_box_font.render(
-            self.text, True, (255, 255, 255)
+            self.text, True, TEXT_COLOR
         )
         vis.screen.blit(txt_surface, (self.rect.x + 5, self.rect.y + 7))
 
@@ -172,22 +178,20 @@ class GameOver():
 
         self.draw_user_selection()
 
-        title_surface = vis.title_font.render(
+        title_surf = vis.title_font.render(
             self.title, True, TILE_COLOR
         )
-        high_score_surface = vis.font.render(
+        score_surf = vis.font.render(
             f"Score: {str(vis.maze.score)}", True, TEXT_COLOR
         )
         screen_w, screen_h = self.vis.screen.get_size()
         center_y = screen_h // 2
 
         self.vis.screen.blit(
-            title_surface,
-            (screen_w // 2 - title_surface.get_width() // 2, 10)
+            title_surf, (screen_w // 2 - title_surf.get_width() // 2, 10)
         )
         self.vis.screen.blit(
-            high_score_surface,
-            (screen_w // 2 - high_score_surface.get_width() // 2, 60)
+            score_surf, (screen_w // 2 - score_surf.get_width() // 2, 180)
         )
         levels = gameplay.config.settings.levels
         if gameplay.map_idx + 1 >= len(levels) or self.title == "Game Over":

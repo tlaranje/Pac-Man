@@ -27,7 +27,7 @@ class Visualizer():
 
         self.screen: Surface
         self.game_play_size: tuple[int, int] = (500, 500)
-        self.state: str = "MAIN_MENU"
+        self.state: str = "GAME_OVER"
 
         self.user_name: str = ""
         self.leaderboard: list[dict[str, int]] = []
@@ -37,7 +37,7 @@ class Visualizer():
         )
 
         self.font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 30
+            "assets/fonts/Rajdhani-Bold.ttf", 40
         )
 
         self.text_box_font = pygame.font.Font(
