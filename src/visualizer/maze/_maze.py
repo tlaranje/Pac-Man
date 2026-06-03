@@ -6,6 +6,7 @@ from ._hud import HudRenderer
 from pygame import Surface
 from pygame import Event
 import pygame
+import json
 
 if TYPE_CHECKING:
     from .._visualizer import Visualizer
@@ -83,6 +84,7 @@ class Maze:
 
         self.player_ctrl.init(self.maze_grid[map_idx].maze)
         self.ghost_renderer.reset_visual_positions()
+        self.vis.gameplay.level_start = None
 
     # Cheat helpers
     def give_extra_lives(self) -> None:
@@ -99,15 +101,27 @@ class Maze:
 
     # Death / life handling
     def handle_player_death(self, score: int, is_win: bool = False) -> None:
+        vis = self.vis
         self.gameplay.scores.append(self.score)
-        self.vis.state = "GAME_OVER"
-        self.vis.game_over.title = "Game Over" if not is_win else "Win"
+        vis.state = "GAME_OVER"
+        vis.game_over.title = "Game Over" if not is_win else "Win"
         self.maze_surface.fill((0, 0, 0))
         self.gameplay.reset()
         self.score = 0
         self.lives = self.gameplay.config.settings.lives
         self.player_ctrl.reset_state()
         self.ghost_renderer.reset_visual_positions()
+
+        if not is_win:
+            self.score = 0
+            self.lives = 3
+        elif vis.gameplay.map_idx + 1 >= len(
+             vis.gameplay.config.settings.levels):
+            vis.leaderboard.append({vis.user_name: self.score})
+            with open(
+                vis.gameplay.config.settings.highscore_filename, "w"
+            ) as fd:
+                fd.write(json.dumps(vis.leaderboard, indent=4))
 
     def handle_player_lose_life(self) -> None:
         self.player_ctrl.reset_state()
@@ -151,7 +165,9 @@ class Maze:
                 self.handle_player_lose_life()
             return
 
-        self.hud.draw(self.score, self.lives, self.time)
+        self.hud.draw(
+            self.score, self.lives, vis.gameplay.get_level_time_remaining()
+        )
 
         self.player_ctrl.update()
 
@@ -176,6 +192,12 @@ class Maze:
         if self.player_ctrl.game_started and (
             curr_time - self.last_ghost_move >= self.ghost_delay
         ):
+            if vis.gameplay.level_start is None:
+                self.vis.gameplay.level_start = pygame.time.get_ticks()
+
+            if vis.gameplay.get_level_time_remaining() <= 0:
+                self.handle_player_death(0)
+
             self.gameplay.move_ghosts()
             self.last_ghost_move = curr_time
 

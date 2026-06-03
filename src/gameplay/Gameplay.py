@@ -2,6 +2,7 @@ from ..models import PacManMap, PacGumsMap
 from src.visualizer._constants import SUPER_TIME
 from ..parser import PacManConfig
 from typing import Any
+from math import ceil
 import random
 import pygame
 
@@ -349,7 +350,7 @@ class PacManGameplay:
         self.chase_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
         self.scores: list[int] = [0]
         self.freeze_ghosts: bool = False
-        self.level_start = None
+        self.level_start: int | None = None
 
     def toggle_freeze_ghosts(self) -> None:
         self.freeze_ghosts = not self.freeze_ghosts
@@ -377,13 +378,7 @@ class PacManGameplay:
         self.ghosts_maps = self.config.load_ghosts(
             self.maps
         )
-        self.gameplay_init(0)
-
-    def is_level_timeout(self) -> bool:
-        if self.level_start is None:
-            return False
-        level_time = self.config.settings.level_max_time_ms
-        return pygame.time.get_ticks() - self.level_start > level_time
+        self.gameplay_init(self.map_idx)
 
     def get_level_time(self) -> int:
         if self.level_start is None:
@@ -394,7 +389,9 @@ class PacManGameplay:
         level_time: int = self.get_level_time()
         if level_time >= self.config.settings.level_max_time_ms:
             return 0
-        return (self.config.settings.level_max_time_ms - level_time) / 1000
+        return ceil(
+            (self.config.settings.level_max_time_ms - level_time) / 1000
+        )
 
     def gameplay_init(self, map_idx: int) -> None:
         if map_idx < 0 or map_idx >= self.maps_count:
@@ -406,7 +403,6 @@ class PacManGameplay:
             x, y, self.maps[map_idx],
             self.ghosts_maps[self.map_idx]
         )
-        self.level_start = pygame.time.get_ticks()
 
     def move_ghosts(self) -> None:
         if self.freeze_ghosts:
