@@ -77,6 +77,8 @@ class GameOver():
                     vis.user_name = username
                     gameplay.level_start = None
                     self.save_score()
+                    vis.maze.score -= vis.maze.level_score
+                    vis.maze.level_score = 0
                     vis.maze.lives = vis.gameplay.config.settings.lives
                     gameplay.reset()
                     vis.maze.player_ctrl.reset_state()
@@ -86,6 +88,7 @@ class GameOver():
                     vis.maze.reset_maze()
                     return
                 elif btn.action_value == "NEXT_LEVEL":
+                    vis.maze.level_score = 0
                     vis.maze_surface.fill((0, 0, 0))
                     gameplay.next_level()
                     vis.maze.init_level()
