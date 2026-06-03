@@ -106,6 +106,7 @@ class Menu:
                     vis.state = 'GAME_PLAY'
                     return
                 elif btn.action_value == "RESTART":
+                    vis.make.level_score = 0
                     vis.maze.score = 0
                     vis.maze.lives = vis.gameplay.config.settings.lives
                     vis.gameplay.reset()

@@ -24,9 +24,11 @@ class PacgumController:
 
         if cell_type == "normal":
             score += gameplay.config.settings.points_per_pacgum
+            self.vis.maze.level_score += gameplay.config.settings.points_per_pacgum
         elif cell_type == "super":
             gameplay.player.turn_on_super()
             score += gameplay.config.settings.points_per_super_pacgum
+            self.vis.maze.level_score += gameplay.config.settings.points_per_super_pacgum
 
         gameplay.player.eat(pacgums_map)
 
