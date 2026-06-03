@@ -70,6 +70,7 @@ class PacManConfigModel:
         self.level_max_time = self._parse_positive_int(
             data, "level_max_time", DEFAULT_LEVEL_MAX_TIME
         )
+        self.level_max_time_ms = self.level_max_time * 1000
         self.levels = self._parse_levels(
             data
         )
