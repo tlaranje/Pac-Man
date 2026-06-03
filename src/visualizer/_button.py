@@ -15,6 +15,7 @@ class Button:
         pos: tuple[int | None, int | None] = (None, None),
         size: tuple[int, int] = (160, 50),
         text: str = "Hello",
+        text_size: int = 25,
         font: pygame.font.Font | None = None,
         action: str | None = None,
         disabled: bool = False,
@@ -24,7 +25,7 @@ class Button:
         self.size = size
         self.text = text
         self.font = font or pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 24
+            "assets/fonts/Rajdhani-Bold.ttf", text_size
         )
         self.action_value = action
         self.disabled = disabled

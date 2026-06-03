@@ -20,7 +20,7 @@ class PacManLevel:
     start_y: int = DEFAULT_START_Y
 
 
-DEFAULT_HIGHSCORE_FILENAME: str = "output_test.txt"
+DEFAULT_HIGHSCORE_FILENAME: str = "scores.json"
 DEFAULT_LEVELS: list[PacManLevel] = [PacManLevel()]
 DEFAULT_LIVES: int = 3
 DEFAULT_PACGUM: int = 42

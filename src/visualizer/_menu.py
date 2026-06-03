@@ -7,6 +7,8 @@ import sys
 if TYPE_CHECKING:
     from ._visualizer import Visualizer
 
+BUTTON_SIZE = (300, 100)
+
 
 class Menu:
     def __init__(self, visualizer: "Visualizer") -> None:
@@ -17,10 +19,10 @@ class Menu:
         self.cheat_menu_buttons: list[Button] = []
 
         self.title_font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 50
+            "assets/fonts/Rajdhani-Bold.ttf", 150
         )
         self.font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 25
+            "assets/fonts/Rajdhani-Bold.ttf", 30
         )
         self.text_box_font = pygame.font.Font(
             "assets/fonts/Rajdhani-Bold.ttf", 19
@@ -90,11 +92,14 @@ class Menu:
 
         self.menu_buttons = [
             Button(
-                screen=vis.screen, pos=(None, 180),
-                text="Play", action="PLAY"
+                size=BUTTON_SIZE, screen=vis.screen, text="Play", action="PLAY"
             ),
             Button(
-                screen=vis.screen, pos=(None, 240),
+                size=BUTTON_SIZE, screen=vis.screen,
+                text="Leaderboard", action="LEADERBOARD"
+            ),
+            Button(
+                size=BUTTON_SIZE, screen=vis.screen,
                 text="Exit", action="QUIT_APP"
             )
         ]
@@ -141,6 +146,7 @@ class Menu:
                     vis.gameplay.player.toggle_invencibility()
                     return
                 elif btn.action_value == "CHEAT_SKIP":
+                    vis.maze.player_ctrl.game_started = False
                     vis.state = "GAME_PLAY"
                     vis.maze_surface.fill((0, 0, 0))
                     vis.gameplay.next_level()
@@ -232,14 +238,16 @@ class Menu:
 
     def draw_user_selection(self) -> None:
         vis = self.vis
+        wx, wy = vis.screen.get_size()
+        centerx = wx // 2
+
         text = self.font.render("Enter username", True, TILE_COLOR)
-        text_rect = text.get_rect(centerx=vis.screen.get_rect().centerx, y=80)
+        text_rect = text.get_rect(centerx=centerx, y=250)
         vis.screen.blit(text, text_rect)
 
         text_box_size = (150, 40)
         tx, ty = text_box_size
-        wx, wy = vis.screen.get_size()
-        self.rect = pygame.Rect(wx // 2 - tx // 2, 120, tx, ty)
+        self.rect = pygame.Rect(centerx - tx // 2, 300, tx, ty)
 
         pygame.draw.rect(vis.screen, (60, 60, 60), self.rect)
         color = (255, 255, 255) if self.active else (100, 100, 100)
@@ -252,16 +260,25 @@ class Menu:
 
     def draw_main_menu(self) -> None:
         vis = self.vis
-
         vis.screen.fill((50, 50, 50))
 
+        screen_w, screen_h = vis.screen.get_size()
+        centerx = screen_w // 2
+        center_y = screen_h // 2
+
         text_surf = self.title_font.render("Pac-Man", True, TILE_COLOR)
-        text_rect = text_surf.get_rect(
-            centerx=vis.screen.get_rect().centerx, y=10
-        )
+        text_rect = text_surf.get_rect(centerx=centerx, y=50)
         vis.screen.blit(text_surf, text_rect)
 
         self.draw_user_selection()
+
+        btn_width = BUTTON_SIZE[0]
+        popup_x = centerx - btn_width // 2
+        btn_start_y = center_y - 20
+
+        for i, btn in enumerate(self.menu_buttons):
+            btn.rect.x = popup_x
+            btn.rect.y = btn_start_y + i * 110
 
         mouse_pos = pygame.mouse.get_pos()
         for btn in self.menu_buttons:

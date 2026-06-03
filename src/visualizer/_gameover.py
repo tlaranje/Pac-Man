@@ -30,7 +30,8 @@ class GameOver():
                 action="NEXT_LEVEL"
             ),
             Button(
-                screen=vis.screen, pos=(None, 170), text=b1_text, action="PLAY"
+                screen=vis.screen, pos=(None, 170), text=b1_text,
+                action="PLAY"
             ),
             Button(
                 screen=vis.screen, pos=(None, 230), text="Exit",
@@ -40,23 +41,38 @@ class GameOver():
 
     def handle_game_over_events(self, event: Event) -> None:
         vis = self.vis
+        gameplay = vis.gameplay
 
-        for btn in self.gameover_buttons:
+        levels = gameplay.config.settings.levels
+        if gameplay.map_idx >= len(levels) or self.title == "Game Over":
+            buttons = self.gameover_buttons[1:]
+        else:
+            buttons = self.gameover_buttons
+
+        for btn in buttons:
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
-                    vis.state = 'GAME_PLAY'
+                    gameplay.level_start = None
+                    gameplay.scores.pop()
+                    vis.maze.score = sum(vis.gameplay.scores)
+                    vis.maze.lives = 3
+                    gameplay.reset()
+                    vis.maze.player_ctrl.reset_state()
+                    vis.maze.ghost_renderer.reset_visual_positions()
+                    vis.maze.maze_surface.fill((0, 0, 0))
+                    vis.state = "GAME_PLAY"
                     vis.maze.reset_maze()
                     return
                 elif btn.action_value == "NEXT_LEVEL":
-                    vis.state = "GAME_PLAY"
                     vis.maze_surface.fill((0, 0, 0))
-                    vis.gameplay.next_level()
+                    gameplay.next_level()
                     vis.maze.init_level()
-                    maze_grid = vis.maze.maze_grid[vis.gameplay.map_idx].maze
+                    maze_grid = vis.maze.maze_grid[gameplay.map_idx].maze
                     vis.maze_size = (
                         len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
                     )
                     vis.maze.reset_maze()
+                    vis.state = "GAME_PLAY"
                     return
                 elif btn.action_value == "QUIT_APP":
                     pygame.quit()
@@ -84,8 +100,7 @@ class GameOver():
             (screen_w // 2 - high_score_surface.get_width() // 2, 60)
         )
         levels = gameplay.config.settings.levels
-
-        if gameplay.map_idx + 1 >= len(levels):
+        if gameplay.map_idx + 1 >= len(levels) or self.title == "Game Over":
             buttons = self.gameover_buttons[1:]
         else:
             buttons = self.gameover_buttons
@@ -96,11 +111,11 @@ class GameOver():
 
         for i, btn in enumerate(buttons):
             btn.rect.x = popup_rect.x
-            btn.rect.y = 100 + i * 60
+            btn.rect.y = 110 + i * 60
 
         for button in buttons:
             button.draw()
 
         mouse_pos = pygame.mouse.get_pos()
-        for btn in self.gameover_buttons:
+        for btn in buttons:
             btn.update(mouse_pos)

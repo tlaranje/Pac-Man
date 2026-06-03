@@ -29,3 +29,4 @@ class Visualizer():
         self.state: str = "MAIN_MENU"
 
         self.user_name: str = ""
+        self.leaderboard: list[dict[str, int]]

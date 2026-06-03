@@ -15,6 +15,9 @@ class HudRenderer:
     def draw(self, score: int, lives: int, time: int) -> None:
         screen = self.vis.screen
 
+        level_surf = self.font.render(
+            f"Level: {self.vis.gameplay.map_idx}", True, (255, 255, 255)
+        )
         high_score_surf = self.font.render(
             f"High Score: {score}", True, (255, 255, 255)
         )
@@ -42,4 +45,5 @@ class HudRenderer:
 
         screen.blit(lives_surf, (live_x, 10))
         screen.blit(high_score_surf, (high_x, 10))
+        screen.blit(level_surf, (high_x, 30))
         screen.blit(time_surf, (time_x, 10))
