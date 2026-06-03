@@ -76,10 +76,14 @@ class Menu:
             ),
             Button(
                 screen=self.pause_surface, pos=(20, 80),
-                text="Main Menu", action="RMain"
+                text="Restart", action="RESTART"
             ),
             Button(
                 screen=self.pause_surface, pos=(20, 140),
+                text="Main Menu", action="RMain"
+            ),
+            Button(
+                screen=self.pause_surface, pos=(20, 200),
                 text="Exit", action="QUIT_APP"
             ),
         ]
@@ -107,6 +111,15 @@ class Menu:
                 if btn.action_value == "PLAY":
                     vis.state = 'GAME_PLAY'
                     return
+                elif btn.action_value == "RESTART":
+                    vis.maze.score = 0
+                    vis.maze.lives = 3
+                    vis.gameplay.reset()
+                    vis.maze.player_ctrl.reset_state()
+                    vis.maze.ghost_renderer.reset_visual_positions()
+                    vis.maze.maze_surface.fill((0, 0, 0))
+                    vis.state = "GAME_PLAY"
+                    vis.maze.reset_maze()
                 elif btn.action_value == "RMain":
                     vis.state = 'MAIN_MENU'
                     vis.maze.handle_player_death(0, True)
@@ -136,13 +149,7 @@ class Menu:
                     vis.maze_size = (
                         len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
                     )
-                    vis.renderer.draw_walls(maze_grid)
-                    vis.renderer.draw_pacgums(
-                        vis.maze.gameplay.pacgums_maps[
-                            vis.maze.gameplay.map_idx
-                        ],
-                        vis.maze.fruit_sprites
-                    )
+                    vis.maze.reset_maze()
                     return
                 elif btn.action_value == "CHEAT_FREEZE":
                     vis.gameplay.toggle_freeze_ghosts()
@@ -193,16 +200,8 @@ class Menu:
                         return
 
                     vis.user_name = username
+                    vis.maze.reset_maze()
                     vis.state = 'GAME_PLAY'
-                    vis.renderer.draw_walls(
-                        vis.maze.maze_grid[vis.gameplay.map_idx].maze
-                    )
-                    vis.renderer.draw_pacgums(
-                        vis.maze.gameplay.pacgums_maps[
-                            vis.maze.gameplay.map_idx
-                        ],
-                        vis.maze.fruit_sprites
-                    )
                     return
                 elif btn.action_value == "QUIT_APP":
                     pygame.quit()

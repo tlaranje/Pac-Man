@@ -113,7 +113,7 @@ class PacManGhost(PacManEntity):
         self.last_move: Any
         self.ghost_angle: int = 0
         self.is_scared: bool = False
-        self.last_death = None
+        self.last_death: int | None = None
 
     def die(self) -> None:
         self.last_death = pygame.time.get_ticks()

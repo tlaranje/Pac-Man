@@ -2,6 +2,7 @@ from ._ghost_renderer import GhostRenderer
 from ._pacgum import PacgumController
 from ._player import PlayerController
 from typing import TYPE_CHECKING
+from ._hud import HudRenderer
 from pygame import Surface
 from pygame import Event
 import pygame
@@ -36,6 +37,8 @@ class Maze:
         self.ghosts_frames: list[Surface] = []
         self.fruit_sprites: list[Surface] = []
         self.scared_ghosts_sprites: list[Surface] = []
+        self.end_ghosts_sprites: list[Surface] = []
+        self.dead_ghosts_sprites: list[Surface] = []
 
         # Game state
         self.score: int = 0
@@ -48,10 +51,21 @@ class Maze:
         self.ghost_renderer = GhostRenderer(visualizer)
         self.pacgum_ctrl = PacgumController(visualizer)
 
-        from ._hud import HudRenderer
         self.hud = HudRenderer(visualizer)
 
         self.init_level()
+
+    def reset_maze(self) -> None:
+        vis = self.vis
+        vis.renderer.draw_walls(
+            vis.maze.maze_grid[vis.gameplay.map_idx].maze
+        )
+        vis.renderer.draw_pacgums(
+            vis.maze.gameplay.pacgums_maps[
+                vis.maze.gameplay.map_idx
+            ],
+            vis.maze.fruit_sprites
+        )
 
     # Level setup
     def init_level(self) -> None:
@@ -103,13 +117,7 @@ class Maze:
             g.reset_position()
 
         self.maze_surface.fill((0, 0, 0))
-        self.vis.renderer.draw_walls(
-            self.maze_grid[self.gameplay.map_idx].maze
-        )
-        self.vis.renderer.draw_pacgums(
-            self.gameplay.pacgums_maps[self.gameplay.map_idx],
-            self.fruit_sprites,
-        )
+        self.vis.maze.reset_maze()
 
         self.ghost_renderer.reset_visual_positions()
 

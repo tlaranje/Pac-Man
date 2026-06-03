@@ -27,11 +27,7 @@ class Manager:
         vis.maze_size = (
             len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
         )
-        renderer.draw_walls(maze_grid)
-        renderer.draw_pacgums(
-            maze.gameplay.pacgums_maps[maze.gameplay.map_idx],
-            maze.fruit_sprites
-        )
+        maze.reset_maze()
 
         clock: pygame.time.Clock = pygame.time.Clock()
         while True:
@@ -67,11 +63,7 @@ class Manager:
             elif state == "GAME_OVER":
                 game_over.draw_game_over()
             elif state == 'PAUSE':
-                renderer.draw_walls(maze.maze_grid[vis.gameplay.map_idx].maze)
-                renderer.draw_pacgums(
-                    maze.gameplay.pacgums_maps[maze.gameplay.map_idx],
-                    maze.fruit_sprites
-                )
+                maze.reset_maze()
                 menu.draw_pause_menu()
 
             pygame.display.flip()

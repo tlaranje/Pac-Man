@@ -40,15 +40,7 @@ class GameOver():
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
                     vis.state = 'GAME_PLAY'
-                    vis.renderer.draw_walls(
-                        vis.maze.maze_grid[vis.gameplay.map_idx].maze
-                    )
-                    vis.renderer.draw_pacgums(
-                        vis.maze.gameplay.pacgums_maps[
-                            vis.maze.gameplay.map_idx
-                        ],
-                        vis.maze.fruit_sprites
-                    )
+                    vis.maze.reset_maze()
                     return
                 elif btn.action_value == "QUIT_APP":
                     vis.state = "MAIN_MENU"

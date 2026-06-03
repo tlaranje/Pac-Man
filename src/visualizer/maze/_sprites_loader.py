@@ -8,7 +8,7 @@ class SpriteLoader:
 
     def load_frames(
         self, is_fruit: bool = False, num_frames: int = 1,
-        pos: int = 0, start: int = 0
+        pos: int = 0, start: int = 0, dir_key: str = "0"
     ) -> Any:
         try:
             spritesheet = pygame.image.load(
@@ -24,7 +24,7 @@ class SpriteLoader:
         base_column = 16 * pos
         background_color = spritesheet.get_at((0, base_column))
 
-        direcoes = ["0"] if is_fruit else ["D", "S", "A", "W"]
+        direcoes = [dir_key] if is_fruit else ["D", "S", "A", "W"]
         frames_dict: Any = {}
         current_x = start * 16
 
