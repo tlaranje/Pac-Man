@@ -235,14 +235,5 @@ class GameOver():
         for btn in buttons:
             btn.update(mouse_pos)
 
-        # pygame.draw.aaline(
-        #     vis.screen, pygame.Color("red"), (screen_w // 2, 0),
-        #     (screen_w // 2, screen_h)
-        # )
-        # pygame.draw.aaline(
-        #     vis.screen, pygame.Color("red"), (0, screen_h // 2),
-        #     (screen_w, screen_h // 2)
-        # )
-
         if self.show_error:
             self.draw_error_popup("Empty username!")

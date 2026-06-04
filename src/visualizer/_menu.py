@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 BUTTON_SIZE = (250, 80)
 SW, SH = SCREEN_SIZE
-INS_SIZE = (500, 500)
+INS_SIZE = (1000, 1000)
 CHEAT_MENU_SIZE = (250, 390)
 PAUSE_MENU_SIZE = (250, 270)
 
@@ -141,7 +141,6 @@ class Menu:
                     vis.maze.reset_maze()
                 case "RMain":
                     vis.state = "MAIN_MENU"
-                    vis.maze.handle_player_death(0, True)
                 case "QUIT_APP":
                     self._quit()
             return
@@ -196,7 +195,6 @@ class Menu:
                     vis.maze.reset_maze()
                     vis.state = "GAME_PLAY"
                 case "INSTRUCTIONS":
-                    self._ins_bg = vis.screen.copy()
                     vis.state = "INSTRUCTIONS"
                 case "QUIT_APP":
                     self._quit()
@@ -279,9 +277,6 @@ class Menu:
         mouse_pos = pygame.mouse.get_pos()
         close_btm = self.close_button
 
-        if hasattr(self, '_ins_bg'):
-            vis.screen.blit(self._ins_bg, (0, 0))
-
         self.ins_surface.fill((0, 0, 0, 0))
 
         left = SW // 2 - pw // 2
@@ -290,10 +285,37 @@ class Menu:
         rect = Rect(left, top, pw, ph)
         RoundRect().draw(self.ins_surface, rect, b_size=2)
 
-        vis.screen.blit(self.ins_surface, (0, 0))
-
-        close_btm.screen = vis.screen
-        close_btm.rect.x = left
-        close_btm.rect.y = top
+        close_btm.screen = self.ins_surface
+        close_btm.rect.x = left + pw // 2 - close_btm.rect.width // 2
+        close_btm.rect.y = top + ph - close_btm.rect.height - 20
         close_btm.update(mouse_pos)
         close_btm.draw()
+
+        t_surf = vis.sub_title_font.render("Instructions", True, TILE_COLOR)
+
+        t_w, t_h = vis.sub_title_font.size("Instructions")
+
+        with open("INSTRUCTIONS.txt", "r") as fd:
+            text = fd.read()
+
+        ins_surf = vis.ins_font.render(text, True, TILE_COLOR)
+
+        self.ins_surface.blit(ins_surf, (left + 75, top + 75))
+
+        title_rect = t_surf.get_rect(centerx=left + pw // 2, centery=top)
+        title_rect.inflate_ip(20, -10)
+        RoundRect().draw(self.ins_surface, title_rect, b_size=2)
+        self.ins_surface.blit(
+            t_surf, t_surf.get_rect(center=title_rect.center)
+        )
+
+        vis.screen.blit(self.ins_surface, (0, 0))
+
+        # pygame.draw.aaline(
+        #     vis.screen, pygame.Color("red"), (SW // 2, 0),
+        #     (SW // 2, SH)
+        # )
+        # pygame.draw.aaline(
+        #     vis.screen, pygame.Color("red"), (0, SH // 2),
+        #     (SW, SH // 2)
+        # )

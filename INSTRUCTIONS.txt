@@ -1,11 +1,8 @@
-PACMAN
-
 Launching the game
 ------------------
 Run:
 
 ./dist/pacman
-
 Controls
 --------
 W - Move up

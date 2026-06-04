@@ -53,3 +53,11 @@ class Visualizer():
         self.text_box_font = pygame.font.Font(
             "assets/fonts/Rajdhani-Bold.ttf", 30
         )
+
+        self.sub_title_font = pygame.font.Font(
+            "assets/fonts/Rajdhani-Bold.ttf", 60
+        )
+
+        self.ins_font = pygame.font.Font(
+            "assets/fonts/Rajdhani-Bold.ttf", 30
+        )
