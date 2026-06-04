@@ -5,6 +5,7 @@ from ._gameover import GameOver
 from ._menu import Menu
 from ._window import Window
 from pygame import Surface
+import json
 import pygame
 
 
@@ -30,7 +31,8 @@ class Visualizer():
         self.state: str = "MAIN_MENU"
 
         self.user_name: str = ""
-        self.leaderboard: list[dict[str, int]] = []
+        with open(self.config.settings.highscore_filename, "r") as fd:
+            self.leaderboard: list[dict[str, int]] = json.load(fd)
 
         self.title_font = pygame.font.Font(
             "assets/fonts/Rajdhani-Bold.ttf", 130
