@@ -8,8 +8,6 @@ PacGumsMap = list[list[tuple[bool, str]]]
 
 DEFAULT_WIDTH: int = 20
 DEFAULT_HEIGHT: int = 20
-DEFAULT_START_X: int = 0
-DEFAULT_START_Y: int = 0
 
 
 @dataclass
@@ -21,8 +19,6 @@ class PacManLevel:
     """
     width: int = DEFAULT_WIDTH
     height: int = DEFAULT_HEIGHT
-    start_x: int = DEFAULT_START_X
-    start_y: int = DEFAULT_START_Y
 
 
 DEFAULT_HIGHSCORE_FILENAME: str = "scores.json"
@@ -115,7 +111,7 @@ class PacManConfigModel:
         Returns:
             Validated non-negative integer.
         """
-        v = data.get(field, default)
+        v = data.get(field, None)
         if not isinstance(v, int) or v < 0:
             self._warning(field, v, default)
             return default
@@ -133,7 +129,7 @@ class PacManConfigModel:
         Returns:
             Validated positive integer.
         """
-        v = data.get(field, default)
+        v = data.get(field, None)
         if not isinstance(v, int) or v <= 0:
             self._warning(field, v, default)
             return default
@@ -151,7 +147,7 @@ class PacManConfigModel:
         Returns:
             Validated integer.
         """
-        v = data.get(field, default)
+        v = data.get(field, None)
         if not isinstance(v, int):
             self._warning(field, v, default)
             return default
@@ -169,7 +165,7 @@ class PacManConfigModel:
         Returns:
             Validated non-empty string.
         """
-        v = data.get(field, default)
+        v = data.get(field, None)
         if not isinstance(v, str) or not v:
             self._warning(field, v, default)
             return default
@@ -187,8 +183,7 @@ class PacManConfigModel:
         """
         v = data.get("levels", None)
         if not isinstance(v, list) or len(v) < 10:
-            if v is not None:
-                self._warning("levels", v, DEFAULT_LEVELS)
+            self._warning("levels", v, DEFAULT_LEVELS)
             return DEFAULT_LEVELS
         levels = []
         for i, level in enumerate(v):
@@ -214,7 +209,7 @@ class PacManConfigModel:
         Returns:
             Validated integer within bounds.
         """
-        v = data.get(field, default)
+        v = data.get(field, None)
         if not isinstance(v, int) or not (low <= v <= high):
             self._warning(field, v, default)
             return default
@@ -236,11 +231,5 @@ class PacManConfigModel:
         )
         level.height = self._parse_bounded_int(
             data, "height", DEFAULT_HEIGHT, 10, 33
-        )
-        level.start_x = self._parse_bounded_int(
-            data, "start_x", DEFAULT_START_X, 0, level.width - 1
-        )
-        level.start_y = self._parse_bounded_int(
-            data, "start_y", DEFAULT_START_Y, 0, level.height - 1
         )
         return level

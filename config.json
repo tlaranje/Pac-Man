@@ -1,9 +1,2 @@
-{
-    "levels": [
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10},
-        {"width": 10, "height": 10}
-    ],
-    "pacgum": 0,
-    "level_max_time": 90
-}
+[
+]

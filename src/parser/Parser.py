@@ -51,7 +51,10 @@ class PacManConfig:
             content: str = re.sub(
                 r"^\s*#.*$", "", file.read(), flags=re.MULTILINE
             )
-            data = json.loads(content)
+            try:
+                data = json.loads(content)
+            except Exception:
+                data = {}
 
         if not isinstance(data, dict):
             print(
@@ -72,11 +75,9 @@ class PacManConfig:
         maps: list[PacManMap] = []
         for i, level in enumerate(self.settings.levels):
             size: tuple[int, int] = (level.width, level.height)
-            start_position: tuple[int, int] = (level.start_x, level.start_y)
             maps.append(
                 MazeGenerator(
                     size=size,
-                    entry_cell=start_position,
                     perfect=False,
                     seed=self.settings.seeds[i]
                 )
