@@ -4,6 +4,7 @@ from src.utils import RoundRect
 from ._button import Button
 from pygame import Rect
 import pygame
+import json
 import sys
 
 if TYPE_CHECKING:
@@ -211,6 +212,8 @@ class Menu:
                     return
                 case "INSTRUCTIONS":
                     vis.state = "INSTRUCTIONS"
+                case "LEADERBOARD":
+                    vis.state = "LEADERBOARD"
                 case "QUIT_APP":
                     self._quit()
             return
@@ -315,7 +318,7 @@ class Menu:
 
         ins_surf = vis.ins_font.render(text, True, TILE_COLOR)
 
-        self.ins_surface.blit(ins_surf, (left + 75, top + 75))
+        self.ins_surface.blit(ins_surf, (left + 100, top + 100))
 
         title_rect = t_surf.get_rect(centerx=left + pw // 2, centery=top)
         title_rect.inflate_ip(20, -10)
@@ -326,11 +329,52 @@ class Menu:
 
         vis.screen.blit(self.ins_surface, (0, 0))
 
-        # pygame.draw.aaline(
-        #     vis.screen, pygame.Color("red"), (SW // 2, 0),
-        #     (SW // 2, SH)
-        # )
-        # pygame.draw.aaline(
-        #     vis.screen, pygame.Color("red"), (0, SH // 2),
-        #     (SW, SH // 2)
-        # )
+    def draw_leaderboard(self) -> None:
+        vis = self.vis
+        pw, ph = INS_SIZE
+        mouse_pos = pygame.mouse.get_pos()
+        close_btm = self.close_button
+
+        self.ins_surface.fill((0, 0, 0, 0))
+
+        left = SW // 2 - pw // 2
+        top = SH // 2 - ph // 2
+
+        rect = Rect(left, top, pw, ph)
+        RoundRect().draw(self.ins_surface, rect, b_size=2)
+
+        close_btm.screen = self.ins_surface
+        close_btm.rect.x = left + pw // 2 - close_btm.rect.width // 2
+        close_btm.rect.y = top + ph - close_btm.rect.height - 20
+        close_btm.update(mouse_pos)
+        close_btm.draw()
+
+        t_surf = vis.sub_title_font.render("Leaderboard", True, TILE_COLOR)
+
+        t_w, t_h = vis.sub_title_font.size("Leaderboard")
+
+        text: list[str] = []
+
+        try:
+            with open("scores.json", "r") as fd:
+                data = json.load(fd)
+            for i, player in enumerate(data, start=1):
+                name, score = next(iter(player.items()))
+                text.append(f"{i} - {name}: {score}")
+        except FileNotFoundError:
+            output = ""
+
+        output = "\n".join(text) if text else (
+            "No scores yet. Play the game to get on the leaderboard!")
+        ins_surf = vis.ins_font.render(output, True, TILE_COLOR)
+
+        self.ins_surface.blit(ins_surf, (left + 100, top + 100))
+
+        title_rect = t_surf.get_rect(centerx=left + pw // 2, centery=top)
+        title_rect.inflate_ip(20, -10)
+        RoundRect().draw(self.ins_surface, title_rect, b_size=2)
+        self.ins_surface.blit(
+            t_surf, t_surf.get_rect(center=title_rect.center)
+        )
+
+        vis.screen.blit(self.ins_surface, (0, 0))

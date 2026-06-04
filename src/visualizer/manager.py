@@ -57,6 +57,11 @@ class Manager:
                     if close_btn.is_clicked(event) and \
                        close_btn.action_value == "CLOSE":
                         vis.state = "MAIN_MENU"
+                elif state == "LEADERBOARD":
+                    close_btn = menu.close_button
+                    if close_btn.is_clicked(event) and \
+                       close_btn.action_value == "CLOSE":
+                        vis.state = "MAIN_MENU"
                 elif state == "PAUSE":
                     menu.handle_pause_menu_events(event)
                 elif state == "GAME_OVER":
@@ -66,6 +71,8 @@ class Manager:
                 menu.draw_main_menu()
             elif state == "INSTRUCTIONS":
                 menu.draw_instructions()
+            elif state == "LEADERBOARD":
+                menu.draw_leaderboard()
             elif state == "GAME_PLAY":
                 maze.move_player_ghosts()
                 if menu.cheat_menu_open:
