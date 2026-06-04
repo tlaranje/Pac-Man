@@ -45,6 +45,13 @@ class GameOver():
         file_name = vis.gameplay.config.settings.highscore_filename
 
         vis.leaderboard.append({vis.user_name: vis.maze.score})
+        vis.leaderboard.sort(
+            key=lambda entry: list(entry.values())[0],
+            reverse=True
+        )
+        if len(vis.leaderboard) > 10:
+            vis.leaderboard.pop()
+
         with open(file_name, "w") as fd:
             fd.write(json.dumps(vis.leaderboard, indent=4))
 
@@ -66,15 +73,7 @@ class GameOver():
         for btn in buttons:
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
-                    username = self.text.strip()
-
-                    if username == "":
-                        self.show_error = True
-                        return
-
-                    vis.user_name = username
                     gameplay.level_start = None
-                    self.save_score()
                     vis.maze.score -= vis.maze.level_score
                     vis.maze.level_score = 0
                     vis.maze.lives = vis.gameplay.config.settings.lives

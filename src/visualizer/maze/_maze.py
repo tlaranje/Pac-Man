@@ -109,10 +109,6 @@ class Maze:
         self.lives = self.gameplay.config.settings.lives
         self.player_ctrl.reset_state()
         self.ghost_renderer.reset_visual_positions()
-        if not is_win:
-            self.level_score = 0
-            self.score = 0
-            self.lives = self.gameplay.config.settings.lives
 
     def handle_player_lose_life(self) -> None:
         self.player_ctrl.reset_state()
