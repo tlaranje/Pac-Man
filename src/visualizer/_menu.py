@@ -45,7 +45,8 @@ class Menu:
         ps = self.pause_surface
 
         self.close_button = self._make_button(
-            vis.screen, "X", "CLOSE", text_size=40, size=(50, 50)
+            vis.screen, "Close", "CLOSE", text_size=30,
+            size=(100, 50), offset_y=1
         )
 
         self.cheat_button = self._make_button(
@@ -189,6 +190,7 @@ class Menu:
                     vis.maze.reset_maze()
                     vis.state = "GAME_PLAY"
                 case "INSTRUCTIONS":
+                    self._ins_bg = vis.screen.copy()
                     vis.state = "INSTRUCTIONS"
                 case "QUIT_APP":
                     self._quit()
@@ -269,6 +271,10 @@ class Menu:
         vis = self.vis
         pw, ph = INS_SIZE
         mouse_pos = pygame.mouse.get_pos()
+        close_btm = self.close_button
+
+        if hasattr(self, '_ins_bg'):
+            vis.screen.blit(self._ins_bg, (0, 0))
 
         self.ins_surface.fill((0, 0, 0, 0))
 
@@ -278,10 +284,10 @@ class Menu:
         rect = Rect(left, top, pw, ph)
         RoundRect().draw(self.ins_surface, rect, b_size=2)
 
-        self.close_button.screen = self.ins_surface
-        self.close_button.rect.x = left + pw
-        self.close_button.rect.y = top
-        self.close_button.draw()
-        self.close_button.update(mouse_pos)
-
         vis.screen.blit(self.ins_surface, (0, 0))
+
+        close_btm.screen = vis.screen
+        close_btm.rect.x = left
+        close_btm.rect.y = top
+        close_btm.update(mouse_pos)
+        close_btm.draw()

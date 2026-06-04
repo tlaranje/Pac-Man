@@ -19,6 +19,7 @@ class Button:
         font: pygame.font.Font | None = None,
         action: str | None = None,
         disabled: bool = False,
+        offset_y: int = 3
     ) -> None:
         self.screen = screen
         self.pos = pos
@@ -29,6 +30,7 @@ class Button:
         )
         self.action_value = action
         self.disabled = disabled
+        self.offset_y = offset_y
 
         raster_rect = pygame.Rect(0, 0, *self.size)
         is_square = size[0] == size[1]
@@ -99,7 +101,9 @@ class Button:
                 )
             else:
                 text_rect = text_surf.get_rect(
-                    center=(draw_rect.centerx, draw_rect.centery - 3)
+                    center=(
+                        draw_rect.centerx, draw_rect.centery - self.offset_y
+                    )
                 )
 
             self.screen.blit(text_surf, text_rect)
