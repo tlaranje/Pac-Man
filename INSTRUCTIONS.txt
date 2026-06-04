@@ -1,0 +1,15 @@
+Controls
+--------
+W - Move up
+A - Move left
+S - Move down
+D - Move right
+
+Configuration
+-------------
+The game requires a JSON configuration file.
+
+Default configuration:
+config.json
+
+Edit the file before launching the game to modify game settings.

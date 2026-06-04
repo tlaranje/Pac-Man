@@ -1,8 +1,10 @@
-import curses
-import time
-import random
-from ..parser import PacManConfig
 from ..models import PacManMap, PacGumsMap
+from src.visualizer._constants import SUPER_TIME
+from ..parser import PacManConfig
+from typing import Any
+from math import ceil
+import random
+import pygame
 
 NORTH: int = 1
 EAST: int = 2
@@ -21,8 +23,22 @@ class PacManEntity:
         self.x: int = x
         self.y: int = y
 
-    def eat(self, objects_map: list[list[bool]]) -> None:
-        objects_map[self.y][self.x] = False
+    def get_possible_moves(self) -> list[str]:
+        possible_moves: list[str] = []
+        cell: int = self.maze[self.y][self.x]
+        if not cell & NORTH:
+            possible_moves.append("N")
+        if not cell & SOUTH:
+            possible_moves.append("S")
+        if not cell & EAST:
+            possible_moves.append("E")
+        if not cell & WEST:
+            possible_moves.append("W")
+        return possible_moves
+
+    def eat(self, objects_map: list[list[tuple[bool, str]]]) -> None:
+        cell_type: str = objects_map[self.y][self.x][1]
+        objects_map[self.y][self.x] = (False, cell_type)
 
     def move(self, direction: str) -> None:
         if direction == "N":
@@ -81,14 +97,76 @@ class PacManGhost(PacManEntity):
     :TODO
     """
 
-    def __init__(self, x: int, y: int, map: PacManMap) -> None:
+    TIME_TO_RESPAWN = 5000
+
+    def __init__(self,
+                 x: int,
+                 y: int,
+                 map: PacManMap) -> None:
         super().__init__(x, y, map)
+        self.spawn_x: int = x
+        self.spawn_y: int = y
+
         self.repeat_move: int = 0
         self.last_diretion: int = 0
-        self.shortest_path: str = ""
-        self.last_chase_x: int = None
-        self.last_chase_y: int = None
-        self.last_move = None
+        self.shortest_path: Any = ""
+        self.last_chase_x: int = 0
+        self.last_chase_y: int = 0
+        self.last_move: Any
+        self.ghost_angle: int = 0
+        self.is_scared: bool = False
+        self.last_death: int | None = None
+
+    def die(self) -> None:
+        self.last_death = pygame.time.get_ticks()
+
+    def is_dead(self) -> bool:
+        if self.last_death is None:
+            return False
+        return pygame.time.get_ticks() - self.last_death < self.TIME_TO_RESPAWN
+
+    def reset_position(self) -> None:
+        self.x = self.spawn_x
+        self.y = self.spawn_y
+        self.shortest_path = ""
+        self.last_chase_x = 0
+        self.last_chase_y = 0
+        self.repeat_move = 0
+        self.last_diretion = 0
+        self.is_scared = False
+
+    def update_ghost_angle(self) -> None:
+        if self.last_diretion == NORTH:
+            self.ghost_angle = 90
+        elif self.last_diretion == SOUTH:
+            self.ghost_angle = 270
+        elif self.last_diretion == WEST:
+            self.ghost_angle = 180
+        elif self.last_diretion == EAST:
+            self.ghost_angle = 0
+
+    def move(self, direction: str) -> None:
+        super().move(direction)
+
+        if direction == "N":
+            self.last_diretion = NORTH
+        elif direction == "S":
+            self.last_diretion = SOUTH
+        elif direction == "E":
+            self.last_diretion = EAST
+        elif direction == "W":
+            self.last_diretion = WEST
+
+        self.update_ghost_angle()
+
+    def move_away(self, direction: str) -> None:
+        possible_moves = [
+            move for move in super().get_possible_moves()
+            if move != direction
+        ]
+        if not possible_moves:
+            return
+        self.move(random.choice(possible_moves))
 
     def move_randomly(self) -> None:
         map = self.maze
@@ -99,6 +177,7 @@ class PacManGhost(PacManEntity):
                 and random.random() > 0.1:
             self.repeat_move -= 1
             self.last_move()
+            self.update_ghost_angle()
             return
 
         self.repeat_move = 4
@@ -126,6 +205,7 @@ class PacManGhost(PacManEntity):
             move[0]()
             self.last_move = move[0]
             self.last_diretion = move[1]
+            self.update_ghost_angle()
 
     def chase_position(self, x: int, y: int) -> None:
         if self.last_chase_x == x and self.last_chase_y == y \
@@ -158,6 +238,95 @@ class PacManGhost(PacManEntity):
         self.map._exitx = save_exitx
         self.map._exity = save_exity
 
+    def run_away(self, x: int, y: int) -> None:
+        self.shortest_path = None
+        save_entryx: int = self.map._entryx
+        save_entryy: int = self.map._entryy
+        save_exitx: int = self.map._exitx
+        save_exity: int = self.map._exity
+
+        self.map._entryx = self.x
+        self.map._entryy = self.y
+        self.map._exitx = x
+        self.map._exity = y
+
+        self.map._find_short_path()
+        if self.map._shortest_path:
+            self.move_away(self.map._shortest_path[0])
+
+        self.map._entryx = save_entryx
+        self.map._entryy = save_entryy
+        self.map._exitx = save_exitx
+        self.map._exity = save_exity
+
+
+class PacManPlayer(PacManEntity):
+    """
+    :TODO
+    """
+    def __init__(self, x: int, y: int, map: PacManMap,
+                 ghosts_map: list[PacManGhost]) -> None:
+        super().__init__(x, y, map)
+        self.ghosts_map: list[PacManGhost] = ghosts_map
+        self.spawn_x: int = x
+        self.spawn_y: int = y
+        self.super_start: int | None = None
+        self.is_invencible: bool = False
+
+    def toggle_invencibility(self) -> None:
+        self.is_invencible = not self.is_invencible
+
+    def turn_on_super(self) -> None:
+        self.super_start = pygame.time.get_ticks()
+        for ghost in self.ghosts_map:
+            if not ghost.is_dead():
+                ghost.is_scared = True
+
+    def is_on_super(self) -> bool:
+        if self.super_start is None:
+            return False
+        return pygame.time.get_ticks() - self.super_start <= SUPER_TIME
+
+    def reset_position(self) -> None:
+        self.x = self.spawn_x
+        self.y = self.spawn_y
+
+    def is_on_ghost(self) -> bool:
+        for ghost in self.ghosts_map:
+            if ghost.is_dead():
+                continue
+            if ghost.x == self.x \
+                    and ghost.y == self.y:
+                return True
+        return False
+
+    def is_dead(self) -> bool:
+        if self.is_invencible:
+            return False
+        if not self.is_on_super():
+            return self.is_on_ghost()
+        for ghost in self.ghosts_map:
+            if ghost.is_dead():
+                continue
+            if ghost.x == self.x \
+                    and ghost.y == self.y \
+                    and (not ghost.is_scared):
+                return True
+        return False
+
+    def eat_ghosts(self) -> int:
+        ghosts_ate: int = 0
+        for ghost in self.ghosts_map:
+            if ghost.is_dead():
+                continue
+            if ghost.x == self.x \
+                    and ghost.y == self.y and ghost.is_scared:
+                ghosts_ate += 1
+                ghost.die()
+                ghost.reset_position()
+
+        return ghosts_ate
+
 
 class PacManGameplay:
     """
@@ -165,7 +334,11 @@ class PacManGameplay:
     """
 
     def __init__(self, config: PacManConfig) -> None:
+        self.config: PacManConfig = config
         self.maps: list[PacManMap] = config.load_maps()
+        self.maps_middle: list[tuple[int, int]] = config.load_maps_middle(
+            self.maps
+        )
         self.maps_count: int = len(self.maps)
         self.pacgums_maps: list[PacGumsMap] = config.load_pacgums(
             self.maps
@@ -173,201 +346,80 @@ class PacManGameplay:
         self.ghosts_maps: list[list[PacManGhost]] = config.load_ghosts(
             self.maps
         )
-        self.player: PacManEntity = None
+        self.player: PacManPlayer
         self.map_idx: int = 0
+        self.chase_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
+        self.freeze_ghosts: bool = False
+        self.level_start: int | None = None
+
+    def toggle_freeze_ghosts(self) -> None:
+        self.freeze_ghosts = not self.freeze_ghosts
+
+    def next_level(self) -> bool:
+        index_map = self.map_idx + 1
+
+        if index_map >= len(self.config.settings.levels):
+            return False
+
+        self.map_idx = index_map
+        self.gameplay_init(self.map_idx)
+
+        return True
+
+    def is_win(self) -> bool:
+        for row in self.pacgums_maps[self.map_idx]:
+            for pacgum in row:
+                if pacgum[0]:
+                    return False
+        return True
+
+    def reset(self) -> None:
+        self.pacgums_maps = self.config.load_pacgums(self.maps)
+        self.ghosts_maps = self.config.load_ghosts(
+            self.maps
+        )
+        self.gameplay_init(self.map_idx)
+
+    def get_level_time(self) -> int:
+        if self.level_start is None:
+            return 0
+        return (pygame.time.get_ticks() - self.level_start)
+
+    def get_level_time_remaining(self) -> int:
+        level_time: int = self.get_level_time()
+        if level_time >= self.config.settings.level_max_time_ms:
+            return 0
+        return ceil(
+            (self.config.settings.level_max_time_ms - level_time) / 1000
+        )
 
     def gameplay_init(self, map_idx: int) -> None:
         if map_idx < 0 or map_idx >= self.maps_count:
             return
         self.map_idx = map_idx
-        x: int = self.maps[map_idx]._entryx
-        y: int = self.maps[map_idx]._entryy
-        self.player = PacManEntity(x, y, self.maps[map_idx])
+        x: int = self.maps_middle[map_idx][0]
+        y: int = self.maps_middle[map_idx][1]
+        self.player = PacManPlayer(
+            x, y, self.maps[map_idx],
+            self.ghosts_maps[self.map_idx]
+        )
 
     def move_ghosts(self) -> None:
-        chasing_moves: list[int] = [0] * len(self.ghosts_maps[self.map_idx])
+        if self.freeze_ghosts:
+            return
         for i, ghost in enumerate(self.ghosts_maps[self.map_idx]):
-            playerx: int = self.player.x
-            playery: int = self.player.y
-            if ghost.is_on_corridor_pos(playerx, playery):
-                chasing_moves[i] = 20
-            if chasing_moves[i] > 0:
-                chasing_moves[i] -= 1
-                ghost.chase_position(playerx, playery)
+            if ghost.is_dead():
+                continue
+            player_x: int = self.player.x
+            player_y: int = self.player.y
+            if ghost.is_scared:
+                self.chase_moves[i] = 0
+                ghost.run_away(player_x, player_y)
+                continue
+            if ghost.is_on_corridor_pos(player_x, player_y):
+                self.chase_moves[i] = 20
+            if self.chase_moves[i] > 0:
+                self.chase_moves[i] -= 1
+                ghost.chase_position(player_x, player_y)
             else:
                 ghost.move_randomly()
-
-
-def render_maze(
-    stdscr,
-    maze: list[list[int]],
-    pacgums_map,
-    player=None,
-    ghosts: list = None
-) -> None:
-
-    rows = len(maze)
-    cols = len(maze[0])
-
-    y_offset = 0
-
-    # Precompute ghost positions for fast lookup
-    ghost_positions = {
-        (g.x, g.y)
-        for g in ghosts
-    } if ghosts else set()
-
-    # ------------------------
-    # TOP BORDER
-    # ------------------------
-    line = ""
-
-    for x in range(cols):
-        cell = maze[0][x]
-
-        if cell & (1 << 0):
-            line += "+---"
-        else:
-            line += "+   "
-
-    line += "+"
-
-    stdscr.addstr(y_offset, 0, line)
-    y_offset += 1
-
-    # ------------------------
-    # MAZE BODY
-    # ------------------------
-    for y in range(rows):
-
-        # vertical walls + content
-        line = ""
-
-        for x in range(cols):
-
-            cell = maze[y][x]
-
-            # west wall
-            if cell & (1 << 3):
-                line += "|"
-            else:
-                line += " "
-
-            # PLAYER
-            if player is not None and player.x == x and player.y == y:
-                line += " P "
-
-            # GHOST
-            elif (x, y) in ghost_positions:
-                line += " G "
-
-            # PACGUM
-            elif pacgums_map[y][x]:
-                line += " @ "
-
-            # EMPTY
-            else:
-                line += "   "
-
-        # east wall
-        last = maze[y][-1]
-
-        if last & (1 << 1):
-            line += "|"
-
-        stdscr.addstr(y_offset, 0, line)
-        y_offset += 1
-
-        # ------------------------
-        # SOUTH WALLS
-        # ------------------------
-        line = ""
-
-        for x in range(cols):
-
-            cell = maze[y][x]
-
-            line += "+"
-
-            if cell & (1 << 2):
-                line += "---"
-            else:
-                line += "   "
-
-        line += "+"
-
-        stdscr.addstr(y_offset, 0, line)
-        y_offset += 1
-
-
-# ----------------------------
-# GAME LOOP
-# ----------------------------
-def main(stdscr):
-
-    curses.cbreak()
-    stdscr.nodelay(True)
-    stdscr.keypad(True)
-    curses.curs_set(0)
-
-    config = PacManConfig("/home/joesanto/Downloads/test.json")
-
-    pacman = PacManGameplay(config)
-    pacman.gameplay_init(0)
-
-    while True:
-
-        # ------------------------
-        # GAME UPDATE
-        # ------------------------
-        pacman.player.eat(
-            pacman.pacgums_maps[0]
-        )
-        pacman.move_ghosts()
-
-        # ------------------------
-        # INPUT
-        # ------------------------
-        key = stdscr.getch()
-
-        if key == ord('w'):
-            pacman.player.move_up()
-
-        elif key == ord('d'):
-            pacman.player.move_right()
-
-        elif key == ord('s'):
-            pacman.player.move_down()
-
-        elif key == ord('a'):
-            pacman.player.move_left()
-
-        elif key == ord('q'):
-            break
-
-        # ------------------------
-        # RENDER
-        # ------------------------
-        stdscr.clear()
-
-        render_maze(
-            stdscr,
-            pacman.maps[0].maze,
-            pacman.pacgums_maps[0],
-            pacman.player,
-            pacman.ghosts_maps[0]
-        )
-
-        stdscr.refresh()
-
-        # ------------------------
-        # FPS CONTROL
-        # ------------------------
-        time.sleep(0.7)
-
-
-# ----------------------------
-# RUN
-# ----------------------------
-if __name__ == "__main__":
-    curses.wrapper(main)

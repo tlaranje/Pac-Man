@@ -1,9 +1,10 @@
+import random
 from typing import Any
 from dataclasses import dataclass
 from mazegenerator import MazeGenerator
 
 PacManMap = MazeGenerator
-PacGumsMap = list[list[bool]]
+PacGumsMap = list[list[tuple[bool, str]]]
 
 DEFAULT_WIDTH: int = 20
 DEFAULT_HEIGHT: int = 20
@@ -19,8 +20,10 @@ class PacManLevel:
     start_y: int = DEFAULT_START_Y
 
 
-DEFAULT_HIGHSCORE_FILENAME: str = "output_test.txt"
-DEFAULT_LEVELS: list[PacManLevel] = [PacManLevel()]
+DEFAULT_HIGHSCORE_FILENAME: str = "scores.json"
+DEFAULT_LEVELS: list[PacManLevel] = [
+    PacManLevel() for _ in range(10)
+]
 DEFAULT_LIVES: int = 3
 DEFAULT_PACGUM: int = 42
 DEFAULT_POINTS_PER_PACGUM: int = 10
@@ -51,7 +54,7 @@ class PacManConfigModel:
         self.lives = self._parse_positive_int(
             data, "lives", DEFAULT_LIVES
         )
-        self.pacgum = self._parse_positive_int(
+        self.pacgum = self._parse_unsigned_int(
             data, "pacgum", DEFAULT_PACGUM
         )
         self.points_per_pacgum = self._parse_positive_int(
@@ -69,9 +72,14 @@ class PacManConfigModel:
         self.level_max_time = self._parse_positive_int(
             data, "level_max_time", DEFAULT_LEVEL_MAX_TIME
         )
+        self.level_max_time_ms = self.level_max_time * 1000
         self.levels = self._parse_levels(
             data
         )
+        self.seeds = [self.seed] + [
+            random.randint(0, 2**32 - 1)
+            for _ in range(len(self.levels) - 1)
+        ]
 
     @staticmethod
     def _warning(field: str, value: Any, default: Any) -> None:
@@ -79,6 +87,13 @@ class PacManConfigModel:
             f"[Warning] Invalid value \"{value}\" for field \"{field}\". "
             f"Setting to default: \"{default}\"."
         )
+
+    def _parse_unsigned_int(self, data: dict, field: str, default: int) -> int:
+        v = data.get(field, default)
+        if not isinstance(v, int) or v < 0:
+            self._warning(field, v, default)
+            return default
+        return v
 
     def _parse_positive_int(self, data: dict, field: str, default: int) -> int:
         v = data.get(field, default)
@@ -103,7 +118,7 @@ class PacManConfigModel:
 
     def _parse_levels(self, data: dict) -> list:
         v = data.get("levels", None)
-        if not isinstance(v, list) or len(v) == 0:
+        if not isinstance(v, list) or len(v) < 10:
             if v is not None:
                 self._warning("levels", v, DEFAULT_LEVELS)
             return DEFAULT_LEVELS
@@ -126,11 +141,11 @@ class PacManConfigModel:
 
     def _parse_level(self, data: dict) -> PacManLevel:
         level = PacManLevel()
-        level.width = self._parse_positive_int(
-            data, "width", DEFAULT_WIDTH
+        level.width = self._parse_bounded_int(
+            data, "width", DEFAULT_WIDTH, 10, 33
         )
-        level.height = self._parse_positive_int(
-            data, "height", DEFAULT_HEIGHT
+        level.height = self._parse_bounded_int(
+            data, "height", DEFAULT_HEIGHT, 10, 33
         )
         level.start_x = self._parse_bounded_int(
             data, "start_x", DEFAULT_START_X, 0, level.width - 1
