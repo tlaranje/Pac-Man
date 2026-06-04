@@ -74,8 +74,13 @@ class GameOver():
             if btn.is_clicked(event):
                 if btn.action_value == "PLAY":
                     gameplay.level_start = None
-                    vis.maze.score -= vis.maze.level_score
-                    vis.maze.level_score = 0
+                    gameplay.gameplay_init(0)
+                    vis.maze.init_level()
+                    maze_grid = vis.maze.maze_grid[gameplay.map_idx].maze
+                    vis.maze_size = (
+                        len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+                    )
+                    vis.maze.score = 0
                     vis.maze.lives = vis.gameplay.config.settings.lives
                     gameplay.reset()
                     vis.maze.player_ctrl.reset_state()
@@ -85,7 +90,6 @@ class GameOver():
                     vis.maze.reset_maze()
                     return
                 elif btn.action_value == "NEXT_LEVEL":
-                    vis.maze.level_score = 0
                     vis.maze_surface.fill((0, 0, 0))
                     gameplay.next_level()
                     vis.maze.init_level()

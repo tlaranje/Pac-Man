@@ -42,7 +42,6 @@ class Maze:
 
         # Game state
         self.score: int = 0
-        self.level_score: int = 0
         self.lives: int = self.gameplay.config.settings.lives
         self.time: int = 90
         self.is_cheat_mode: bool = False
@@ -164,9 +163,6 @@ class Maze:
             if self.gameplay.player.is_on_ghost():
                 ghosts_ate = self.gameplay.player.eat_ghosts()
                 self.score += (
-                    ghosts_ate * self.gameplay.config.settings.points_per_ghost
-                )
-                self.level_score += (
                     ghosts_ate * self.gameplay.config.settings.points_per_ghost
                 )
         else:
