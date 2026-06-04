@@ -100,7 +100,8 @@ class GameOver():
                     pygame.quit()
                     sys.exit()
 
-        self.handle_text_box_events(event)
+        if gameplay.map_idx + 1 >= len(levels) and self.title == "Win":
+            self.handle_text_box_events(event)
 
     def handle_text_box_events(self, event) -> None:
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -180,7 +181,16 @@ class GameOver():
         gameplay = vis.gameplay
         vis.screen.fill((50, 50, 50))
 
-        self.draw_user_selection()
+        sw, sh = vis.screen.get_size()
+        container_w = 300
+        levels = gameplay.config.settings.levels
+        if gameplay.map_idx + 1 >= len(levels) and self.title == "Win":
+            self.draw_user_selection()
+        else:
+            rect = pygame.Rect(
+                sw // 2 - container_w // 2, 190, container_w, 50
+            )
+            RoundRect().draw(vis.screen, rect, b_size=2)
 
         title_surf = vis.title_font.render(
             self.title, True, TILE_COLOR

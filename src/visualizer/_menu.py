@@ -138,9 +138,10 @@ class Menu:
     def handle_cheat_menu_events(self, event: pygame.event.Event) -> None:
         vis = self.vis
 
-        if self.cheat_button.is_clicked(event):
-            self.cheat_menu_open = not self.cheat_menu_open
-            return
+        if not self.cheat_menu_open:
+            if self.cheat_button.is_clicked(event):
+                self.cheat_menu_open = True
+                return
 
         if not self.cheat_menu_open:
             return

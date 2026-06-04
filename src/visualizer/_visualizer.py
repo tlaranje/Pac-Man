@@ -31,8 +31,11 @@ class Visualizer():
         self.state: str = "MAIN_MENU"
 
         self.user_name: str = ""
-        with open(self.config.settings.highscore_filename, "r") as fd:
-            self.leaderboard: list[dict[str, int]] = json.load(fd)
+        try:
+            with open(self.config.settings.highscore_filename, "r") as fd:
+                self.leaderboard: list[dict[str, int]] = json.load(fd)
+        except FileNotFoundError:
+            self.leaderboard = []
 
         self.title_font = pygame.font.Font(
             "assets/fonts/Rajdhani-Bold.ttf", 130
