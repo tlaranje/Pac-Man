@@ -59,6 +59,8 @@ class Manager:
 
             if state == "MAIN_MENU":
                 menu.draw_main_menu()
+            elif vis.state == "INSTRUCTIONS":
+                menu.draw_instructions()
             elif state == "GAME_PLAY":
                 maze.move_player_ghosts()
                 if menu.cheat_menu_open:

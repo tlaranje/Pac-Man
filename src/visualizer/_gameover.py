@@ -104,7 +104,8 @@ class GameOver():
                     pygame.quit()
                     sys.exit()
 
-        if gameplay.map_idx + 1 >= len(levels) and self.title == "Win":
+        if gameplay.map_idx + 1 >= len(levels) and self.title == "Win" or \
+           self.title == "Game Over":
             self.handle_text_box_events(event)
 
     def handle_text_box_events(self, event) -> None:
@@ -188,7 +189,8 @@ class GameOver():
         sw, sh = vis.screen.get_size()
         container_w = 300
         levels = gameplay.config.settings.levels
-        if gameplay.map_idx + 1 >= len(levels) and self.title == "Win":
+        if gameplay.map_idx + 1 >= len(levels) and self.title == "Win" or \
+           self.title == "Game Over":
             self.draw_user_selection()
         else:
             rect = pygame.Rect(
