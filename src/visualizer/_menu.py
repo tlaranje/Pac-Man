@@ -1,9 +1,10 @@
 from ._constants import TILE_COLOR, TILE_SIZE, SCREEN_SIZE
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from src.utils import RoundRect
 from ._button import Button
 from pygame import Rect
 import pygame
+from pygame import Surface
 import json
 import sys
 
@@ -18,6 +19,12 @@ PAUSE_MENU_SIZE = (250, 270)
 
 
 class Menu:
+    """Main menu, pause menu, and cheat menu controller.
+
+    Manages all menu screens including main menu, pause menu, cheat menu,
+    instructions, and leaderboard display.
+    """
+
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
 
@@ -37,10 +44,27 @@ class Menu:
         self.cheat_button: Button
         self.close_button: Button
 
-    def _make_button(self, screen, text, action, **kwargs) -> Button:
+    def _make_button(self, screen: Surface,
+                     text: str,
+                     action: str, **kwargs: Any) -> Button:
+        """
+        Create and configure a button.
+
+        Args:
+            screen: Target Pygame surface.
+            text: Button label text.
+            action: Action code for the button.
+            **kwargs: Additional button parameters.
+
+        Returns:
+            Configured button object.
+        """
         return Button(screen=screen, text=text, action=action, **kwargs)
 
     def init_buttons(self) -> None:
+        """
+        Initialize all menu buttons.
+        """
         vis = self.vis
         cs = self.cheat_surface
         ps = self.pause_surface
@@ -102,16 +126,31 @@ class Menu:
         ]
 
     def _quit(self) -> None:
+        """
+        Exit the game application.
+        """
         pygame.quit()
         sys.exit()
 
     def _draw_buttons(self, buttons: list[Button]) -> None:
+        """
+        Draw a list of buttons.
+
+        Args:
+            buttons: List of button objects to draw.
+        """
         mouse_pos = pygame.mouse.get_pos()
         for btn in buttons:
             btn.update(mouse_pos)
             btn.draw()
 
     def handle_pause_menu_events(self, event: pygame.event.Event) -> None:
+        """
+        Process pause menu events.
+
+        Args:
+            event: Pygame event to handle.
+        """
         vis = self.vis
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -147,6 +186,12 @@ class Menu:
             return
 
     def handle_cheat_menu_events(self, event: pygame.event.Event) -> None:
+        """
+        Process cheat menu events.
+
+        Args:
+            event: Pygame event to handle.
+        """
         vis = self.vis
 
         if not self.cheat_menu_open:
@@ -186,6 +231,12 @@ class Menu:
             return
 
     def handle_menu_events(self, event: pygame.event.Event) -> None:
+        """
+        Process main menu events.
+
+        Args:
+            event: Pygame event to handle.
+        """
         vis = self.vis
         gameplay = vis.gameplay
 
@@ -219,6 +270,9 @@ class Menu:
             return
 
     def draw_main_menu(self) -> None:
+        """
+        Draw the main menu screen.
+        """
         vis = self.vis
         vis.screen.fill((50, 50, 50))
 
@@ -239,6 +293,9 @@ class Menu:
         self._draw_buttons(self.menu_buttons)
 
     def draw_pause_menu(self) -> None:
+        """
+        Draw the pause menu screen.
+        """
         vis = self.vis
         pw, ph = PAUSE_MENU_SIZE
 
@@ -255,6 +312,9 @@ class Menu:
         vis.screen.blit(self.pause_surface, (0, 0))
 
     def draw_cheat_menu(self) -> None:
+        """
+        Draw the cheat menu screen.
+        """
         vis = self.vis
         pw, ph = CHEAT_MENU_SIZE
 
@@ -290,6 +350,9 @@ class Menu:
         vis.screen.blit(self.cheat_surface, (0, 0))
 
     def draw_instructions(self) -> None:
+        """
+        Draw the instructions screen.
+        """
         vis = self.vis
         pw, ph = INS_SIZE
         mouse_pos = pygame.mouse.get_pos()
@@ -330,6 +393,9 @@ class Menu:
         vis.screen.blit(self.ins_surface, (0, 0))
 
     def draw_leaderboard(self) -> None:
+        """
+        Draw the highscore leaderboard screen.
+        """
         vis = self.vis
         pw, ph = INS_SIZE
         mouse_pos = pygame.mouse.get_pos()

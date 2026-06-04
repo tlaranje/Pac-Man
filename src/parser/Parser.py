@@ -8,12 +8,23 @@ from ..models import PacManMap, PacGumsMap, PacManConfigModel
 
 
 class PacManCLI:
-    """
-    :TODO
+    """Command-line interface parser for Pac-Man game configuration.
+
+    Parses command-line arguments and validates the JSON configuration
+    file path before game initialization.
     """
 
     def __init__(self) -> None:
         def json_file(path: str) -> str:
+            """
+            Validate JSON file path.
+
+            Args:
+                path: File path to validate.
+
+            Returns:
+                Path if valid JSON file, raises error otherwise.
+            """
             file_path: Path = Path(path)
             if file_path.suffix != ".json":
                 raise TypeError("Config must be .json format")
@@ -29,8 +40,10 @@ class PacManCLI:
 
 
 class PacManConfig:
-    """
-    :TODO
+    """Configuration loader that constructs game entities from JSON.
+
+    Reads and parses JSON configuration files, generates mazes,
+    places pacgums, and initializes ghost spawn positions.
     """
 
     def __init__(self, path: str) -> None:
@@ -50,6 +63,12 @@ class PacManConfig:
         self.settings = PacManConfigModel(data)
 
     def load_maps(self) -> list[PacManMap]:
+        """
+        Load and generate all level mazes.
+
+        Returns:
+            List of generated maze objects.
+        """
         maps: list[PacManMap] = []
         for i, level in enumerate(self.settings.levels):
             size: tuple[int, int] = (level.width, level.height)
@@ -60,11 +79,20 @@ class PacManConfig:
                     entry_cell=start_position,
                     perfect=False,
                     seed=self.settings.seeds[i]
-                    )
                 )
+            )
         return maps
 
     def load_pacgums(self, maps: list[PacManMap]) -> list[PacGumsMap]:
+        """
+        Generate pacgum placement for all mazes.
+
+        Args:
+            maps: List of maze objects.
+
+        Returns:
+            List of pacgum maps.
+        """
         pacgums_maps: list[PacGumsMap] = []
         for map in maps:
             corners = self.load_corners(map)
@@ -94,17 +122,44 @@ class PacManConfig:
         return pacgums_maps
 
     def load_corners(self, map: PacManMap) -> list[tuple[int, int]]:
+        """
+        Get the four corner positions of a maze.
+
+        Args:
+            map: Maze object.
+
+        Returns:
+            List of four corner coordinate tuples.
+        """
         return [
-                (0, 0),
-                (map._width - 1, 0),
-                (0, map._height - 1),
-                (map._width - 1, map._height - 1)
-            ]
+            (0, 0),
+            (map._width - 1, 0),
+            (0, map._height - 1),
+            (map._width - 1, map._height - 1)
+        ]
 
     def load_maps_middle(self, maps: list[PacManMap]) -> list[tuple[int, int]]:
+        """
+        Find center positions for all mazes.
+
+        Args:
+            maps: List of maze objects.
+
+        Returns:
+            List of center coordinate tuples.
+        """
         return [self._find_closest_walkable_center(map) for map in maps]
 
     def _find_closest_walkable_center(self, map: PacManMap) -> tuple[int, int]:
+        """
+        Find the closest walkable cell to maze center.
+
+        Args:
+            map: Maze object.
+
+        Returns:
+            Closest walkable center coordinate tuple.
+        """
         center_x = map._width // 2
         center_y = map._height // 2
 
@@ -122,6 +177,15 @@ class PacManConfig:
 
     def load_ghosts(self,
                     maps: list[PacManMap]) -> list[list]:
+        """
+        Create ghost entities at maze corners.
+
+        Args:
+            maps: List of maze objects.
+
+        Returns:
+            List of ghost lists, one per maze.
+        """
         from ..gameplay import PacManGhost
         ghosts_maps: list[list[PacManGhost]] = []
 

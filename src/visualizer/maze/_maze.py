@@ -12,6 +12,12 @@ if TYPE_CHECKING:
 
 
 class Maze:
+    """Maze game state manager and event handler.
+
+    Manages maze rendering, player and ghost movement, collision detection,
+    score updates, and game state transitions.
+    """
+
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
 
@@ -56,6 +62,9 @@ class Maze:
         self.init_level()
 
     def reset_maze(self) -> None:
+        """
+        Reset maze state and rendering.
+        """
         vis = self.vis
         vis.renderer.draw_walls(
             vis.maze.maze_grid[vis.gameplay.map_idx].maze
@@ -69,6 +78,9 @@ class Maze:
 
     # Level setup
     def init_level(self) -> None:
+        """
+        Initialize the current level for play.
+        """
         self.maze_grid = self.vis.gameplay.maps
 
         map_idx = self.gameplay.map_idx
@@ -87,19 +99,38 @@ class Maze:
 
     # Cheat helpers
     def give_extra_lives(self) -> None:
+        """
+        Increase the player's life count by one.
+        """
         self.lives += 1
 
     def increase_player_speed(self) -> None:
+        """
+        Increase the player's movement speed.
+        """
         self.player_ctrl.increase_speed()
 
     def decrease_player_speed(self) -> None:
+        """
+        Decrease the player's movement speed.
+        """
         self.player_ctrl.decrease_speed()
 
     def toggle_cheat_mode(self) -> None:
+        """
+        Toggle cheat mode on or off.
+        """
         self.is_cheat_mode = not self.is_cheat_mode
 
     # Death / life handling
     def handle_player_death(self, score: int, is_win: bool = False) -> None:
+        """
+        Handle player death or level completion.
+
+        Args:
+            score: Final score for the level.
+            is_win: True if level was won, False if lost.
+        """
         vis = self.vis
         vis.state = "GAME_OVER"
         vis.game_over.title = "Game Over" if not is_win else "Win"
@@ -109,6 +140,9 @@ class Maze:
         self.ghost_renderer.reset_visual_positions()
 
     def handle_player_lose_life(self) -> None:
+        """
+        Process a single lost life.
+        """
         self.player_ctrl.reset_state()
 
         self.gameplay.player.reset_position()
@@ -122,6 +156,12 @@ class Maze:
 
     # Event handling
     def handle_game_play_events(self, event: Event) -> None:
+        """
+        Process gameplay events.
+
+        Args:
+            event: Pygame event to handle.
+        """
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.vis.state = "PAUSE"
@@ -135,6 +175,9 @@ class Maze:
 
     # Main game loop tick
     def move_player_ghosts(self) -> None:
+        """
+        Update and move all game entities.
+        """
         vis = self.vis
         vis.screen.blit(self.maze_surface, (0, 0))
 

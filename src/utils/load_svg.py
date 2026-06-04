@@ -6,6 +6,16 @@ import re
 
 
 def load_svg(path: str, rect: pygame.Rect) -> pygame.Surface:
+    """
+    Load and render an SVG file to a Pygame surface.
+
+    Args:
+        path: Path to the SVG file.
+        rect: Target rectangle for rendering.
+
+    Returns:
+        Pygame surface containing the rendered SVG.
+    """
     with open(path, "rb") as f:
         svg_data = f.read().decode("utf-8")
 

@@ -7,10 +7,26 @@ if TYPE_CHECKING:
 
 
 class PacgumController:
+    """Pacgum consumption and score update logic.
+
+    Detects and processes pacgum consumption at player position,
+    updating visual state and player score.
+    """
+
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
 
     def try_eat(self, maze_surface: pygame.Surface, score: int) -> int:
+        """
+        Attempt to consume pacgums at player position.
+
+        Args:
+            maze_surface: Current maze rendering surface.
+            score: Current player score.
+
+        Returns:
+            Updated score after consumption.
+        """
         vis = self.vis
         gameplay = vis.gameplay
         px = gameplay.player.x

@@ -7,6 +7,12 @@ if TYPE_CHECKING:
 
 
 class HudRenderer:
+    """HUD (Heads-Up Display) renderer for score, lives, and time.
+
+    Displays game statistics including current score, remaining lives,
+    and time remaining in the level.
+    """
+
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
         self.font = pygame.font.Font(
@@ -14,6 +20,17 @@ class HudRenderer:
         )
 
     def draw(self, score: int, lives: int, time: int) -> None:
+        """
+        Draw a rounded rectangle on the surface.
+
+        Args:
+            surface: Target Pygame surface.
+            rect: Rectangle defining position and size.
+            color: RGB color tuple.
+            radius: Corner radius in pixels.
+            b_size: Border size.
+            b_color: Border color tuple.
+        """
         screen = self.vis.screen
 
         level_surf = self.font.render(

@@ -3,6 +3,12 @@ import pygame
 
 
 class SpriteLoader:
+    """Animation sprite loader from sprite sheets.
+
+    Loads and parses sprite sheets to extract animation frames for
+    players, ghosts, and fruit objects.
+    """
+
     def __init__(self) -> None:
         self.spritesheet_path: str = "assets/img/pacman.png"
 
@@ -10,6 +16,16 @@ class SpriteLoader:
         self, is_fruit: bool = False, num_frames: int = 1,
         pos: int = 0, start: int = 0, dir_key: str = "0"
     ) -> Any:
+        """
+        Load animation frames from image files.
+
+        Args:
+            frame_names: List of frame names to load.
+            size: Frame size tuple.
+
+        Returns:
+            List of loaded animation frames.
+        """
         try:
             spritesheet = pygame.image.load(
                 self.spritesheet_path

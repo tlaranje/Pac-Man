@@ -4,10 +4,28 @@ from typing import Any
 
 
 class RoundRect:
+    """Utility for drawing rounded rectangles in Pygame.
+
+    Provides methods to draw rectangles with rounded corners
+    and optional borders
+    using circle rendering and scaling techniques.
+    """
+
     def draw(
         self, surface: Surface, rect: Rect, color: Any = (50, 50, 50),
         radius: Any = 0.4, b_size: int = 0, b_color: Any = (255, 255, 255)
     ) -> None:
+        """
+        Draw a rounded rectangle on the surface.
+
+        Args:
+            surface: Target Pygame surface.
+            rect: Rectangle defining position and size.
+            color: RGB color tuple.
+            radius: Corner radius in pixels.
+            b_size: Border size.
+            b_color: Border color tuple.
+        """
         if b_size > 0:
             border_size = b_size * 2
             f_width = rect.width + border_size
@@ -22,6 +40,15 @@ class RoundRect:
         self, surface: Surface, rect: Rect, color: Any = (50, 50, 50),
         radius: Any = 0.4,
     ) -> Rect:
+        """
+        Draw a single rounded rectangle corner.
+
+        Args:
+            surface: Target Pygame surface.
+            rect: Rectangle defining position and size.
+            color: RGB color tuple.
+            radius: Corner radius in pixels.
+        """
         # Normalise inputs
         rect = Rect(rect)
         color = Color(*color)

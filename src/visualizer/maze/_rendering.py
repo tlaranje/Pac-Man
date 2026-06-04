@@ -12,11 +12,20 @@ if TYPE_CHECKING:
 
 
 class MazeRenderer:
+    """Maze wall and pacgum rendering engine.
+
+    Renders maze walls with proper corner handling and draws pacgums
+    with animation frames.
+    """
+
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
         self.maze_surface = self.vis.maze_surface
 
     def init_sprites(self) -> None:
+        """
+        Load and initialize sprite resources.
+        """
         sprite_loader = SpriteLoader()
         self.vis.maze.player_frames = sprite_loader.load_frames(
             pos=21, num_frames=3
@@ -49,17 +58,36 @@ class MazeRenderer:
             )
         ]
 
-    def _draw_square(self, color, pos: tuple[int, int]) -> None:
+    def _draw_square(self, color: pygame.Color, pos: tuple[int, int]) -> None:
+        """
+        Draw a single maze tile.
+
+        Args:
+            color: RGB color tuple.
+            pos: Position tuple.
+        """
         padding = BORDER_SIZE - 8 // 2
         start_rect = pygame.Rect(pos[0] + padding, pos[1] + padding, 16, 16)
         pygame.draw.rect(self.maze_surface, color, start_rect)
 
     def _draw_square_cap(self, pos: tuple) -> None:
+        """
+        Draw a corner cap for maze walls.
+
+        Args:
+            pos: Position tuple.
+        """
         rect = pygame.Rect(0, 0, BORDER_SIZE, BORDER_SIZE)
         rect.center = (pos[0], pos[1])
         pygame.draw.rect(self.maze_surface, BORDER_COLOR, rect)
 
     def draw_walls(self, maze_grid: list) -> None:
+        """
+        Draw all walls on the maze.
+
+        Args:
+            maze_grid: 2D maze structure.
+        """
         maze_size = self.vis.maze_size
         for y, row in enumerate(maze_grid):
             for x, cell in enumerate(row):
@@ -153,6 +181,13 @@ class MazeRenderer:
                     )
 
     def draw_pacgums(self, pacgums_map: list, fruit_frames: list) -> None:
+        """
+        Draw pacgums and animations.
+
+        Args:
+            pacgums_map: 2D map of pacgums.
+            fruit_frames: Animation frames for fruits.
+        """
         maze_size = self.vis.maze_size
 
         for y, row in enumerate(pacgums_map):

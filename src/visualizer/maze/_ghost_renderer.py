@@ -8,12 +8,21 @@ if TYPE_CHECKING:
 
 
 class GhostRenderer:
+    """Ghost rendering and animation controller.
+
+    Updates ghost visual positions and renders them with appropriate
+    animation frames based on state and direction.
+    """
+
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
         self.visual_positions: list[dict] = []
         self.lerp_speed: float = 0.15
 
     def reset_visual_positions(self) -> None:
+        """
+        Reset ghost visual positions to spawn points.
+        """
         vis = self.vis
         self.visual_positions = []
         for g in vis.gameplay.ghosts_maps[vis.gameplay.map_idx]:
@@ -35,6 +44,13 @@ class GhostRenderer:
         self, ghosts_frames: list[Surface], scared_sprites: list[Surface],
         end_sprites: list[Surface], current_frame: int,
     ) -> None:
+        """
+        Update ghost positions and draw them.
+
+        Args:
+            ghost_frames: Animation frames for ghosts.
+            current_frame: Current animation frame index.
+        """
         vis = self.vis
         ghosts = vis.gameplay.ghosts_maps[vis.gameplay.map_idx]
 

@@ -9,6 +9,12 @@ SVG_BUTTON_SQ_CLICK = "assets/img/Button_sq_click.svg"
 
 
 class Button:
+    """Clickable UI button with hover state and action callback.
+
+    Renders a button with text on a Pygame surface and executes an action
+    when clicked. Supports disabled state and position updates.
+    """
+
     def __init__(
         self,
         screen: pygame.Surface,
@@ -48,6 +54,9 @@ class Button:
         self.setup_button()
 
     def setup_button(self) -> None:
+        """
+        Initialize button visual properties and state.
+        """
         x, y = self.pos
 
         active_screen = pygame.display.get_surface()
@@ -61,6 +70,12 @@ class Button:
         self.rect.topleft = (pos_x, pos_y)
 
     def update(self, mouse_pos: tuple[int, int]) -> None:
+        """
+        Update button state based on mouse position.
+
+        Args:
+            mouse_pos: Current mouse position tuple.
+        """
         if self.disabled:
             return
 
@@ -68,6 +83,15 @@ class Button:
         self._pressed = self._hovered and pygame.mouse.get_pressed()[0]
 
     def is_clicked(self, event: pygame.event.Event) -> bool:
+        """
+        Check if button was clicked by an event.
+
+        Args:
+            event: Pygame event.
+
+        Returns:
+            True if button was clicked, False otherwise.
+        """
         if self.disabled:
             return False
 
@@ -78,6 +102,17 @@ class Button:
         )
 
     def draw(self) -> None:
+        """
+        Draw a rounded rectangle on the surface.
+
+        Args:
+            surface: Target Pygame surface.
+            rect: Rectangle defining position and size.
+            color: RGB color tuple.
+            radius: Corner radius in pixels.
+            b_size: Border size.
+            b_color: Border color tuple.
+        """
         if self._pressed or self._hovered:
             img = self._img_click
             draw_rect = self.rect.move(0, 4)

@@ -2,6 +2,7 @@ from .._constants import TILE_SIZE, SCREEN_MIDPOINT
 from ._movement import MovementController
 from typing import TYPE_CHECKING
 import pygame
+from pygame import Surface
 
 if TYPE_CHECKING:
     from .._visualizer import Visualizer
@@ -13,6 +14,12 @@ DELAY_STEP = 10
 
 
 class PlayerController:
+    """Player visual state and movement controller.
+
+    Manages player position animation, speed control, direction queuing,
+    and visual sprite rendering.
+    """
+
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
 
@@ -32,13 +39,28 @@ class PlayerController:
 
     @property
     def speed(self) -> int:
+        """
+        Get the player's current movement speed.
+
+        Returns:
+            Speed value in pixels per update.
+        """
         return max(1, (MAX_DELAY - self.player_delay) // DELAY_STEP + 1)
 
     def init(self, maze_grid: list) -> None:
+        """
+        Initialize player controller with maze grid.
+
+        Args:
+            maze_grid: 2D maze structure.
+        """
         self.movement_controller = MovementController(maze_grid)
         self.reset_visual_position()
 
     def reset_visual_position(self) -> None:
+        """
+        Reset player visual position to spawn.
+        """
         vis = self.vis
         player = vis.gameplay.player
         if not hasattr(vis, 'maze_size'):
@@ -59,6 +81,9 @@ class PlayerController:
         )
 
     def reset_state(self) -> None:
+        """
+        Reset player state for a new level.
+        """
         self.game_started = False
         self.current_dir = None
         self.next_dir = None
@@ -66,18 +91,36 @@ class PlayerController:
         self.reset_visual_position()
 
     def set_next_dir(self, direction: str | None) -> None:
+        """
+        Set the next movement direction.
+
+        Args:
+            direction: Next direction code.
+        """
         if direction:
             self.next_dir = direction
 
     def increase_speed(self) -> None:
+        """
+        Increase the player's speed.
+        """
         if self.player_delay - DELAY_STEP >= MIN_DELAY:
             self.player_delay -= DELAY_STEP
 
     def decrease_speed(self) -> None:
+        """
+        Decrease the player's speed.
+        """
         if self.player_delay + DELAY_STEP <= MAX_DELAY:
             self.player_delay += DELAY_STEP
 
     def update(self) -> None:
+        """
+        Update button state based on mouse position.
+
+        Args:
+            mouse_pos: Current mouse position tuple.
+        """
         curr_time = pygame.time.get_ticks()
 
         if not self.game_started:
@@ -117,6 +160,9 @@ class PlayerController:
             self.current_dir = None
 
     def update_visual_position(self) -> None:
+        """
+        Update visual position based on game position.
+        """
         vis = self.vis
         target_x = (
             (vis.gameplay.player.x * TILE_SIZE) + SCREEN_MIDPOINT[0]
@@ -129,7 +175,18 @@ class PlayerController:
         self.visual_x += (target_x - self.visual_x) * self.lerp_speed
         self.visual_y += (target_y - self.visual_y) * self.lerp_speed
 
-    def draw(self, player_frames, current_frame: int) -> None:
+    def draw(self, player_frames: list[Surface], current_frame: int) -> None:
+        """
+        Draw a rounded rectangle on the surface.
+
+        Args:
+            surface: Target Pygame surface.
+            rect: Rectangle defining position and size.
+            color: RGB color tuple.
+            radius: Corner radius in pixels.
+            b_size: Border size.
+            b_color: Border color tuple.
+        """
         vis = self.vis
 
         dir_key = (

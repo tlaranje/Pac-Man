@@ -14,6 +14,11 @@ DEFAULT_START_Y: int = 0
 
 @dataclass
 class PacManLevel:
+    """Level configuration with maze dimensions and start position.
+
+    Stores all parameters needed to generate a single game level,
+    including maze size and player start coordinates.
+    """
     width: int = DEFAULT_WIDTH
     height: int = DEFAULT_HEIGHT
     start_x: int = DEFAULT_START_X
@@ -43,8 +48,10 @@ POSITIVE_INT_FIELDS = {
 
 
 class PacManConfigModel:
-    """
-    :TODO
+    """Validated configuration model with parsing and default fallback.
+
+    Parses and validates individual configuration fields from JSON data,
+    applying default values for missing or invalid entries.
     """
 
     def __init__(self, data: dict) -> None:
@@ -83,12 +90,31 @@ class PacManConfigModel:
 
     @staticmethod
     def _warning(field: str, value: Any, default: Any) -> None:
+        """
+        Print a configuration parsing warning message.
+
+        Args:
+            field: Field name that failed validation.
+            value: Invalid value provided.
+            default: Default value being used.
+        """
         print(
             f"[Warning] Invalid value \"{value}\" for field \"{field}\". "
             f"Setting to default: \"{default}\"."
         )
 
     def _parse_unsigned_int(self, data: dict, field: str, default: int) -> int:
+        """
+        Parse and validate non-negative integer from config.
+
+        Args:
+            data: Configuration dictionary.
+            field: Field name to parse.
+            default: Default value if parsing fails.
+
+        Returns:
+            Validated non-negative integer.
+        """
         v = data.get(field, default)
         if not isinstance(v, int) or v < 0:
             self._warning(field, v, default)
@@ -96,6 +122,17 @@ class PacManConfigModel:
         return v
 
     def _parse_positive_int(self, data: dict, field: str, default: int) -> int:
+        """
+        Parse and validate positive integer from config.
+
+        Args:
+            data: Configuration dictionary.
+            field: Field name to parse.
+            default: Default value if parsing fails.
+
+        Returns:
+            Validated positive integer.
+        """
         v = data.get(field, default)
         if not isinstance(v, int) or v <= 0:
             self._warning(field, v, default)
@@ -103,6 +140,17 @@ class PacManConfigModel:
         return v
 
     def _parse_int(self, data: dict, field: str, default: int) -> int:
+        """
+        Parse and validate integer from config.
+
+        Args:
+            data: Configuration dictionary.
+            field: Field name to parse.
+            default: Default value if parsing fails.
+
+        Returns:
+            Validated integer.
+        """
         v = data.get(field, default)
         if not isinstance(v, int):
             self._warning(field, v, default)
@@ -110,6 +158,17 @@ class PacManConfigModel:
         return v
 
     def _parse_str(self, data: dict, field: str, default: str) -> str:
+        """
+        Parse and validate string from config.
+
+        Args:
+            data: Configuration dictionary.
+            field: Field name to parse.
+            default: Default value if parsing fails.
+
+        Returns:
+            Validated non-empty string.
+        """
         v = data.get(field, default)
         if not isinstance(v, str) or not v:
             self._warning(field, v, default)
@@ -117,6 +176,15 @@ class PacManConfigModel:
         return v
 
     def _parse_levels(self, data: dict) -> list:
+        """
+        Parse and validate level list from config.
+
+        Args:
+            data: Configuration dictionary.
+
+        Returns:
+            List of validated level objects.
+        """
         v = data.get("levels", None)
         if not isinstance(v, list) or len(v) < 10:
             if v is not None:
@@ -133,6 +201,19 @@ class PacManConfigModel:
 
     def _parse_bounded_int(self, data: dict, field: str,
                            default: int, low: int, high: int) -> int:
+        """
+        Parse and validate integer within bounds.
+
+        Args:
+            data: Configuration dictionary.
+            field: Field name to parse.
+            default: Default value if parsing fails.
+            low: Minimum valid value.
+            high: Maximum valid value.
+
+        Returns:
+            Validated integer within bounds.
+        """
         v = data.get(field, default)
         if not isinstance(v, int) or not (low <= v <= high):
             self._warning(field, v, default)
@@ -140,6 +221,15 @@ class PacManConfigModel:
         return v
 
     def _parse_level(self, data: dict) -> PacManLevel:
+        """
+        Parse a single level configuration object.
+
+        Args:
+            data: Level configuration dictionary.
+
+        Returns:
+            Parsed and validated level object.
+        """
         level = PacManLevel()
         level.width = self._parse_bounded_int(
             data, "width", DEFAULT_WIDTH, 10, 33

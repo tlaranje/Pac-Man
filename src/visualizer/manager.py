@@ -5,12 +5,21 @@ import sys
 
 
 class Manager:
+    """Main game loop manager coordinating all game systems.
+
+    Initializes Pygame and all game components, then executes the main
+    event-driven game loop with 60 FPS timing.
+    """
+
     def __init__(self) -> None:
         pygame.init()
         pygame.key.set_repeat(500, 30)
         self.vis = Visualizer()
 
     def run(self) -> None:
+        """
+        Start the main game loop and run until quit.
+        """
         vis = self.vis
         menu = vis.menu
         maze = vis.maze

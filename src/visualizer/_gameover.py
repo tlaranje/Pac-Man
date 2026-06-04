@@ -15,6 +15,12 @@ BUTTON_SIZE = (250, 80)
 
 
 class GameOver():
+    """Game over and win screen manager with leaderboard integration.
+
+    Handles game end states, score saving, username entry, and leaderboard
+    display with error validation.
+    """
+
     def __init__(self, visualizer: "Visualizer") -> None:
         self.vis = visualizer
         self.gameover_buttons: list[Button] = []
@@ -24,6 +30,9 @@ class GameOver():
         self.active: bool = False
 
     def init_game_over_buttons(self) -> None:
+        """
+        Initialize button states for game over screen.
+        """
         vis = self.vis
         b1_text = "Restart" if self.title == "GAME_OVER" else "Play again"
         self.gameover_buttons = [
@@ -42,6 +51,9 @@ class GameOver():
         ]
 
     def save_score(self) -> None:
+        """
+        Save the current score to the leaderboard.
+        """
         vis = self.vis
         file_name = vis.gameplay.config.settings.highscore_filename
 
@@ -57,6 +69,12 @@ class GameOver():
             fd.write(json.dumps(vis.leaderboard, indent=4))
 
     def handle_game_over_events(self, event: Event) -> None:
+        """
+        Process events on the game over screen.
+
+        Args:
+            event: Pygame event to handle.
+        """
         vis = self.vis
         gameplay = vis.gameplay
 
@@ -111,6 +129,15 @@ class GameOver():
 
     @staticmethod
     def is_valid_username(username: str) -> bool:
+        """
+        Validate a username string.
+
+        Args:
+            username: Username to validate.
+
+        Returns:
+            True if username is valid, False otherwise.
+        """
         if not isinstance(username, str):
             return False
 
@@ -124,7 +151,13 @@ class GameOver():
 
         return bool(re.fullmatch(r"[A-Za-z0-9 ]+", username))
 
-    def handle_text_box_events(self, event) -> None:
+    def handle_text_box_events(self, event: pygame.event.Event) -> None:
+        """
+        Process text input events.
+
+        Args:
+            event: Pygame event to handle.
+        """
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.active = self.rect.collidepoint(event.pos)
 
@@ -150,6 +183,12 @@ class GameOver():
                     self.text += event.unicode
 
     def draw_error_popup(self, error_message: str = "") -> None:
+        """
+        Draw an error message popup.
+
+        Args:
+            error_message: Error message to display.
+        """
         vis = self.vis
         wx, wy = vis.screen.get_size()
 
@@ -169,6 +208,9 @@ class GameOver():
         vis.screen.blit(txt, (popup_rect.centerx - txt.get_width() // 2, 30))
 
     def draw_user_selection(self) -> None:
+        """
+        Draw the username entry screen.
+        """
         vis = self.vis
         sw, _ = vis.screen.get_size()
         centerx = sw // 2
@@ -198,6 +240,9 @@ class GameOver():
         vis.screen.blit(txt_surface, (self.rect.x + 5, self.rect.y + 7))
 
     def draw_game_over(self) -> None:
+        """
+        Draw the game over or win screen.
+        """
         vis = self.vis
         gameplay = vis.gameplay
         vis.screen.fill((50, 50, 50))

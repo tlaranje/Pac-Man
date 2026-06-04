@@ -10,6 +10,12 @@ import pygame
 
 
 class Visualizer():
+    """Main visualizer coordinating all visual and gameplay components.
+
+    Integrates configuration parsing, gameplay logic, window management,
+    rendering, and UI menus into a cohesive visual framework.
+    """
+
     def __init__(self) -> None:
         self.maze_size: tuple[int, int]
 
