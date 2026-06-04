@@ -1,5 +1,6 @@
 from ._constants import TILE_COLOR, TILE_SIZE, SCREEN_SIZE
 from typing import TYPE_CHECKING
+from src.utils import RoundRect
 from ._button import Button
 import pygame
 import sys
@@ -7,7 +8,7 @@ import sys
 if TYPE_CHECKING:
     from ._visualizer import Visualizer
 
-BUTTON_SIZE = (300, 100)
+BUTTON_SIZE = (250, 80)
 
 
 class Menu:
@@ -17,44 +18,55 @@ class Menu:
         self.menu_buttons: list[Button] = []
         self.pause_menu_buttons: list[Button] = []
         self.cheat_menu_buttons: list[Button] = []
+        self.cheat_button: Button
 
         self.rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
 
-        self.pause_surface = pygame.Surface((0, 0), pygame.SRCALPHA)
-        self.cheat_surface = pygame.Surface((0, 0), pygame.SRCALPHA)
+        self.pause_surface = pygame.Surface(SCREEN_SIZE, pygame.SRCALPHA)
+        self.cheat_surface = pygame.Surface(SCREEN_SIZE, pygame.SRCALPHA)
+        self.cheat_menu_open: bool = False
 
     def init_buttons(self) -> None:
         vis = self.vis
-        x = SCREEN_SIZE[0] - 180
+
+        self.cheat_button = Button(
+            screen=vis.screen, text="Cheat Menu", action="CHEAT",
+            pos=(SCREEN_SIZE[0] - 170, SCREEN_SIZE[1] // 2 - 25)
+        )
+
+        self.close_cheat_button = Button(
+            screen=self.cheat_surface, size=(40, 40), text="X",
+            action="CLOSE_CHEAT", text_size=20
+        )
 
         self.cheat_menu_buttons = [
             Button(
-                screen=self.cheat_surface, pos=(x, 20),
-                text="Invincibility", action="CHEAT_INV"
+                screen=self.cheat_surface, text="Invincibility",
+                action="CHEAT_INV"
             ),
             Button(
-                screen=self.cheat_surface, pos=(x, 80),
-                text="Level skip", action="CHEAT_SKIP"
+                screen=self.cheat_surface, text="Level skip",
+                action="CHEAT_SKIP"
             ),
             Button(
-                screen=self.cheat_surface, pos=(x, 140),
-                text="Ghost freeze", action="CHEAT_FREEZE"
+                screen=self.cheat_surface, text="Ghost freeze",
+                action="CHEAT_FREEZE"
             ),
             Button(
-                screen=self.cheat_surface, pos=(x, 200),
-                text="Extra lives", action="CHEAT_LIVES"
+                screen=self.cheat_surface, text="Extra lives",
+                action="CHEAT_LIVES"
             ),
             Button(
-                screen=self.cheat_surface, pos=(x, 260),
-                text="Player speed", action="NONE", disabled=True
+                screen=self.cheat_surface, text="Player speed",
+                action="NONE", disabled=True
             ),
             Button(
-                screen=self.cheat_surface, size=(50, 50), pos=(x, 320),
-                text="+", action="CHEAT_SPEED+"
+                screen=self.cheat_surface, size=(50, 50), text="+",
+                action="CHEAT_SPEED+"
             ),
             Button(
-                screen=self.cheat_surface, size=(50, 50), pos=(x + 110, 320),
-                text="-", action="CHEAT_SPEED-"
+                screen=self.cheat_surface, size=(50, 50), text="-",
+                action="CHEAT_SPEED-"
             ),
         ]
 
@@ -80,15 +92,15 @@ class Menu:
         self.menu_buttons = [
             Button(
                 size=BUTTON_SIZE, screen=vis.screen, text="Play",
-                action="PLAY", text_size=40
+                action="PLAY", text_size=35
 
             ),
             Button(
-                size=BUTTON_SIZE, screen=vis.screen, text_size=40,
+                size=BUTTON_SIZE, screen=vis.screen, text_size=35,
                 text="Leaderboard", action="LEADERBOARD"
             ),
             Button(
-                size=BUTTON_SIZE, screen=vis.screen, text_size=40,
+                size=BUTTON_SIZE, screen=vis.screen, text_size=35,
                 text="Exit", action="QUIT_APP"
             )
         ]
@@ -106,7 +118,7 @@ class Menu:
                     vis.state = 'GAME_PLAY'
                     return
                 elif btn.action_value == "RESTART":
-                    vis.make.level_score = 0
+                    vis.maze.level_score = 0
                     vis.maze.score = 0
                     vis.maze.lives = vis.gameplay.config.settings.lives
                     vis.gameplay.reset()
@@ -125,10 +137,17 @@ class Menu:
 
     def handle_cheat_menu_events(self, event: pygame.event.Event) -> None:
         vis = self.vis
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                self.vis.state = 'PAUSE'
-                return
+
+        if self.cheat_button.is_clicked(event):
+            self.cheat_menu_open = not self.cheat_menu_open
+            return
+
+        if not self.cheat_menu_open:
+            return
+
+        if self.close_cheat_button.is_clicked(event):
+            self.cheat_menu_open = False
+            return
 
         for btn in self.cheat_menu_buttons:
             if btn.is_clicked(event):
@@ -176,9 +195,9 @@ class Menu:
         vis = self.vis
         vis.screen.fill((50, 50, 50))
 
-        screen_w, screen_h = vis.screen.get_size()
-        center_x = screen_w // 2
-        center_y = screen_h // 2
+        sw, sh = vis.screen.get_size()
+        center_x = sw // 2
+        center_y = sh // 2
 
         text_surf = vis.title_font.render("Pac-Man", True, TILE_COLOR)
         text_rect = text_surf.get_rect(centerx=center_x, y=50)
@@ -190,7 +209,7 @@ class Menu:
 
         for i, btn in enumerate(self.menu_buttons):
             btn.rect.x = popup_x
-            btn.rect.y = btn_start_y + i * 110
+            btn.rect.y = btn_start_y + i * 90
 
         mouse_pos = pygame.mouse.get_pos()
         for btn in self.menu_buttons:
@@ -201,21 +220,20 @@ class Menu:
         vis = self.vis
         current_size = vis.screen.get_size()
 
-        if self.pause_surface.get_size() != current_size:
-            self.pause_surface = pygame.Surface(current_size, pygame.SRCALPHA)
-            for btn in self.pause_menu_buttons:
-                btn.screen = self.pause_surface
-
         self.pause_surface.fill((0, 0, 0, 0))
 
-        wx, wy = current_size
-        pw, ph = 200, wy
-        popup_rect = pygame.Rect(0, 0, pw, ph)
+        sw, sh = current_size
+        pw, ph = 250, 270
+        rect = pygame.Rect(-45, sh // 2 - ph // 2, pw, ph)
 
-        pygame.draw.rect(self.pause_surface, (40, 40, 40), popup_rect)
-        pygame.draw.line(
-            self.pause_surface, TILE_COLOR, (pw, 0), (pw, wy), 2
-        )
+        RoundRect().draw(self.pause_surface, rect, b_size=2)
+
+        popup_x = 20
+        btn_start_y = sh // 2 - ph // 2 + 20
+
+        for i, btn in enumerate(self.pause_menu_buttons):
+            btn.rect.x = popup_x
+            btn.rect.y = btn_start_y + i * 60
 
         mouse_pos = pygame.mouse.get_pos()
         for btn in self.pause_menu_buttons:
@@ -227,24 +245,35 @@ class Menu:
     def draw_cheat_menu(self) -> None:
         vis = self.vis
         current_size = vis.screen.get_size()
-
-        if self.cheat_surface.get_size() != current_size:
-            self.cheat_surface = pygame.Surface(current_size, pygame.SRCALPHA)
-            for btn in self.cheat_menu_buttons:
-                btn.screen = self.cheat_surface
+        sw, sh = current_size
 
         self.cheat_surface.fill((0, 0, 0, 0))
 
-        wx, wy = current_size
-        pw, ph = 200, wy
-        popup_rect = pygame.Rect(wx - pw, 0, pw, ph)
+        pw, ph = 250, 440
+        popup_rect = pygame.Rect(sw - pw + 45, sh // 2 - ph // 2, pw, ph)
+        RoundRect().draw(self.cheat_surface, popup_rect, b_size=2)
 
-        pygame.draw.rect(self.cheat_surface, (40, 40, 40), popup_rect)
-        pygame.draw.line(
-            self.cheat_surface, TILE_COLOR, (wx - pw, 0), (wx - pw, wy), 2
-        )
+        self.close_cheat_button.rect.x = sw - pw + 70
+        self.close_cheat_button.rect.y = sh // 2 - ph // 2 + 20
+
+        btn_width = 150
+        popup_x = sw - btn_width - 30
+        btn_start_y = sh // 2 - ph // 2 + 70
+
+        for i, btn in enumerate(self.cheat_menu_buttons):
+            if btn.text == "-":
+                btn.rect.x = popup_x + btn_width - 40
+                btn.rect.y = btn_start_y + (i - 1) * 60
+                continue
+
+            btn.rect.x = popup_x
+            btn.rect.y = btn_start_y + i * 60
 
         mouse_pos = pygame.mouse.get_pos()
+
+        self.close_cheat_button.update(mouse_pos)
+        self.close_cheat_button.draw()
+
         for btn in self.cheat_menu_buttons:
             if btn.action_value == "NONE":
                 btn.text = f"Speed: {vis.maze.player_ctrl.speed}"

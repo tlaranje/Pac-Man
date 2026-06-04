@@ -2,7 +2,7 @@ import pygame
 
 # Menu constants
 TILE_COLOR = pygame.Color("white")
-TEXT_COLOR = pygame.Color("light grey")
+TEXT_COLOR = pygame.Color("white")
 
 # Screen constants
 pygame.init()

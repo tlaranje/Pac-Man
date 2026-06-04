@@ -61,7 +61,11 @@ class Manager:
                 menu.draw_main_menu()
             elif state == "GAME_PLAY":
                 maze.move_player_ghosts()
-                menu.draw_cheat_menu()
+                mouse_pos = pygame.mouse.get_pos()
+                menu.cheat_button.update(mouse_pos)
+                menu.cheat_button.draw()
+                if menu.cheat_menu_open:
+                    menu.draw_cheat_menu()
             elif state == "GAME_OVER":
                 game_over.draw_game_over()
             elif state == 'PAUSE':

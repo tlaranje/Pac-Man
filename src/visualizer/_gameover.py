@@ -8,9 +8,9 @@ import json
 import sys
 
 if TYPE_CHECKING:
-    from .._visualizer import Visualizer
+    from ._visualizer import Visualizer
 
-BUTTON_SIZE = (300, 100)
+BUTTON_SIZE = (250, 80)
 
 
 class GameOver():
@@ -19,7 +19,7 @@ class GameOver():
         self.gameover_buttons: list[Button] = []
         self.title: str = "Game Over"
         self.show_error: bool = False
-        self.text: str = "Hi"
+        self.text: str = ""
         self.active: bool = False
 
     def init_game_over_buttons(self) -> None:
@@ -43,13 +43,10 @@ class GameOver():
     def save_score(self) -> None:
         vis = self.vis
         file_name = vis.gameplay.config.settings.highscore_filename
-        gameplay = vis.gameplay
-        settings = gameplay.config.settings
 
-        if gameplay.map_idx + 1 >= len(settings.levels) or vis.maze.lives <= 0:
-            vis.leaderboard.append({vis.user_name: vis.maze.score})
-            with open(file_name, "w") as fd:
-                fd.write(json.dumps(vis.leaderboard, indent=4))
+        vis.leaderboard.append({vis.user_name: vis.maze.score})
+        with open(file_name, "w") as fd:
+            fd.write(json.dumps(vis.leaderboard, indent=4))
 
     def handle_game_over_events(self, event: Event) -> None:
         vis = self.vis
@@ -114,9 +111,16 @@ class GameOver():
             if event.key == pygame.K_BACKSPACE:
                 self.text = self.text[:-1]
             elif event.key == pygame.K_RETURN:
+                username = self.text.strip()
+
+                if username == "":
+                    self.show_error = True
+                    return
+
                 self.vis.user_name = self.text
                 self.save_score()
                 self.text = ""
+                return
             else:
                 test = self.vis.text_box_font.render(
                     self.text + event.unicode, True, (255, 255, 255)
@@ -133,41 +137,39 @@ class GameOver():
         vis.screen.blit(overlay, (0, 0))
 
         pw, ph = 250, 60
-        popup_rect = pygame.Rect(wx // 2 - pw // 2, wy // 2 - ph // 2, pw, ph)
-        pygame.draw.rect(
-            vis.screen, (40, 40, 40), popup_rect, border_radius=8
-        )
-        pygame.draw.rect(
-            vis.screen, (220, 50, 50), popup_rect, 2, border_radius=8
+        popup_rect = pygame.Rect(wx // 2 - pw // 2, 20, pw, ph)
+
+        RoundRect().draw(
+            vis.screen, popup_rect, color=(40, 40, 40), b_size=2,
+            b_color=pygame.Color("red")
         )
 
-        txt = vis.font.render(error_message, True, (255, 255, 255))
-        vis.screen.blit(txt, (
-            popup_rect.centerx - txt.get_width() // 2,
-            popup_rect.centery - txt.get_height() // 2
-        ))
+        txt = vis.error_font.render(error_message, True, (255, 255, 255))
+        vis.screen.blit(txt, (popup_rect.centerx - txt.get_width() // 2, 30))
 
     def draw_user_selection(self) -> None:
         vis = self.vis
-        sw, sh = vis.screen.get_size()
+        sw, _ = vis.screen.get_size()
         centerx = sw // 2
 
-        container_w = 370
+        container_w = 350
         rect = pygame.Rect(
-            sw // 2 - container_w // 2, -2, container_w, 68
+            sw // 2 - container_w // 2, 180, container_w, 200
         )
-        RoundRect.draw(vis.screen, rect)
+        RoundRect().draw(vis.screen, rect, b_size=2)
+
         text = vis.font.render("Enter username", True, TEXT_COLOR)
-        text_rect = text.get_rect(centerx=centerx, y=250)
+        text_rect = text.get_rect(centerx=centerx, y=240)
         vis.screen.blit(text, text_rect)
 
-        text_box_size = (150, 40)
+        text_box_size = (300, 50)
         tx, ty = text_box_size
         self.rect = pygame.Rect(centerx - tx // 2, 300, tx, ty)
 
-        pygame.draw.rect(vis.screen, (60, 60, 60), self.rect)
-        color = (255, 255, 255) if self.active else (100, 100, 100)
-        pygame.draw.rect(vis.screen, color, self.rect, 2)
+        RoundRect().draw(vis.screen, self.rect, color=(60, 60, 60), b_size=0)
+
+        border_color = (80, 80, 80) if self.active else (100, 100, 100)
+        RoundRect().draw(vis.screen, self.rect, color=border_color, b_size=2)
 
         txt_surface = vis.text_box_font.render(
             self.text, True, TEXT_COLOR
@@ -191,25 +193,25 @@ class GameOver():
         center_y = screen_h // 2
 
         self.vis.screen.blit(
-            title_surf, (screen_w // 2 - title_surf.get_width() // 2, 10)
+            title_surf, (screen_w // 2 - title_surf.get_width() // 2, 0)
         )
         self.vis.screen.blit(
-            score_surf, (screen_w // 2 - score_surf.get_width() // 2, 180)
+            score_surf, (screen_w // 2 - score_surf.get_width() // 2, 190)
         )
         levels = gameplay.config.settings.levels
         if gameplay.map_idx + 1 >= len(levels) or self.title == "Game Over":
             buttons = self.gameover_buttons[1:]
-            btn_start_y = center_y - 105
+            btn_start_y = center_y - 85
         else:
             buttons = self.gameover_buttons
-            btn_start_y = center_y - 160
+            btn_start_y = center_y - 125
 
         btn_width = BUTTON_SIZE[0]
         popup_x = screen_w // 2 - btn_width // 2
 
         for i, btn in enumerate(buttons):
             btn.rect.x = popup_x
-            btn.rect.y = btn_start_y + i * 110
+            btn.rect.y = btn_start_y + i * 90
 
         for button in buttons:
             button.draw()
@@ -218,14 +220,14 @@ class GameOver():
         for btn in buttons:
             btn.update(mouse_pos)
 
-        pygame.draw.aaline(
-            vis.screen, pygame.Color("red"), (screen_w // 2, 0),
-            (screen_w // 2, screen_h)
-        )
-        pygame.draw.aaline(
-            vis.screen, pygame.Color("red"), (0, screen_h // 2),
-            (screen_w, screen_h // 2)
-        )
+        # pygame.draw.aaline(
+        #     vis.screen, pygame.Color("red"), (screen_w // 2, 0),
+        #     (screen_w // 2, screen_h)
+        # )
+        # pygame.draw.aaline(
+        #     vis.screen, pygame.Color("red"), (0, screen_h // 2),
+        #     (screen_w, screen_h // 2)
+        # )
 
         if self.show_error:
             self.draw_error_popup("Empty username!")

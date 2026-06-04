@@ -33,13 +33,17 @@ class Visualizer():
         self.leaderboard: list[dict[str, int]] = []
 
         self.title_font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 150
+            "assets/fonts/Rajdhani-Bold.ttf", 130
         )
 
         self.font = pygame.font.Font(
             "assets/fonts/Rajdhani-Bold.ttf", 40
         )
 
+        self.error_font = pygame.font.Font(
+            "assets/fonts/Rajdhani-Bold.ttf", 30
+        )
+
         self.text_box_font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 19
+            "assets/fonts/Rajdhani-Bold.ttf", 30
         )
