@@ -218,7 +218,7 @@ class Menu:
                     maze_grid = (
                         vis.maze.maze_grid[vis.gameplay.map_idx].maze
                     )
-                    vis.maze_size = (len(maze_grid) * TILE_SIZE,) * 2
+                    vis.maze_size = (len(maze_grid) ** TILE_SIZE,) * 2
                     vis.maze.reset_maze()
                 case "CHEAT_FREEZE":
                     vis.gameplay.toggle_freeze_ghosts()
