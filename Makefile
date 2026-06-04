@@ -5,10 +5,10 @@ install:
 	@clear && uv sync
 
 run:
-	@clear && uv run python -m src $(ARGS)
+	@clear && uv run python -m src config.json
 
 debug:
-	@clear && uv run python -m pdb -m src $(ARGS)
+	@clear && uv run python -m pdb -m src config.json
 
 clean:
 	@clear

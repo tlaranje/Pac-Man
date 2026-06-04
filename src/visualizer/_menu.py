@@ -124,7 +124,13 @@ class Menu:
                 case "PLAY":
                     vis.state = "GAME_PLAY"
                 case "RESTART":
-                    vis.maze.level_score = 0
+                    vis.gameplay.level_start = None
+                    vis.gameplay.gameplay_init(0)
+                    vis.maze.init_level()
+                    maze_grid = vis.maze.maze_grid[vis.gameplay.map_idx].maze
+                    vis.maze_size = (
+                        len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+                    )
                     vis.maze.score = 0
                     vis.maze.lives = vis.gameplay.config.settings.lives
                     vis.gameplay.reset()

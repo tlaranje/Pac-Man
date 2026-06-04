@@ -1,6 +1,6 @@
 from src.gameplay import PacManGameplay
 from .maze import MazeRenderer, Maze
-from src.parser import PacManConfig
+from src.parser import PacManConfig, PacManCLI
 from ._gameover import GameOver
 from ._menu import Menu
 from ._window import Window
@@ -13,7 +13,8 @@ class Visualizer():
     def __init__(self) -> None:
         self.maze_size: tuple[int, int]
 
-        self.config = PacManConfig("./config.json")
+        pacman_cli = PacManCLI()
+        self.config = PacManConfig(pacman_cli.args.config)
         self.gameplay = PacManGameplay(self.config)
 
         self.window = Window(self)

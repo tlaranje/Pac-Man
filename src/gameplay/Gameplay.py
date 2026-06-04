@@ -413,6 +413,7 @@ class PacManGameplay:
             player_x: int = self.player.x
             player_y: int = self.player.y
             if ghost.is_scared:
+                self.chase_moves[i] = 0
                 ghost.run_away(player_x, player_y)
                 continue
             if ghost.is_on_corridor_pos(player_x, player_y):
