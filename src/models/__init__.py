@@ -21,7 +21,9 @@ class PacManLevel:
 
 
 DEFAULT_HIGHSCORE_FILENAME: str = "scores.json"
-DEFAULT_LEVELS: list[PacManLevel] = [PacManLevel()]
+DEFAULT_LEVELS: list[PacManLevel] = [
+    PacManLevel() for _ in range(10)
+]
 DEFAULT_LIVES: int = 3
 DEFAULT_PACGUM: int = 42
 DEFAULT_POINTS_PER_PACGUM: int = 10
@@ -116,7 +118,7 @@ class PacManConfigModel:
 
     def _parse_levels(self, data: dict) -> list:
         v = data.get("levels", None)
-        if not isinstance(v, list) or len(v) == 0:
+        if not isinstance(v, list) or len(v) < 10:
             if v is not None:
                 self._warning("levels", v, DEFAULT_LEVELS)
             return DEFAULT_LEVELS

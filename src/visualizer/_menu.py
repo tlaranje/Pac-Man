@@ -186,14 +186,29 @@ class Menu:
 
     def handle_menu_events(self, event: pygame.event.Event) -> None:
         vis = self.vis
+        gameplay = vis.gameplay
 
         for btn in self.menu_buttons:
             if not btn.is_clicked(event):
                 continue
             match btn.action_value:
                 case "PLAY":
-                    vis.maze.reset_maze()
+                    gameplay.level_start = None
+                    gameplay.gameplay_init(0)
+                    vis.maze.init_level()
+                    maze_grid = vis.maze.maze_grid[gameplay.map_idx].maze
+                    vis.maze_size = (
+                        len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+                    )
+                    vis.maze.score = 0
+                    vis.maze.lives = vis.gameplay.config.settings.lives
+                    gameplay.reset()
+                    vis.maze.player_ctrl.reset_state()
+                    vis.maze.ghost_renderer.reset_visual_positions()
+                    vis.maze.maze_surface.fill((0, 0, 0))
                     vis.state = "GAME_PLAY"
+                    vis.maze.reset_maze()
+                    return
                 case "INSTRUCTIONS":
                     vis.state = "INSTRUCTIONS"
                 case "QUIT_APP":

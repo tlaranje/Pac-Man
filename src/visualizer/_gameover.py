@@ -4,6 +4,7 @@ from src.utils import RoundRect
 from ._button import Button
 from pygame import Event
 import pygame
+import re
 import json
 import sys
 
@@ -108,6 +109,21 @@ class GameOver():
            self.title == "Game Over":
             self.handle_text_box_events(event)
 
+    @staticmethod
+    def is_valid_username(username: str) -> bool:
+        if not isinstance(username, str):
+            return False
+
+        username = username.strip()
+
+        if len(username) == 0:
+            return False
+
+        if len(username) > 10:
+            return False
+
+        return bool(re.fullmatch(r"[A-Za-z0-9 ]+", username))
+
     def handle_text_box_events(self, event) -> None:
         if event.type == pygame.MOUSEBUTTONDOWN:
             self.active = self.rect.collidepoint(event.pos)
@@ -118,7 +134,7 @@ class GameOver():
             elif event.key == pygame.K_RETURN:
                 username = self.text.strip()
 
-                if username == "":
+                if not self.is_valid_username(username):
                     self.show_error = True
                     return
 
@@ -236,4 +252,4 @@ class GameOver():
             btn.update(mouse_pos)
 
         if self.show_error:
-            self.draw_error_popup("Empty username!")
+            self.draw_error_popup("Invalid username!")
