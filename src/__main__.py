@@ -1,11 +1,9 @@
-from src.visualizer import Manager
-from rich import print
-import traceback
+try:
+    from src.visualizer import Manager
+    from rich import print
 
-if __name__ == "__main__":
-    try:
+    if __name__ == "__main__":
         manager = Manager()
         manager.run()
-    except Exception as e:
-        print(f"[bold red]{e}[/bold red]")
-        traceback.print_exc()
+except Exception as e:
+    print(e)
