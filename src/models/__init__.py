@@ -66,7 +66,8 @@ class PacManConfigModel:
             data, "points_per_pacgum", DEFAULT_POINTS_PER_PACGUM, 1, MAX_VALUE
         )
         self.points_per_super_pacgum = self._parse_bounded_int(
-            data, "points_per_super_pacgum", DEFAULT_POINTS_PER_SUPER_PACGUM, 1, MAX_VALUE
+            data, "points_per_super_pacgum", DEFAULT_POINTS_PER_SUPER_PACGUM,
+            1, MAX_VALUE
         )
         self.points_per_ghost = self._parse_bounded_int(
             data, "points_per_ghost", DEFAULT_POINTS_PER_GHOST, 1, MAX_VALUE

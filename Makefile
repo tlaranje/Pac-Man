@@ -42,15 +42,15 @@ build-clean:
 	@echo "Done!"
 
 lint:
-	@clear && uv run flake8 .
-	@uv run mypy . --warn-return-any \
+	@clear && uv run flake8 src
+	@uv run mypy src --warn-return-any \
 		--warn-unused-ignores \
 	    --ignore-missing-imports \
 	    --disallow-untyped-defs \
 	    --check-untyped-defs
 
 lint-strict:
-	@clear && uv run flake8 .
-	@uv run mypy . --strict
+	@clear && uv run flake8 src
+	@uv run mypy src --strict
 
 .PHONY: install run debug clean build build-clean lint lint-strict

@@ -94,6 +94,7 @@ class Manager:
             elif state == "GAME_OVER":
                 game_over.draw_game_over()
             elif state == 'PAUSE':
+                assert vis.gameplay.level_start is not None
                 vis.gameplay.level_start += dt
                 maze.reset_maze()
                 menu.draw_pause_menu()
