@@ -47,18 +47,18 @@ class PacManConfig:
     """
 
     def __init__(self, path: str) -> None:
-        with open(path, "r") as file:
-            content: str = re.sub(
-                r"^\s*#.*$", "", file.read(), flags=re.MULTILINE
-            )
-            try:
-                data = json.loads(content)
-            except Exception:
-                data = {}
-
-        if not isinstance(data, dict):
+        try:
+            with open(path, "r") as file:
+                content: str = re.sub(
+                    r"^\s*#.*$", "", file.read(), flags=re.MULTILINE
+                )
+            data = json.loads(content)
+            if not isinstance(data, dict):
+                raise ValueError()
+        except Exception as e:
+            print(e)
             print(
-                "[Warning] Config file must be a JSON object. "
+                "[Warning] Config file must be a dict JSON object. "
                 "Using all defaults."
             )
             data = {}

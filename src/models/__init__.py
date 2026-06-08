@@ -42,6 +42,8 @@ POSITIVE_INT_FIELDS = {
     "level_max_time": DEFAULT_LEVEL_MAX_TIME,
 }
 
+MAX_VALUE: int = 1000
+
 
 class PacManConfigModel:
     """Validated configuration model with parsing and default fallback.
@@ -54,26 +56,26 @@ class PacManConfigModel:
         self.highscore_filename = self._parse_str(
             data, "highscore_filename", DEFAULT_HIGHSCORE_FILENAME
         )
-        self.lives = self._parse_positive_int(
-            data, "lives", DEFAULT_LIVES
+        self.lives = self._parse_bounded_int(
+            data, "lives", DEFAULT_LIVES, 1, MAX_VALUE
         )
-        self.pacgum = self._parse_unsigned_int(
-            data, "pacgum", DEFAULT_PACGUM
+        self.pacgum = self._parse_bounded_int(
+            data, "pacgum", DEFAULT_PACGUM, 0, MAX_VALUE
         )
-        self.points_per_pacgum = self._parse_positive_int(
-            data, "points_per_pacgum", DEFAULT_POINTS_PER_PACGUM
+        self.points_per_pacgum = self._parse_bounded_int(
+            data, "points_per_pacgum", DEFAULT_POINTS_PER_PACGUM, 1, MAX_VALUE
         )
-        self.points_per_super_pacgum = self._parse_positive_int(
-            data, "points_per_super_pacgum", DEFAULT_POINTS_PER_SUPER_PACGUM
+        self.points_per_super_pacgum = self._parse_bounded_int(
+            data, "points_per_super_pacgum", DEFAULT_POINTS_PER_SUPER_PACGUM, 1, MAX_VALUE
         )
-        self.points_per_ghost = self._parse_positive_int(
-            data, "points_per_ghost", DEFAULT_POINTS_PER_GHOST
+        self.points_per_ghost = self._parse_bounded_int(
+            data, "points_per_ghost", DEFAULT_POINTS_PER_GHOST, 1, MAX_VALUE
         )
         self.seed = self._parse_int(
             data, "seed", DEFAULT_SEED
         )
-        self.level_max_time = self._parse_positive_int(
-            data, "level_max_time", DEFAULT_LEVEL_MAX_TIME
+        self.level_max_time = self._parse_bounded_int(
+            data, "level_max_time", DEFAULT_LEVEL_MAX_TIME, 1, MAX_VALUE
         )
         self.level_max_time_ms = self.level_max_time * 1000
         self.levels = self._parse_levels(

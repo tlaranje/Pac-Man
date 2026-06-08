@@ -422,7 +422,7 @@ class Menu:
         text: list[str] = []
 
         try:
-            with open("scores.json", "r") as fd:
+            with open(vis.config.settings.highscore_filename, "r") as fd:
                 data = json.load(fd)
             for i, player in enumerate(data, start=1):
                 name, score = next(iter(player.items()))
