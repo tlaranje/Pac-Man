@@ -6,7 +6,6 @@ from pygame import Event
 import pygame
 import re
 import json
-import sys
 
 if TYPE_CHECKING:
     from ._visualizer import Visualizer
@@ -97,7 +96,8 @@ class GameOver():
                     vis.maze.init_level()
                     maze_grid = vis.maze.maze_grid[gameplay.map_idx].maze
                     vis.maze_size = (
-                        len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+                        len(maze_grid[0]) * TILE_SIZE,
+                        len(maze_grid) * TILE_SIZE
                     )
                     vis.maze.score = 0
                     vis.maze.lives = vis.gameplay.config.settings.lives
@@ -114,14 +114,14 @@ class GameOver():
                     vis.maze.init_level()
                     maze_grid = vis.maze.maze_grid[gameplay.map_idx].maze
                     vis.maze_size = (
-                        len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+                        len(maze_grid[0]) * TILE_SIZE,
+                        len(maze_grid) * TILE_SIZE
                     )
                     vis.maze.reset_maze()
                     vis.state = "GAME_PLAY"
                     return
                 elif btn.action_value == "QUIT_APP":
-                    pygame.quit()
-                    sys.exit()
+                    vis.state = "MAIN_MENU"
 
         if gameplay.map_idx + 1 >= len(levels) and self.title == "Win" or \
            self.title == "Game Over":

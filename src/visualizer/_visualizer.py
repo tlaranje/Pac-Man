@@ -64,6 +64,6 @@ class Visualizer():
             "assets/fonts/Rajdhani-Bold.ttf", 60
         )
 
-        self.ins_font = pygame.font.Font(
-            "assets/fonts/Rajdhani-Bold.ttf", 30
-        )
+        self.ins_font = pygame.font.Font("assets/fonts/Rajdhani-Bold.ttf", 30)
+
+        self.arrows_font = pygame.font.SysFont("dejavusans", 30)

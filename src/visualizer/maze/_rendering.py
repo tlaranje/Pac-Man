@@ -200,7 +200,7 @@ class MazeRenderer:
                     )
                     pos_y = (
                         (y * TILE_SIZE) + SCREEN_MIDPOINT[1]
-                        - maze_size[0] // 2 + 6
+                        - maze_size[1] // 2 + 6
                     )
                     if cell[1] == "super":
                         self.maze_surface.blit(

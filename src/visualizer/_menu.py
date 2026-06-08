@@ -169,7 +169,8 @@ class Menu:
                     vis.maze.init_level()
                     maze_grid = vis.maze.maze_grid[vis.gameplay.map_idx].maze
                     vis.maze_size = (
-                        len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+                        len(maze_grid[0]) * TILE_SIZE,
+                        len(maze_grid) * TILE_SIZE
                     )
                     vis.maze.score = 0
                     vis.maze.lives = vis.gameplay.config.settings.lives
@@ -218,7 +219,10 @@ class Menu:
                     maze_grid = (
                         vis.maze.maze_grid[vis.gameplay.map_idx].maze
                     )
-                    vis.maze_size = (len(maze_grid) ** TILE_SIZE,) * 2
+                    vis.maze_size = (
+                        len(maze_grid[0]) * TILE_SIZE,
+                        len(maze_grid) * TILE_SIZE
+                    )
                     vis.maze.reset_maze()
                 case "CHEAT_FREEZE":
                     vis.gameplay.toggle_freeze_ghosts()
@@ -250,7 +254,8 @@ class Menu:
                     vis.maze.init_level()
                     maze_grid = vis.maze.maze_grid[gameplay.map_idx].maze
                     vis.maze_size = (
-                        len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+                        len(maze_grid[0]) * TILE_SIZE,
+                        len(maze_grid) * TILE_SIZE
                     )
                     vis.maze.score = 0
                     vis.maze.lives = vis.gameplay.config.settings.lives
@@ -379,9 +384,9 @@ class Menu:
         with open("INSTRUCTIONS.txt", "r") as fd:
             text = fd.read()
 
-        ins_surf = vis.ins_font.render(text, True, TILE_COLOR)
+        ins_surf = vis.arrows_font.render(text, True, TILE_COLOR)
 
-        self.ins_surface.blit(ins_surf, (left + 100, top + 100))
+        self.ins_surface.blit(ins_surf, (left + 75, top + 100))
 
         title_rect = t_surf.get_rect(centerx=left + pw // 2, centery=top)
         title_rect.inflate_ip(20, -10)

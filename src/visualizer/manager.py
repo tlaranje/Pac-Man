@@ -34,7 +34,7 @@ class Manager:
 
         maze_grid = maze.maze_grid[vis.gameplay.map_idx].maze
         vis.maze_size = (
-            len(maze_grid) * TILE_SIZE, len(maze_grid) * TILE_SIZE
+            len(maze_grid[0]) * TILE_SIZE, len(maze_grid) * TILE_SIZE
         )
         maze.player_ctrl.reset_visual_position()
         maze.ghost_renderer.reset_visual_positions()

@@ -1,9 +1,9 @@
 Controls
 --------
-W - Move up
-A - Move left
-S - Move down
-D - Move right
+W or ↑ - Move up
+A or ← - Move left
+S or ↓ - Move down
+D or → - Move right
 
 Configuration
 -------------
