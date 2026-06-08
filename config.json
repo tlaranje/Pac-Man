@@ -1,52 +1,28 @@
 {
 	"highscore_filename": "scores.json",
 	"levels": [
-		{
-			"width": 33,
-			"height": 10
-		},
-		{
-			"width": 11,
-			"height": 32
-		},
-		{
-			"width": 11,
-			"height": 32
-		},
-		{
-			"width": 11,
-			"height": 32
-		},
-		{
-			"width": 11,
-			"height": 32
-		},
-		{
-			"width": 11,
-			"height": 32
-		},
-		{
-			"width": 11,
-			"height": 32
-		},
-		{
-			"width": 11,
-			"height": 32
-		},
-		{
-			"width": 11,
-			"height": 32
-		},
-		{
-			"width": 11,
-			"height": 32
-		}
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 },
+		{ "width": 11, "height": 32 }
 	],
-	"lives": 1000,
-	"pacgum": 1000,
-	"points_per_pacgum": 1000,
-	"points_per_super_pacgum": 1000,
-	"points_per_ghost": 1000,
+	"lives": 3,
+	"pacgum": 3,
+	"points_per_pacgum": 5,
+	"points_per_super_pacgum": 10,
+	"points_per_ghost": 100,
 	"seed": 59,
-	"level_max_time": 1000
+	"level_max_time": 30
 }

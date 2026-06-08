@@ -43,6 +43,7 @@ class Manager:
         clock: pygame.time.Clock = pygame.time.Clock()
         while True:
             state = vis.state
+            dt: int = clock.tick(60)
 
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -93,8 +94,8 @@ class Manager:
             elif state == "GAME_OVER":
                 game_over.draw_game_over()
             elif state == 'PAUSE':
+                vis.gameplay.level_start += dt
                 maze.reset_maze()
                 menu.draw_pause_menu()
 
             pygame.display.flip()
-            clock.tick(60)
